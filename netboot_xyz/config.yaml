@@ -1,6 +1,6 @@
 name: netboot.xyz
 version: 2.0.74
-slug: netboot_xyz addon
+slug: netboot_xyz
 description: netboot_xyz is a convenient place to boot into any type of operating system or utility disk without the need of having to go spend time retrieving the ISO just to run it
 url: https://netboot.xyz
 image: espresense/espresense-companion
