@@ -6,7 +6,7 @@ url: https://netboot.xyz
 image: espresense/espresense-companion
 arch:
   - amd64
-  - arm64
+  - armv6
   - armv7
 map:
   - config:rw

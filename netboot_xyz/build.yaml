@@ -1,6 +1,7 @@
 ---
 build_from:
   arm64: ghcr.io/netbootxyz/netbootxyz:0.7.0-nbxyz1@sha256:d5778bdfc407e3aa9a8941ec038db5bf59f49777307462eed69028780e4e676f
+  armv6: ghcr.io/netbootxyz/netbootxyz:0.7.0-nbxyz1@sha256:98f15792d8dcdffdd67e04f87d9a6b2841d18232dc6232787e42fb7ea4f67d5c
   amd64: ghcr.io/netbootxyz/netbootxyz:0.7.0-nbxyz1@sha256:c7a9c2f4cd2edfad5a00ae7e4d24be509943882779051b71ccab6b02c72430ec
   armv7: ghcr.io/netbootxyz/netbootxyz:0.7.0-nbxyz1@sha256:570451fd251995662ce0612003e37a3b64102feec2f9a907241a01eaa35ae602
 codenotary:
