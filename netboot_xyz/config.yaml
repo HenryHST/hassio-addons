@@ -3,25 +3,30 @@ version: 2.0.74
 slug: netboot_xyz
 description: netboot_xyz is a convenient place to boot into any type of operating system or utility disk without the need of having to go spend time retrieving the ISO just to run it
 url: https://netboot.xyz
-image: espresense/espresense-companion
+image: henryhst/netboot_xyz--{arch}
 arch:
   - amd64
   - armhf
   - armv7
 map:
   - config:rw
+boot: auto
 host_network: true
+hassio_api: true
+hassio_role: manager
 ingress: true
-ingress_port: 8267
+ingress_port: 3000
 ingress_stream: true
-panel_icon: mdi:alpha-e-circle
+panel_icon: mdi:ip
 panel_title: netboot.xyz
 homeassistant_api: true
 services:
   - mqtt:want
 ports:
-  8267/tcp: null
-  8268/tcp: null
+  3000/tcp: 3000
+  69/udp: 69
+  8080/tcp: 80
 ports_description:
-  8267/tcp: UI
-  8268/tcp: Firmware Updates
+  3000/tcp: Web configuration interface
+  69/udp: TFTP Port
+  8080/tcp: NGINX server for hosting assets
