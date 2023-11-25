@@ -14,7 +14,7 @@ boot: manual
 apparmor: true
 docker_api: true
 host_network: true
-host_pid: true
+host_pid: false
 panel_admin: true
 hassio_api: true
 hassio_role: manager
