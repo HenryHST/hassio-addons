@@ -1,8 +1,7 @@
 ---
 build_from:
-  arm64: ghcr.io/netbootxyz/netbootxyz:0.7.0
+  arm64: linuxserver/netbootxyz:0.7.0
   armv6: ghcr.io/netbootxyz/netbootxyz:0.7.0
-  amd64: ghcr.io/netbootxyz/netbootxyz:0.7.0
-  armv7: ghcr.io/netbootxyz/netbootxyz:0.7.0
+  amd64: linuxserver/netbootxyz:0.7.0
 codenotary:
   signer: h.stadthagen@me.com
