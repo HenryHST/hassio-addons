@@ -12,6 +12,7 @@ map:
   - config:rw
 boot: manual
 apparmor: true
+advanced: true
 docker_api: true
 host_network: true
 host_pid: false
