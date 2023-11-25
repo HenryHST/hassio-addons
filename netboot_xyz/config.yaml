@@ -10,16 +10,20 @@ arch:
   - armv7
 map:
   - config:rw
-boot: auto
+boot: manual
+apparmor: true
+docker_api: true
 host_network: true
 hassio_api: true
 hassio_role: manager
 ingress: true
 ingress_port: 3000
+webui: 
 ingress_stream: true
 panel_icon: mdi:ip
 panel_title: netboot.xyz
 homeassistant_api: true
+webui: https://[HOST]:[PORT:3000]
 services:
   - mqtt:want
 ports:
