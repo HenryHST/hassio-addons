@@ -28,7 +28,7 @@ journald: true
 panel_icon: mdi:ip
 panel_title: netboot.xyz
 homeassistant_api: true
-webui: https://[HOST]:[PORT:3000]
+webui: http://[HOST]:[PORT:3000]
 services:
   - mqtt:want
 ports:
