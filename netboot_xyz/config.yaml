@@ -10,7 +10,6 @@ arch:
   - armv7
 map:
   - config:rw
-  - assets:rw
   - ssl
 boot: manual
 apparmor: true
