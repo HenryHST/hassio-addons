@@ -16,7 +16,7 @@ apparmor: true
 advanced: true
 backup: cold
 docker_api: true
-host_network: true
+host_network: false
 host_pid: false
 panel_admin: true
 hassio_api: true
