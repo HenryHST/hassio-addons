@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM alpine:3.20
 
 # set version label
 ARG BUILD_DATE
@@ -14,6 +14,7 @@ RUN \
    bash \
    busybox \
    curl \
+   envsubst \
    git \
    jq \
    nghttp2-dev \
@@ -24,7 +25,7 @@ RUN \
    supervisor \
    syslog-ng \
    tar \
-   tftp-hpa && \
+   dnsmasq && \
  apk add --no-cache --virtual=build-dependencies \
    npm && \
  groupmod -g 1000 users && \
@@ -46,7 +47,11 @@ RUN \
  rm -rf /tmp/*
 
 ENV TFTPD_OPTS=''
+ENV NGINX_PORT='80'
+ENV WEB_APP_PORT='3000'
 
+EXPOSE 69/udp
+EXPOSE 80
 EXPOSE 3000
 
 COPY root/ /
