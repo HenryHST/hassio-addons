@@ -5,9 +5,17 @@ ARG BUILD_DATE
 ARG VERSION
 ARG WEBAPP_VERSION
 
-LABEL build_version="netboot.xyz version: ${VERSION} Build-date: ${BUILD_DATE}"
-LABEL maintainer="antonym"
-LABEL org.opencontainers.image.description netboot.xyz official docker container - Your favorite operating systems in one place. A network-based bootable operating system installer based on iPXE.
+LABEL build_version="netboot.xyz version: ${VERSION} Build-date: ${BUILD_DATE}" \
+      maintainer="antonym" \
+      org.opencontainers.image.title="netbootxyz" \
+      org.opencontainers.image.description="netboot.xyz official docker container - Your favorite operating systems in one place. A network-based bootable operating system installer based on iPXE." \
+      org.opencontainers.image.vendor="netboot.xyz" \
+      org.opencontainers.image.url="https://github.com/netbootxyz/docker-netbootxyz/packages" \
+      org.opencontainers.image.documentation="https://netboot.xyz"  \
+      org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.authors="netboot.xyz" \
+      org.opencontainers.image.source="https://github.com/netbootxyz/docker-netbootxyz"
+
 
 RUN \
  apk add --no-cache \
