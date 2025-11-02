@@ -1,0 +1,12 @@
+#!/bin/bash
+# ==============================================================================
+# Home Assistant Community Add-on: Network UPS Tools
+# Notify handler script
+# ==============================================================================
+
+readonly NOTIFYMSG=${1}
+
+curl -sS -X "POST" \
+    -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    --data-binary "{\"ups_name\":\"${UPSNAME}\",\"notify_type\":\"${NOTIFYTYPE}\",\"notify_msg\":\"${NOTIFYMSG}\"}" \
+    "http://supervisor/core/api/events/nut.ups_event"
