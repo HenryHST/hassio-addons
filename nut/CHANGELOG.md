@@ -5,6 +5,26 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.1] - 2025-12-17
+
+### Changed
+- Switched to official Debian base image (`debian:bookworm-slim`)
+- Improved Docker build process with official sources
+- Added s6-overlay v3.1.6.2 for robust service management
+- Enhanced package installation with system utilities (ca-certificates, tzdata, procps)
+
+### Added
+- GitHub Actions CI/CD workflows for automated builds
+- Multi-architecture Docker image building (aarch64, amd64, armv7)
+- Docker image signing with Cosign
+- Automated linting (YAML, ShellCheck, Hadolint)
+- s6-overlay integration for better service lifecycle management
+
+### Fixed
+- Hadolint warnings - improved Dockerfile best practices
+- Shell pipefail option for safer script execution
+- Service startup reliability with s6-overlay
+
 ## [1.0.0] - 2025-12-17
 
 ### Added

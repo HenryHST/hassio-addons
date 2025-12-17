@@ -1,6 +1,4 @@
-# hadolint ignore=DL3006
-ARG BUILD_FROM=ghcr.io/hassio-addons/alpine-base:3.20
-FROM ${BUILD_FROM}
+FROM alpine:3.20
 
 # Set version label
 ARG BUILD_DATE
@@ -24,14 +22,15 @@ ENV ADDON_VERSION="${BUILD_VERSION}" \
 # Set shell with pipefail option
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
-# Install required packages
+# Install required packages and setup base system
 # hadolint ignore=DL3018
 RUN \
     apk add --no-cache \
         bash \
         busybox \
+        ca-certificates \
         curl \
-        envsubst \
+        gettext \
         git \
         jq \
         nginx \
@@ -43,10 +42,14 @@ RUN \
         syslog-ng \
         tar \
         tftp-hpa \
+        tzdata \
+    && rm -rf /var/cache/apk/* \
     && groupmod -g 1000 users \
     && useradd -u 911 -U -d /config -s /bin/false nbxyz \
     && usermod -G users nbxyz \
-    && mkdir -p /app /config /defaults /assets
+    && mkdir -p /app /config /defaults /assets /var/log/nginx \
+    && ln -sf /dev/stdout /var/log/nginx/access.log \
+    && ln -sf /dev/stderr /var/log/nginx/error.log
 
 # Install netboot.xyz webapp
 WORKDIR /app

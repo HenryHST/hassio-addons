@@ -5,6 +5,25 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.1] - 2025-12-17
+
+### Changed
+- Switched to official Alpine Linux base image (`alpine:3.20`)
+- Improved Docker build process with official sources
+- Enhanced package installation with additional system tools (ca-certificates, tzdata)
+- Added nginx log symlinks to stdout/stderr for better container logging
+
+### Added
+- GitHub Actions CI/CD workflows for automated builds
+- Multi-architecture Docker image building (aarch64, amd64, armv7)
+- Docker image signing with Cosign
+- Automated linting (YAML, ShellCheck, Hadolint)
+
+### Fixed
+- Hadolint warnings (DL3003, DL4006) - improved Dockerfile best practices
+- Shell pipefail option for safer script execution
+- WORKDIR usage instead of cd for better maintainability
+
 ## [1.0.0] - 2025-12-17
 
 ### Added

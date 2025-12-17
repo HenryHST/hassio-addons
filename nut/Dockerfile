@@ -1,6 +1,4 @@
-ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base:8.1.3
-# hadolint ignore=DL3006
-FROM ${BUILD_FROM}
+FROM debian:bookworm-slim
 
 # Version labels
 ARG BUILD_VERSION
@@ -15,18 +13,50 @@ ENV ADDON_VERSION="${BUILD_VERSION}" \
 # Set shell with pipefail option
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Setup base
-# hadolint ignore=DL3003
+# Install base requirements
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        nut=${NUT_VERSION} \
-        nut-snmp=${NUT_VERSION} \
-        nut-xml=${NUT_VERSION} \
-        nut-modbus=${NUT_VERSION} \
-        usbutils=1:018-2 \
+        bash \
+        ca-certificates \
+        curl \
+        jq \
+        tzdata \
+        procps \
+        xz-utils \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install s6-overlay for service management
+ARG S6_OVERLAY_VERSION="3.1.6.2"
+RUN \
+    ARCH="$(uname -m)" \
+    && case "${ARCH}" in \
+        x86_64) S6_ARCH="x86_64" ;; \
+        aarch64) S6_ARCH="aarch64" ;; \
+        armv7l) S6_ARCH="armhf" ;; \
+        *) echo "Unsupported architecture: ${ARCH}" && exit 1 ;; \
+    esac \
+    && curl -L -o /tmp/s6-overlay-noarch.tar.xz \
+        "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" \
+    && curl -L -o /tmp/s6-overlay-arch.tar.xz \
+        "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}.tar.xz" \
+    && tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz \
+    && rm -rf /tmp/*
+
+# Install NUT packages
+# hadolint ignore=DL3008
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        nut \
+        nut-snmp \
+        nut-xml \
+        nut-modbus \
+        usbutils \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy root filesystem
 COPY rootfs /
@@ -60,3 +90,6 @@ LABEL \
     org.opencontainers.image.created=${BUILD_DATE} \
     org.opencontainers.image.revision=${BUILD_REF} \
     org.opencontainers.image.version=${BUILD_VERSION}
+
+# Set s6-overlay entrypoint
+ENTRYPOINT ["/init"]
