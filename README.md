@@ -109,6 +109,9 @@ All Docker images are automatically scanned for vulnerabilities:
 - **PR Scans**: Security validation on pull requests
 - **SARIF Reports**: Results in GitHub Security tab
 - **Trivy Scanner**: Industry-standard vulnerability detection
+- **Automated Patching**: Security fixes applied during build
+
+**Report vulnerabilities**: See our [Security Policy](SECURITY.md)
 
 See [.github/workflows/README.md](.github/workflows/README.md) for details.
 

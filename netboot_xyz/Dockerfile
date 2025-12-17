@@ -59,6 +59,9 @@ RUN \
         "https://github.com/netbootxyz/webapp/archive/${NETBOOTXYZ_VERSION}.tar.gz" \
     && tar xzf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
     && npm install --omit=dev \
+    && echo "Applying security patches..." \
+    && npm update systeminformation@5.27.14 --save \
+    && npm audit fix --omit=dev || true \
     && npm cache clean --force \
     && rm -rf /tmp/* /root/.npm
 

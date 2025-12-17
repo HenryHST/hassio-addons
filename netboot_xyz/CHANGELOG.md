@@ -5,6 +5,22 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.2] - 2025-12-17
+
+### Security
+- **CVE-2025-68154**: Updated `systeminformation` from 5.27.1 to 5.27.14 to fix OS Command Injection vulnerability
+- Added automated security scanning with Trivy
+- Implemented daily vulnerability checks
+
+### Added
+- Security scanning workflow with Trivy scanner
+- Automated npm audit fix during build process
+- SARIF reports uploaded to GitHub Security tab
+
+### Changed
+- Enhanced build process with security patching step
+- Improved npm dependency management
+
 ## [1.0.1] - 2025-12-17
 
 ### Changed
