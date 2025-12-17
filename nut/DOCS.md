@@ -1,4 +1,11 @@
-# Home Assistant Community Add-on: Network UPS Tools
+# Home Assistant Add-on: Network UPS Tools
+
+**Add-on Version**: 1.0.0  
+**NUT Core Version**: 2.8.1-5
+
+> **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
+> changes to the Home Assistant integration, while the core version indicates the underlying Network 
+> UPS Tools version being used.
 
 The primary goal of the Network UPS Tools (NUT) project is to provide support
 for Power Devices, such as Uninterruptible Power Supplies, Power Distribution

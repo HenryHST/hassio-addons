@@ -13,6 +13,13 @@ declare shutdowncmd
 declare upsmonpwd
 declare username
 
+# Display version information
+bashio::log.info "-----------------------------------------------------------"
+bashio::log.info " Network UPS Tools Add-on"
+bashio::log.info " Add-on Version: ${ADDON_VERSION:-unknown}"
+bashio::log.info " NUT Core Version: ${NUT_VERSION:-unknown}"
+bashio::log.info "-----------------------------------------------------------"
+
 chown root:root /var/run/nut
 chmod 0770 /var/run/nut
 

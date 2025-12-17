@@ -2,15 +2,25 @@ ARG BUILD_FROM=ghcr.io/hassio-addons/debian-base:8.1.3
 # hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
+# Version labels
+ARG BUILD_VERSION
+ARG BUILD_DATE
+ARG BUILD_REF
+ARG NUT_VERSION="2.8.1-5"
+
+# Store versions for runtime access
+ENV ADDON_VERSION="${BUILD_VERSION}" \
+    NUT_VERSION="${NUT_VERSION}"
+
 # Setup base
 # hadolint ignore=DL3003
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        nut=2.8.1-5 \
-        nut-snmp=2.8.1-5 \
-        nut-xml=2.8.1-5 \
-        nut-modbus=2.8.1-5 \
+        nut=${NUT_VERSION} \
+        nut-snmp=${NUT_VERSION} \
+        nut-xml=${NUT_VERSION} \
+        nut-modbus=${NUT_VERSION} \
         usbutils=1:018-2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -34,13 +44,14 @@ LABEL \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
-    maintainer="Dale Higgs <dale3h@addons.community>" \
+    io.hass.nut.version="${NUT_VERSION}" \
+    maintainer="henryhst" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
-    org.opencontainers.image.vendor="Home Assistant Community Add-ons" \
-    org.opencontainers.image.authors="Dale Higgs <dale3h@addons.community>" \
+    org.opencontainers.image.vendor="henryhst Home Assistant Add-ons" \
+    org.opencontainers.image.authors="henryhst" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.url="https://addons.community" \
+    org.opencontainers.image.url="https://github.com/henryhst/hassio-addons" \
     org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
     org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
     org.opencontainers.image.created=${BUILD_DATE} \
