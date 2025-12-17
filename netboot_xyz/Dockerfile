@@ -4,7 +4,6 @@ FROM alpine:3.20
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG BUILD_REF
-ARG WEBAPP_VERSION
 ARG NETBOOTXYZ_VERSION="0.7.6"
 
 LABEL \
@@ -53,16 +52,15 @@ RUN \
 
 # Install netboot.xyz webapp
 WORKDIR /app
+ARG NETBOOTXYZ_VERSION
 RUN \
-    if [ -z ${WEBAPP_VERSION+x} ]; then \
-        WEBAPP_VERSION=$(curl -sX GET "https://api.github.com/repos/netbootxyz/webapp/releases/latest" \
-        | awk '/tag_name/{print $4;exit}' FS='[""]'); \
-    fi \
-    && curl -o /tmp/webapp.tar.gz -L \
-        "https://github.com/netbootxyz/webapp/archive/${WEBAPP_VERSION}.tar.gz" \
-    && tar xf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
-    && npm install --production \
-    && rm -rf /tmp/*
+    echo "Installing netboot.xyz webapp version: ${NETBOOTXYZ_VERSION}" \
+    && curl -fsSL -o /tmp/webapp.tar.gz \
+        "https://github.com/netbootxyz/webapp/archive/${NETBOOTXYZ_VERSION}.tar.gz" \
+    && tar xzf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
+    && npm install --omit=dev \
+    && npm cache clean --force \
+    && rm -rf /tmp/* /root/.npm
 
 # Reset workdir to root
 WORKDIR /
