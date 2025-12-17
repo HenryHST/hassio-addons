@@ -12,6 +12,9 @@ ARG NUT_VERSION="2.8.1-5"
 ENV ADDON_VERSION="${BUILD_VERSION}" \
     NUT_VERSION="${NUT_VERSION}"
 
+# Set shell with pipefail option
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
 # Setup base
 # hadolint ignore=DL3003
 RUN \

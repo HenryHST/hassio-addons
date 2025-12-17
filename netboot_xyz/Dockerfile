@@ -1,3 +1,4 @@
+# hadolint ignore=DL3006
 ARG BUILD_FROM=ghcr.io/hassio-addons/alpine-base:3.20
 FROM ${BUILD_FROM}
 
@@ -20,7 +21,11 @@ LABEL \
 ENV ADDON_VERSION="${BUILD_VERSION}" \
     NETBOOTXYZ_VERSION="${NETBOOTXYZ_VERSION}"
 
+# Set shell with pipefail option
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
 # Install required packages
+# hadolint ignore=DL3018
 RUN \
     apk add --no-cache \
         bash \
@@ -44,6 +49,7 @@ RUN \
     && mkdir -p /app /config /defaults /assets
 
 # Install netboot.xyz webapp
+WORKDIR /app
 RUN \
     if [ -z ${WEBAPP_VERSION+x} ]; then \
         WEBAPP_VERSION=$(curl -sX GET "https://api.github.com/repos/netbootxyz/webapp/releases/latest" \
@@ -52,8 +58,11 @@ RUN \
     && curl -o /tmp/webapp.tar.gz -L \
         "https://github.com/netbootxyz/webapp/archive/${WEBAPP_VERSION}.tar.gz" \
     && tar xf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
-    && cd /app && npm install --production \
+    && npm install --production \
     && rm -rf /tmp/*
+
+# Reset workdir to root
+WORKDIR /
 
 # Environment variables
 ENV TFTPD_OPTS=''
