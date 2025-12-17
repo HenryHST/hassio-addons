@@ -37,6 +37,8 @@ jobs:
           scandir: ./
           severity: warning
           ignore_paths: node_modules
+        env:
+          SHELLCHECK_OPTS: -e SC1008
 
   hadolint:
     name: Hadolint (Dockerfile)

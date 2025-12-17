@@ -14,6 +14,7 @@ ENV ADDON_VERSION="${BUILD_VERSION}" \
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
 # Install base requirements
+# hadolint ignore=DL3008
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
