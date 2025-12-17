@@ -96,4 +96,3 @@ jobs:
           yq eval '.arch' nut/config.yaml
 
           echo "✓ nut config is valid"
-

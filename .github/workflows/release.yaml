@@ -70,4 +70,3 @@ jobs:
           IMG_NUT="ghcr.io/${{ github.repository }}/nut:${{ github.event.release.tag_name }}"
           echo "- ${IMG_NB}" >> $GITHUB_STEP_SUMMARY
           echo "- ${IMG_NUT}" >> $GITHUB_STEP_SUMMARY
-
