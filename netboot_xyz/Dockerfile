@@ -56,9 +56,12 @@ ENV WEB_APP_PORT='3000'
 # Copy root filesystem
 COPY root/ /
 
+# Set executable permissions for scripts
+RUN chmod +x /start.sh /init.sh
+
 # Expose ports
 EXPOSE 69/udp 80 3000
 
 # Default command
-CMD ["sh", "/start.sh"]
+CMD ["/bin/bash", "/start.sh"]
 

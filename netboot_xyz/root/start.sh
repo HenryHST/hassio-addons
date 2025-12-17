@@ -3,7 +3,7 @@ set -e
 
 # Perform the initial configuration
 echo "[netbootxyz] Starting initialization..."
-if ! /init.sh; then
+if ! /bin/bash /init.sh; then
   echo "[netbootxyz] ERROR: Initialization failed"
   exit 1
 fi
