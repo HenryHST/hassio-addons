@@ -4,7 +4,6 @@ version: 0.13.0
 slug: nut
 description: Manage battery backup (UPS) devices
 url: https://github.com/henryhst/hassio-addons/tree/master/nut
-codenotary: codenotary@frenck.dev
 startup: system
 arch:
   - aarch64
