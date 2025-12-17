@@ -1,6 +1,33 @@
 # Changelog
 
+All notable changes to this Home Assistant Add-on will be documented in this file.
+
+**Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
+The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
+
+## [1.0.0] - 2025-12-17
+
+### Added
+- Internal add-on versioning independent of netboot.xyz core version
+- Version information display in startup logs showing both add-on and core versions
+- Improved supervisor configuration with proper service ordering
+- Enhanced logging to stdout/stderr for better diagnostics
+
+### Changed
+- Add-on version changed from 0.7.6 to 1.0.0 (semantic versioning for add-on)
+- netboot.xyz core version remains at 0.7.6
+- Nginx configuration always updates on start to ensure latest settings
+- Webapp listens on all interfaces (0.0.0.0) for proper Ingress support
+
+### Fixed
+- Nginx invalid condition syntax in site configuration
+- Supervisor TFTPD_OPTS environment variable expansion
+- File permissions for shell scripts (execute permissions)
+- Service start order for proper initialization
+
 ## [0.7.6] - 2025-01-17
+
+**Note**: This was the initial release using the netboot.xyz version as add-on version.
 
 ### Added
 - Initial release of netboot.xyz Home Assistant Add-on

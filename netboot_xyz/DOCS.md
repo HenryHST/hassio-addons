@@ -1,5 +1,12 @@
 # Home Assistant Add-on: netboot.xyz
 
+**Add-on Version**: 1.0.0  
+**netboot.xyz Core Version**: 0.7.6
+
+> **Note**: The add-on version is independent of the netboot.xyz core version. The add-on version tracks 
+> changes to the Home Assistant integration, while the core version indicates the underlying netboot.xyz 
+> version being used.
+
 ## Installation
 
 1. Add this repository to your Home Assistant add-on store

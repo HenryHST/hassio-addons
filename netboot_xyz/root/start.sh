@@ -15,5 +15,11 @@ echo "| '_ \ / _ \ __| '_ \ / _ \ / _ \| __| \ \/ / | | |_  /  "
 echo "| | | |  __/ |_| |_) | (_) | (_) | |_ _ >  <| |_| |/ /   "
 echo "|_| |_|\___|\__|_.__/ \___/ \___/ \__(_)_/\_\\__,  /___| "
 echo "                                             |___/       "
+echo ""
+echo "-----------------------------------------------------------"
+echo " Home Assistant Add-on Version: ${ADDON_VERSION:-unknown}"
+echo " netboot.xyz Core Version: ${NETBOOTXYZ_VERSION:-unknown}"
+echo "-----------------------------------------------------------"
+echo ""
 
 supervisord -c /etc/supervisor.conf

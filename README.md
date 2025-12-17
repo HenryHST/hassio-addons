@@ -124,7 +124,7 @@ SOFTWARE.
 [netboot-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [netboot-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
-[netboot-version-shield]: https://img.shields.io/badge/version-v0.7.6-blue.svg
+[netboot-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [nut-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg

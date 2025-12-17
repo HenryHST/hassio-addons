@@ -4,14 +4,21 @@ FROM ${BUILD_FROM}
 # Set version label
 ARG BUILD_DATE
 ARG BUILD_VERSION
+ARG BUILD_REF
 ARG WEBAPP_VERSION
+ARG NETBOOTXYZ_VERSION="0.7.6"
 
 LABEL \
     io.hass.name="netboot.xyz" \
     io.hass.description="netboot.xyz network boot manager" \
     io.hass.version="${BUILD_VERSION}" \
     io.hass.type="addon" \
-    io.hass.arch="aarch64|amd64|armv7"
+    io.hass.arch="aarch64|amd64|armv7" \
+    io.hass.netbootxyz.version="${NETBOOTXYZ_VERSION}"
+
+# Store versions in environment for runtime access
+ENV ADDON_VERSION="${BUILD_VERSION}" \
+    NETBOOTXYZ_VERSION="${NETBOOTXYZ_VERSION}"
 
 # Install required packages
 RUN \
