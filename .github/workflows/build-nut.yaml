@@ -43,13 +43,13 @@ jobs:
           description=$(yq eval '.description' nut/config.yaml)
           architectures=$(yq eval -o=json '.arch' nut/config.yaml | jq -c)
           build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-          
+
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "name=${name}" >> $GITHUB_OUTPUT
           echo "description=${description}" >> $GITHUB_OUTPUT
           echo "architectures=${architectures}" >> $GITHUB_OUTPUT
           echo "build_date=${build_date}" >> $GITHUB_OUTPUT
-          
+
           echo "### Addon Information" >> $GITHUB_STEP_SUMMARY
           echo "- **Name:** ${name}" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${version}" >> $GITHUB_STEP_SUMMARY
@@ -106,12 +106,12 @@ jobs:
         run: |
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
-          
+
           TAGS="${IMAGE_NAME}:${{ needs.information.outputs.version }}-${{ matrix.arch }}"
           if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             TAGS="${TAGS},${IMAGE_NAME}:latest-${{ matrix.arch }}"
           fi
-          
+
           echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
@@ -183,25 +183,25 @@ jobs:
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
           VERSION="${{ needs.information.outputs.version }}"
-          
+
           # Create version manifest
           docker manifest create "${IMAGE_NAME}:${VERSION}" \
             "${IMAGE_NAME}:${VERSION}-aarch64" \
             "${IMAGE_NAME}:${VERSION}-amd64" \
             "${IMAGE_NAME}:${VERSION}-armv7"
-          
+
           docker manifest push "${IMAGE_NAME}:${VERSION}"
-          
+
           # Create latest manifest if on main branch
           if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
             docker manifest create "${IMAGE_NAME}:latest" \
               "${IMAGE_NAME}:latest-aarch64" \
               "${IMAGE_NAME}:latest-amd64" \
               "${IMAGE_NAME}:latest-armv7"
-            
+
             docker manifest push "${IMAGE_NAME}:latest"
           fi
-          
+
           echo "### Manifest Created" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** ${IMAGE_NAME}:${VERSION}" >> $GITHUB_STEP_SUMMARY
           echo "- **Architectures:** aarch64, amd64, armv7" >> $GITHUB_STEP_SUMMARY

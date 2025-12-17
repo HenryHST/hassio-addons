@@ -75,25 +75,25 @@ jobs:
         run: |
           echo "Validating netboot_xyz/config.yaml..."
           yq eval '.' netboot_xyz/config.yaml > /dev/null
-          
+
           # Check required fields
           yq eval '.name' netboot_xyz/config.yaml
           yq eval '.version' netboot_xyz/config.yaml
           yq eval '.slug' netboot_xyz/config.yaml
           yq eval '.arch' netboot_xyz/config.yaml
-          
+
           echo "✓ netboot_xyz config is valid"
 
       - name: Validate nut config
         run: |
           echo "Validating nut/config.yaml..."
           yq eval '.' nut/config.yaml > /dev/null
-          
+
           # Check required fields
           yq eval '.name' nut/config.yaml
           yq eval '.version' nut/config.yaml
           yq eval '.slug' nut/config.yaml
           yq eval '.arch' nut/config.yaml
-          
+
           echo "✓ nut config is valid"
 

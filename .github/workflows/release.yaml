@@ -32,13 +32,13 @@ jobs:
       - name: Update addon versions
         run: |
           VERSION="${{ github.event.inputs.version }}"
-          
+
           # Update netboot_xyz version
           yq eval ".version = \"${VERSION}\"" -i netboot_xyz/config.yaml
-          
+
           # Update nut version
           yq eval ".version = \"${VERSION}\"" -i nut/config.yaml
-          
+
           echo "Updated versions to ${VERSION}"
 
       - name: Commit and push changes
@@ -66,6 +66,8 @@ jobs:
           echo "- Network UPS Tools (NUT)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Images:" >> $GITHUB_STEP_SUMMARY
-          echo "- ghcr.io/${{ github.repository }}/netboot_xyz:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- ghcr.io/${{ github.repository }}/nut:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          IMG_NB="ghcr.io/${{ github.repository }}/netboot_xyz:${{ github.event.release.tag_name }}"
+          IMG_NUT="ghcr.io/${{ github.repository }}/nut:${{ github.event.release.tag_name }}"
+          echo "- ${IMG_NB}" >> $GITHUB_STEP_SUMMARY
+          echo "- ${IMG_NUT}" >> $GITHUB_STEP_SUMMARY
 
