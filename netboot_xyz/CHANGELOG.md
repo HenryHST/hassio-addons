@@ -7,7 +7,7 @@
 - Web management interface on port 3000 with Ingress support
 - TFTP server for network booting (port 69/UDP)
 - HTTP asset hosting server (port 8080)
-- Support for multiple architectures: amd64, arm64, armv6
+- Support for multiple architectures: amd64, aarch64, armv7
 - AppArmor security profile
 - Nginx configuration for asset hosting
 

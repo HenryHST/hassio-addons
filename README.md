@@ -32,9 +32,9 @@ This repository contains the following add-ons:
 ### ✓ [netboot.xyz][addon-netboot]
 
 ![Version][netboot-version-shield]
+![Supports aarch64 Architecture][netboot-aarch64-shield]
 ![Supports amd64 Architecture][netboot-amd64-shield]
-![Supports arm64 Architecture][netboot-arm64-shield]
-![Supports armv6 Architecture][netboot-armv6-shield]
+![Supports armv7 Architecture][netboot-armv7-shield]
 
 _Network boot manager for operating systems and utilities_
 
@@ -121,9 +121,9 @@ SOFTWARE.
 [issue]: https://github.com/henryhst/hassio-addons/issues
 [license-shield]: https://img.shields.io/github/license/henryhst/hassio-addons.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
+[netboot-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[netboot-arm64-shield]: https://img.shields.io/badge/arm64-yes-green.svg
-[netboot-armv6-shield]: https://img.shields.io/badge/armv6-yes-green.svg
+[netboot-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [netboot-version-shield]: https://img.shields.io/badge/version-v0.7.6-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
