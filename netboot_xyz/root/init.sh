@@ -10,11 +10,11 @@ mkdir -p \
   /var/lib/nginx/tmp/client_body \
   /var/tmp/nginx
 
-# copy config files
+# copy config files (always update default to get latest changes)
 [[ ! -f /config/nginx/nginx.conf ]] && \
   cp /defaults/nginx.conf /config/nginx/nginx.conf
-[[ ! -f /config/nginx/site-confs/default ]] && \
-  envsubst < /defaults/default > /config/nginx/site-confs/default
+# Always copy default site config to ensure updates
+envsubst < /defaults/default > /config/nginx/site-confs/default
 
 # Ownership
 chown -R nbxyz:nbxyz /assets
