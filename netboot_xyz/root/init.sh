@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # make our folders
 mkdir -p \
@@ -29,6 +30,10 @@ mkdir -p \
 if [[ ! -f /config/menus/remote/menu.ipxe ]]; then
   if [[ -z ${MENU_VERSION+x} ]]; then
     MENU_VERSION=$(curl -sL "https://api.github.com/repos/netbootxyz/netboot.xyz/releases/latest" | jq -r '.tag_name')
+    if [[ -z "${MENU_VERSION}" ]] || [[ "${MENU_VERSION}" == "null" ]]; then
+      echo "[netbootxyz-init] ERROR: Failed to fetch latest version from GitHub API"
+      exit 1
+    fi
   fi
   echo "[netbootxyz-init] Downloading netboot.xyz at ${MENU_VERSION}"
   # menu files

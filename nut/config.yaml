@@ -1,9 +1,9 @@
 ---
 name: Network UPS Tools
-version: dev
+version: 0.13.0
 slug: nut
 description: Manage battery backup (UPS) devices
-url: https://github.com/hassio-addons/addon-nut
+url: https://github.com/henryhst/hassio-addons/tree/master/nut
 codenotary: codenotary@frenck.dev
 startup: system
 arch:
@@ -35,6 +35,8 @@ options:
       config: []
   mode: netserver
   shutdown_host: "false"
+  certverify: 0
+  forcessl: 0
 schema:
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   users:
@@ -61,5 +63,7 @@ schema:
   remote_ups_user: str?
   upsd_maxage: int?
   upsmon_deadtime: int?
+  certverify: int(0|1)?
+  forcessl: int(0|1)?
   i_like_to_be_pwned: bool?
   leave_front_door_open: bool?

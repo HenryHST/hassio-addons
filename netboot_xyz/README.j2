@@ -1,0 +1,93 @@
+# Home Assistant Add-on: netboot.xyz
+
+[![Release][release-shield]][release] ![Project Maintenance][maintenance-shield]
+
+A network boot manager that allows you to boot into any type of operating system or utility disk without the need of retrieving the ISO.
+
+## About
+
+The [netboot.xyz](https://netboot.xyz) add-on provides a convenient way to boot into various operating systems and utilities over the network. The add-on includes:
+
+- Web-based management interface for editing menus
+- TFTP server for network booting
+- HTTP server for hosting local asset mirrors
+- Support for multiple architectures and boot modes
+
+This is ideal for:
+- Network-based OS installations without optical drives or USB media
+- Testing and developing custom iPXE menus
+- Local asset mirroring for faster boot times
+- Managing multiple network boot configurations
+
+## Features
+
+- **Web Interface**: Easy-to-use management interface accessible via Home Assistant Ingress
+- **TFTP Server**: Network boot file serving (port 69/UDP)
+- **Asset Hosting**: Nginx server for local asset mirroring (port 8080)
+- **Multi-Architecture**: Supports x86-64, ARM64, and ARMv6 platforms
+- **Ingress Support**: Integrated with Home Assistant UI
+- **Security**: AppArmor profile for enhanced security
+
+## Installation
+
+1. Add this repository to your Home Assistant add-on store
+2. Install the "netboot.xyz" add-on
+3. Configure your DHCP server (see documentation)
+4. Start the add-on
+5. Access the web interface through Home Assistant Ingress
+
+## Network Requirements
+
+**Important**: This add-on requires an existing DHCP server configured to direct network boot requests to the add-on.
+
+You will need to configure your DHCP server's `next-server` and `boot-file-name` parameters. See the [full documentation][docs] for detailed DHCP configuration examples.
+
+## Support
+
+Got questions?
+
+You have several options to get them answered:
+
+- The [netboot.xyz Discord][discord]
+- The [Home Assistant Community Forum][forum]
+- [Open an issue on GitHub][issue]
+
+## Authors & Contributors
+
+This add-on is maintained by henryhst.
+
+The original netboot.xyz project is maintained by the [netboot.xyz team][netbootxyz-team].
+
+## License
+
+MIT License
+
+Copyright (c) 2025 henryhst
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+[discord]: https://discord.gg/An6PA2a
+[docs]: https://github.com/henryhst/hassio-addons/blob/master/netboot_xyz/DOCS.md
+[forum]: https://community.home-assistant.io
+[issue]: https://github.com/henryhst/hassio-addons/issues
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
+[netbootxyz-team]: https://github.com/netbootxyz
+[release-shield]: https://img.shields.io/badge/version-{{ version }}-blue.svg
+[release]: {{ repo }}/tree/{{ version }}
+

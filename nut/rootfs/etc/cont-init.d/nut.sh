@@ -3,6 +3,8 @@
 # Home Assistant Community Add-on: Network UPS Tools
 # Configures Network UPS Tools
 # ==============================================================================
+set -e
+
 readonly USERS_CONF=/etc/nut/upsd.users
 readonly UPSD_CONF=/etc/nut/upsd.conf
 declare nutmode
@@ -16,7 +18,7 @@ chmod 0770 /var/run/nut
 
 chown -R root:root /etc/nut
 find /etc/nut -not -perm 0660 -type f -exec chmod 0660 {} \;
-find /etc/nut -not -perm 0660 -type d -exec chmod 0660 {} \;
+find /etc/nut -not -perm 0770 -type d -exec chmod 0770 {} \;
 
 nutmode=$(bashio::config 'mode')
 bashio::log.info "Setting mode to ${nutmode}..."
@@ -32,6 +34,9 @@ if bashio::config.equals 'mode' 'netserver' ;then
 
     # Create Monitor User
     upsmonpwd=$(shuf -ze -n20  {A..Z} {a..z} {0..9}|tr -d '\0')
+    if [[ -z "${upsmonpwd}" ]]; then
+        bashio::exit.nok "Failed to generate secure password for upsmon user"
+    fi
     {
         echo
         echo "[upsmonmaster]"
@@ -108,9 +113,13 @@ if bashio::config.equals 'mode' 'netserver' ;then
     bashio::log.info "Starting the UPS drivers..."
     # Run upsdrvctl
     if bashio::debug; then
-        upsdrvctl -u root -D start
+        if ! upsdrvctl -u root -D start; then
+            bashio::exit.nok "Failed to start UPS drivers"
+        fi
     else
-        upsdrvctl -u root start
+        if ! upsdrvctl -u root start; then
+            bashio::exit.nok "Failed to start UPS drivers"
+        fi
     fi
 fi
 

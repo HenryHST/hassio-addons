@@ -3,10 +3,31 @@
 # Home Assistant Community Add-on: Network UPS Tools
 # Notify handler script
 # ==============================================================================
+set -e
 
 readonly NOTIFYMSG=${1}
 
-curl -sS -X "POST" \
+# Validate required environment variables
+if [[ -z "${SUPERVISOR_TOKEN}" ]]; then
+    echo "ERROR: SUPERVISOR_TOKEN not set" >&2
+    exit 1
+fi
+
+if [[ -z "${UPSNAME}" ]]; then
+    echo "ERROR: UPSNAME not set" >&2
+    exit 1
+fi
+
+if [[ -z "${NOTIFYTYPE}" ]]; then
+    echo "ERROR: NOTIFYTYPE not set" >&2
+    exit 1
+fi
+
+# Send notification to Home Assistant
+if ! curl -sS -f -X "POST" \
     -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
     --data-binary "{\"ups_name\":\"${UPSNAME}\",\"notify_type\":\"${NOTIFYTYPE}\",\"notify_msg\":\"${NOTIFYMSG}\"}" \
-    "http://supervisor/core/api/events/nut.ups_event"
+    "http://supervisor/core/api/events/nut.ups_event"; then
+    echo "ERROR: Failed to send UPS event to Home Assistant" >&2
+    exit 1
+fi

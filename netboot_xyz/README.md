@@ -1,127 +1,84 @@
-# docker-netbootxyz
+# netboot.xyz Home Assistant Add-on
 
-[![Release Status](https://github.com/netbootxyz/docker-netbootxyz/actions/workflows/release.yml/badge.svg)](https://github.com/netbootxyz/docker-netbootxyz/actions/workflows/release.yml)
 [![Discord](https://img.shields.io/discord/425186187368595466)](https://discord.gg/An6PA2a)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/netbootxyz/docker-netbootxyz)
 
 ## Overview
 
-The [netboot.xyz docker image](https://github.com/netbootxyz/docker-netbootxyz) allows you to easily set up a local instance of netboot.xyz. The container is a small helper application written in node.js. It provides a simple web interface for editing menus on the fly, retrieving the latest menu release of netboot.xyz, and enables mirroring the downloadable assets from Github to your location machine for faster booting of assets.
+This Home Assistant add-on provides a local instance of [netboot.xyz](https://netboot.xyz), allowing you to easily set up network-based OS installations and utility disks. The add-on includes a web interface for managing boot menus and mirroring downloadable assets locally for faster booting.
 
 ![netboot.xyz webapp](https://netboot.xyz/images/netboot.xyz-webapp.jpg)
 
-It is a great tool for developing and testing custom changes to the menus. If you have a machine without an optical drive that cannot boot from USB then having a local netboot server provides a way to install an OS. If you are looking to get started with netboot.xyz and don't want to manage iPXE menus, you should use the boot media instead of setting up a container.
+This add-on is ideal for:
+- Network-based OS installations without optical drives or USB media
+- Testing and developing custom iPXE menus
+- Local asset mirroring for faster boot times
+- Managing multiple network boot configurations
 
-The container is built upon Alpine Linux and contains several components:
+## Features
 
-* netboot.xyz [webapp](https://github.com/netbootxyz/webapp)
-* Nginx for hosting local assets from the container
-* tftp-hpa
-* syslog for providing tftp activity logs
+- **Web Interface**: Easy-to-use management interface on port 3000
+- **Asset Hosting**: Nginx server for local asset mirroring (port 80)
+- **TFTP Server**: Network boot file serving (port 69/UDP)
+- **Multi-Architecture**: Supports x86-64, ARM64, and ARMv6 platforms
+- **Ingress Support**: Integrated with Home Assistant UI
 
-Services are managed in the container by [supervisord](http://supervisord.org/).
+## Installation
 
-The container runs fine under ARM-based hosts as well as x86-64.
+1. Add this repository to your Home Assistant add-on store
+2. Install the "netboot.xyz" add-on
+3. Configure your network (see DHCP Configuration below)
+4. Start the add-on
+5. Access the web interface through Home Assistant Ingress or directly at `http://[HOST]:3000`
 
-## Usage
+## Configuration
 
-The netboot.xyz docker image requires an existing DHCP server to be setup and running in order to boot from it. The image does not contain a DHCP server service. Please see the DHCP configuration setup near the end of this document for ideas on how to enable your environment to talk to the container. In most cases, you will need to specify the next-server and boot file name in the DHCP configuration. Your DHCP server will need to be assigned a static IP.
+### Add-on Options
 
-### Installing docker
+The add-on supports the following configuration options:
 
-To install docker under Debian and Ubuntu run:
+- **MENU_VERSION**: Specify a specific version of boot files (optional, defaults to latest)
 
-```shell
-sudo apt install docker.io
-```
+### Port Configuration
 
-### Download the docker image
+- **3000/tcp**: Web management interface (default)
+- **69/udp**: TFTP server for network booting (required)
+- **8080/tcp**: HTTP server for hosting boot assets (optional)
 
-#### From Github Container Registry
+### Network Requirements
 
-```shell
-docker pull ghcr.io/netbootxyz/netbootxyz
-```
+This add-on requires an existing DHCP server configured to direct network boot requests to the add-on. You will need to configure your DHCP server's `next-server` and `boot-file-name` parameters. See the DHCP Configuration section below for examples.
 
-#### From Docker Hub
+### Local Asset Mirroring
 
-```shell
-docker pull netbootxyz/netbootxyz
-```
+To use local asset mirroring for faster boot times:
 
-The following snippets are examples of starting up the container.
+1. Configure your boot.cfg to use your local endpoint (e.g., `http://192.168.0.50:8080`) instead of `https://github.com/netbootxyz`
+2. Download assets through the web interface
+3. Assets will be served from the local HTTP server on port 8080
 
-### docker-cli
+## Add-on Data Storage
 
-```shell
-docker run -d \
-  --name=netbootxyz \
-  -e MENU_VERSION=2.0.59             `# optional` \
-  -p 3000:3000                       `# sets webapp port` \
-  -p 69:69/udp                       `# sets tftp port` \
-  -p 8080:80                         `# optional` \
-  -v /local/path/to/config:/config   `# optional` \
-  -v /local/path/to/assets:/assets   `# optional` \
-  --restart unless-stopped \
-  ghcr.io/netbootxyz/netbootxyz
-```
+The add-on uses the following directories for data persistence:
 
-#### Updating the image with docker-cli
+- `/config`: Boot menu files and web application configuration
+- `/assets`: Downloaded bootable assets (ISO files, kernels, etc.)
+- `/ssl`: SSL certificates (if using HTTPS)
 
-```shell
-docker pull ghcr.io/netbootxyz/netbootxyz   # pull the latest image down
-docker stop netbootxyz                      # stop the existing container
-docker rm netbootxyz                        # remove the image
-docker run -d ...                           # previously ran start command
-```
+## DHCP Configuration
 
-Start the container with the same parameters used above. If the same folders are used your settings will remain. If you want to start fresh, you can remove the paths and start over.
+**Important**: This add-on requires a DHCP server to function. The add-on does not include a DHCP server.
 
-### docker-compose
+To use this add-on, you must configure your existing DHCP server to forward network boot requests to the add-on. This typically involves setting:
+- `next-server`: IP address of your Home Assistant host
+- `boot-file-name`: The appropriate boot file for your clients (see boot file table below)
 
-1. Copy [docker-compose.yml.example](https://github.com/netbootxyz/docker-netbootxyz/blob/master/docker-compose.yml.example) to docker-compose.yml
-1. Edit as needed
-1. Run `docker-compose up -d netbootxyz` to start containers in the background
+Your DHCP server should have a static IP address for reliable operation.
 
-#### Updating the image with docker-compose
+### DHCP Server Examples
 
-```shell
-docker-compose pull netbootxyz     # pull the latest image down
-docker-compose up -d netbootxyz    # start containers in the background
-```
+The following examples show how to configure common DHCP servers. Replace `192.168.0.33` with your Home Assistant host IP address.
 
-### Accessing the container services
-
-Once the container is started, the netboot.xyz web application can be accessed by the web configuration interface at `http://localhost:3000` or via the specified port.
-
-Downloaded web assets will be available at `http://localhost:8080` or the specified port.  If you have specified the assets volume, the assets will be available at `http://localhost:8080`.
-
-If you wish to start over from scratch, you can remove the local configuration folders and upon restart of the container, it will load the default configurations.
-
-### Local Mirror Access
-
-If you want to pull the Live Images images down from your own mirror, modify the boot.cfg file and override the default `live_endpoint` setting from `https://github.com/netbootxyz` and set it to your deployment IP or domain, e.g. `http://192.168.0.50:8080`. It will then redirect asset download to the local location you set for assets on port `8080` and you can download the assets by using the local assets menu down to your local server. This can result in a much faster boot and load time.
-
-## Parameters
-
-Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080` outside the container.
-
-| Parameter | Function |
-| :----: | --- |
-| `-p 3000` | Web configuration interface. |
-| `-p 69/udp` | TFTP Port. |
-| `-p 80` | NGINX server for hosting assets. |
-| `-e MENU_VERSION=2.0.56` | Specify a specific version of boot files you want to use from netboot.xyz (unset pulls latest) |
-| `-v /config` | Storage for boot menu files and web application config |
-| `-v /assets` | Storage for netboot.xyz bootable assets (live CDs and other files) |
-
-## DHCP Configurations
-
-This image requires the usage of a DHCP server in order to function properly. If you have an existing DHCP server, usually you will need to make some small adjustments to make your DHCP server forward requests to the netboot.xyz container. You will need to typically set your `next-server` and `boot-file-name` parameters in the DHCP configuration. This tells DHCP to forward requests to the TFTP server and then select a boot file from the TFTP server.
-
-### Examples
-
-These are a few configuration examples for setting up a DHCP server. The main configuration you will need to change are `next-server` and `filename/boot-file-name`. `Next-server` tells your client to check for a host running tftp and retrieve a boot file from there. Because the docker image is hosting a tftp server, the boot files are pulled from it and then it will attempt to load the iPXE configs directly from the host. You can then modify and adjust them to your needs. See [booting from TFTP](https://netboot.xyz/docs/booting/tftp/) for more information.
+For more detailed information, see the [official netboot.xyz TFTP documentation](https://netboot.xyz/docs/booting/tftp/).
 
 #### isc-dhcp-server
 
@@ -176,18 +133,22 @@ To make the dhcp server start automatically on boot:
 sudo systemctl enable isc-dhcp-server
 ```
 
-## netboot.xyz boot file types
+The following boot files are available and can be configured in your DHCP server:
 
-The following bootfile names can be set as the boot file in the DHCP configuration. They are baked into the Docker image:
+| Boot File Name | Architecture | Description |
+| -------------- | ------------ | ----------- |
+| `netboot.xyz.kpxe` | x86/x64 Legacy | Standard legacy BIOS boot (recommended for most legacy systems) |
+| `netboot.xyz-undionly.kpxe` | x86/x64 Legacy | Legacy BIOS boot (use if you have NIC driver issues) |
+| `netboot.xyz.efi` | x86/x64 UEFI | Standard UEFI boot with built-in drivers (recommended for UEFI) |
+| `netboot.xyz-snp.efi` | x86/x64 UEFI | UEFI with Simple Network Protocol (boots all network devices) |
+| `netboot.xyz-snponly.efi` | x86/x64 UEFI | UEFI with SNP (only chainloaded device) |
+| `netboot.xyz-arm64.efi` | ARM64 | ARM64 UEFI boot with built-in drivers |
+| `netboot.xyz-arm64-snp.efi` | ARM64 | ARM64 UEFI with SNP (all devices) |
+| `netboot.xyz-arm64-snponly.efi` | ARM64 | ARM64 UEFI with SNP (chainloaded only) |
+| `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
 
-| bootfile name      | description                                                 |
-| -------------------|-------------------------------------------------------------|
-| `netboot.xyz.kpxe` | Legacy DHCP boot image file, uses built-in iPXE NIC drivers |
-| `netboot.xyz-undionly.kpxe` | Legacy DHCP boot image file, use if you have NIC issues |
-| `netboot.xyz.efi` | UEFI boot image file, uses built-in UEFI NIC drivers |
-| `netboot.xyz-snp.efi` | UEFI w/ Simple Network Protocol, attempts to boot all net devices |
-| `netboot.xyz-snponly.efi` | UEFI w/ Simple Network Protocol, only boots from device chained from |
-| `netboot.xyz-arm64.efi` | DHCP EFI boot image file, uses built-in iPXE NIC drivers |
-| `netboot.xyz-arm64-snp.efi` | UEFI w/ Simple Network Protocol, attempts to boot all net devices |
-| `netboot.xyz-arm64-snponly.efi` | UEFI w/ Simple Network Protocol, only boots from device chained from |
-| `netboot.xyz-rpi4-snp.efi` | UEFI for Raspberry Pi 4, attempts to boot all net devices |
+## Support & Documentation
+
+- [Official netboot.xyz Documentation](https://netboot.xyz/docs/)
+- [Discord Community](https://discord.gg/An6PA2a)
+- [GitHub Issues](https://github.com/netbootxyz/netboot.xyz/issues)

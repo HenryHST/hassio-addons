@@ -27,3 +27,37 @@ if bashio::config.has_value "upsmon_deadtime"; then
 fi
 
 echo "DEADTIME ${deadtime}" >> /etc/nut/upsmon.conf
+
+# SSL Configuration
+if bashio::config.has_value "certverify"; then
+    certverify=$(bashio::config "certverify")
+    if [[ "${certverify}" == "1" ]]; then
+        bashio::log.info "Enabling SSL certificate verification..."
+        echo "CERTVERIFY 1" >> /etc/nut/upsmon.conf
+    fi
+fi
+
+if bashio::config.has_value "forcessl"; then
+    forcessl=$(bashio::config "forcessl")
+    if [[ "${forcessl}" == "1" ]]; then
+        bashio::log.info "Forcing SSL connections..."
+        echo "FORCESSL 1" >> /etc/nut/upsmon.conf
+    fi
+fi
+
+# SSL Configuration
+if bashio::config.has_value "certverify"; then
+    certverify=$(bashio::config "certverify")
+    if [[ "${certverify}" == "1" ]]; then
+        bashio::log.info "Enabling certificate verification for UPS connections"
+        echo "CERTVERIFY 1" >> /etc/nut/upsmon.conf
+    fi
+fi
+
+if bashio::config.has_value "forcessl"; then
+    forcessl=$(bashio::config "forcessl")
+    if [[ "${forcessl}" == "1" ]]; then
+        bashio::log.info "Enforcing SSL for all UPS connections"
+        echo "FORCESSL 1" >> /etc/nut/upsmon.conf
+    fi
+fi

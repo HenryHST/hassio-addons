@@ -1,13 +1,12 @@
 name: netboot.xyz
-version: 0.7.3
+version: 0.7.6
 slug: netboot_xyz
 description: netboot_xyz is a convenient place to boot into any type of operating system or utility disk without the need of having to go spend time retrieving the ISO just to run it
-url: https://netboot.xyz
-image: linuxserver/netbootxyz
+url: https://github.com/henryhst/hassio-addons/tree/master/netboot_xyz
 arch:
   - amd64
-  - armhf
-  - armv7
+  - arm64
+  - armv6
 map:
   - config:rw
   - ssl

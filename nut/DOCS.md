@@ -56,6 +56,8 @@ devices:
     config: []
 mode: netserver
 shutdown_host: "false"
+certverify: 0
+forcessl: 0
 ```
 
 **Note**: _This is just an example, don't copy and paste it! Create your own!_
@@ -229,6 +231,44 @@ specific drivers, should not be changed for the majority of users.
 
 Allows setting the DEADTIME value in upsmon.conf to adjust the stale time for
 the monitor process, should not be changed for the majority of users.
+
+### Option: `certverify`
+
+When set to `1`, makes upsmon verify all connections with SSL certificates.
+This ensures that the upsd server is authentic and greatly reduces the risk of
+man-in-the-middle attacks.
+
+**Default**: `0` (disabled)
+
+**Note**: This requires all your upsd hosts to be configured with SSL and have
+valid certificates. Without proper SSL setup, connections will fail when this
+option is enabled.
+
+### Option: `forcessl`
+
+When set to `1`, forces upsmon to use SSL for all connections to upsd servers.
+This ensures that all communication is encrypted, preventing session sniffing.
+
+**Default**: `0` (disabled)
+
+**Note**: This will make upsmon drop connections if the remote upsd doesn't
+support SSL. Only enable this if all your upsd servers have SSL configured.
+
+**Security Recommendation**: For maximum security, enable both `certverify` and
+`forcessl` together, but ensure all upsd servers are properly configured with
+SSL certificates first.
+
+Example configuration with SSL enabled:
+
+```yaml
+mode: netclient
+remote_ups_host: 192.168.1.100
+remote_ups_name: myups
+remote_ups_user: monuser
+remote_ups_password: secret
+certverify: 1
+forcessl: 1
+```
 
 ### Option: `i_like_to_be_pwned`
 
