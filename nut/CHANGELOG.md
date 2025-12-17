@@ -5,6 +5,30 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.2] - 2025-12-17
+
+### Security
+- **CVE-2024-10918**: Applied security updates for libcurl4 (HIGH severity)
+- **CVE-2025-6020**: Applied security updates for libpam modules (HIGH severity)
+- **CVE-2025-7458**: Applied available updates for libsqlite3-0 (CRITICAL severity)
+- **CVE-2023-45853**: Documented zlib1g vulnerability (marked will_not_fix by Debian)
+- Added automated `apt-get upgrade` during build process
+- Implemented security scanning workflow with Trivy
+
+### Added
+- Automated security patching during Docker build
+- Package version logging for security auditing
+- Daily vulnerability scanning
+
+### Changed
+- Enhanced build process with explicit security update step
+- Improved package version tracking and logging
+
+### Notes
+- Some vulnerabilities may not have fixes available yet in Debian stable
+- Security scanning runs daily to detect new vulnerabilities
+- Base image updated to latest Debian bookworm-slim with security patches
+
 ## [1.0.1] - 2025-12-17
 
 ### Changed

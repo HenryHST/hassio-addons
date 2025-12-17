@@ -13,10 +13,12 @@ ENV ADDON_VERSION="${BUILD_VERSION}" \
 # Set shell with pipefail option
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Install base requirements
+# Install base requirements and apply security updates
 # hadolint ignore=DL3008
 RUN \
     apt-get update \
+    && echo "Applying security updates..." \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         bash \
         ca-certificates \
@@ -25,6 +27,8 @@ RUN \
         tzdata \
         procps \
         xz-utils \
+    && echo "Installed versions:" \
+    && dpkg -l | grep -E 'libcurl|libpam|libsqlite3|zlib1g' || true \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -46,16 +50,19 @@ RUN \
     && tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz \
     && rm -rf /tmp/*
 
-# Install NUT packages
+# Install NUT packages with latest security patches
 # hadolint ignore=DL3008
 RUN \
     apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         nut \
         nut-snmp \
         nut-xml \
         nut-modbus \
         usbutils \
+    && echo "NUT version:" \
+    && upsd -V || true \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

@@ -78,6 +78,26 @@ Check the [Security tab](../../security) for current vulnerability status.
 - **Details**: OS Command Injection in fsSize() function
 - **Resolution**: Updated to systeminformation@5.27.14
 
+#### CVE-2024-10918, CVE-2025-6020 (NUT)
+- **Severity**: HIGH
+- **Component**: libcurl4, libpam-modules (Debian packages)
+- **Fixed in**: Version 1.0.2
+- **Details**: Various security vulnerabilities in system libraries
+- **Resolution**: Applied apt-get upgrade during build process
+
+#### CVE-2025-7458 (NUT)
+- **Severity**: CRITICAL
+- **Component**: libsqlite3-0
+- **Status**: Partial fix applied via apt-get upgrade
+- **Note**: Fix availability depends on Debian security updates
+
+#### CVE-2023-45853 (NUT)
+- **Severity**: CRITICAL
+- **Component**: zlib1g
+- **Status**: Will not fix (marked by Debian)
+- **Note**: Debian team has marked this as will_not_fix
+- **Mitigation**: Monitor for future updates
+
 ## Security Best Practices
 
 ### For Users
