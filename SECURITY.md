@@ -139,7 +139,21 @@ trivy image nut:test
 
 # Scan with specific severity
 trivy image --severity CRITICAL,HIGH netboot_xyz:test
+
+# Scan with VEX document (suppress known false positives)
+trivy image --vex .vex/nut-known-issues.openvex.json nut:test
 ```
+
+### VEX (Vulnerability Exploitability eXchange)
+
+We publish VEX statements for known vulnerabilities that are false positives or have mitigated risk:
+
+- **Location**: `.vex/` directory
+- **Format**: OpenVEX JSON
+- **Purpose**: Reduce false positives and improve security transparency
+- **Documentation**: See [.vex/README.md](.vex/README.md)
+
+VEX statements help security scanners understand which vulnerabilities actually affect our addons.
 
 ### NPM Audit
 

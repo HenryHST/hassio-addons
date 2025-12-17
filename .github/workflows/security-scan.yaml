@@ -54,6 +54,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           image-ref: local/netboot_xyz:scan
           format: sarif
@@ -71,6 +73,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner (table output)
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           image-ref: local/netboot_xyz:scan
           format: table
@@ -119,6 +123,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           image-ref: local/nut:scan
           format: sarif
@@ -136,6 +142,8 @@ jobs:
 
       - name: Run Trivy vulnerability scanner (table output)
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           image-ref: local/nut:scan
           format: table
@@ -164,6 +172,8 @@ jobs:
 
       - name: Run Trivy config scanner on netboot.xyz
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           scan-type: config
           scan-ref: netboot_xyz/Dockerfile
@@ -180,6 +190,8 @@ jobs:
 
       - name: Run Trivy config scanner on NUT
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
         with:
           scan-type: config
           scan-ref: nut/Dockerfile

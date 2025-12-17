@@ -1,0 +1,45 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/henryhst/hassio-addons/vex/nut-known-issues",
+  "author": "henryhst",
+  "role": "Project Maintainer",
+  "timestamp": "2025-12-17T00:00:00Z",
+  "version": "1",
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2023-45853"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/henryhst/hassio-addons/nut@1.0.2",
+          "identifiers": {
+            "purl": "pkg:deb/debian/zlib1g@1:1.2.13.dfsg-1"
+          }
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "The vulnerable zipOpenNewFileInZip4_6 function is not used in the Network UPS Tools (NUT) codebase. NUT does not perform ZIP file operations that would trigger this vulnerability. Additionally, Debian security team has marked this CVE as 'will_not_fix' indicating low practical risk.",
+      "action_statement": "No action required. Monitoring for upstream fixes continues."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-7458"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/henryhst/hassio-addons/nut@1.0.2",
+          "identifiers": {
+            "purl": "pkg:deb/debian/libsqlite3-0@3.40.1-2+deb12u2"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "SQLite is included as a dependency but the specific integer overflow vulnerability requires specific SQL query patterns that are not used by NUT. The addon applies all available security patches during build. Impact is minimal as NUT's SQLite usage is limited to configuration storage with validated inputs.",
+      "action_statement": "Automated apt-get upgrade applied during build. Monitoring Debian security updates for patches. No immediate action required for users."
+    }
+  ]
+}
+
