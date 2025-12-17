@@ -4,6 +4,33 @@ This directory contains automated workflows for building, testing, and releasing
 
 ## Workflows
 
+### 🔒 Security Workflow
+
+#### `security-scan.yaml`
+Scans Docker images and Dockerfiles for security vulnerabilities using Trivy.
+
+**Triggers:**
+- Push to main/master branch (when addon files change)
+- Pull requests (when addon files change)
+- Daily at 02:00 UTC (scheduled)
+- Manual dispatch
+
+**Features:**
+- **Image Scanning**: Scans both netboot.xyz and NUT Docker images for OS and library vulnerabilities
+- **Configuration Scanning**: Checks Dockerfiles for misconfigurations and best practice violations
+- **SARIF Upload**: Results automatically uploaded to GitHub Security tab
+- **Severity Levels**: Scans for CRITICAL, HIGH, and MEDIUM vulnerabilities
+- **Automated Reports**: Generates comprehensive security summaries
+
+**Scan Types:**
+1. **Vulnerability Scanning**: Detects known CVEs in OS packages and dependencies
+2. **Config Scanning**: Identifies Dockerfile misconfigurations
+3. **Best Practices**: Checks against CIS Docker Benchmarks
+
+**Exit Codes:**
+- Fails on CRITICAL or HIGH vulnerabilities in images
+- Informational for Dockerfile misconfigurations
+
 ### 🏗️ Build Workflows
 
 #### `build-netboot-xyz.yaml`
@@ -154,12 +181,45 @@ Clear the cache:
 2. Delete relevant caches
 3. Re-run the workflow
 
+## Security Scanning
+
+### Trivy Scanner
+
+All Docker images are automatically scanned for vulnerabilities using [Trivy](https://trivy.dev/).
+
+**View Security Results:**
+1. Go to **Security** tab
+2. Select **Code scanning alerts**
+3. Filter by addon (netboot-xyz, nut, config)
+
+**Vulnerability Severity:**
+- 🔴 **CRITICAL**: Immediate action required
+- 🟠 **HIGH**: High priority fixes
+- 🟡 **MEDIUM**: Medium priority (informational in scans)
+- 🔵 **LOW**: Low priority (not scanned by default)
+
+**Manual Security Scan:**
+```bash
+# Scan netboot.xyz image
+docker build -t netboot_xyz:test ./netboot_xyz
+trivy image netboot_xyz:test
+
+# Scan NUT image
+docker build -t nut:test ./nut
+trivy image nut:test
+
+# Scan Dockerfile
+trivy config netboot_xyz/Dockerfile
+```
+
 ## Best Practices
 
 1. **Test locally first**: Build and test Docker images locally before pushing
 2. **Use pull requests**: Workflows run on PRs without pushing images
 3. **Semantic versioning**: Follow semver for version numbers
 4. **Update CHANGELOGs**: Document changes in addon CHANGELOG.md files
+5. **Monitor security**: Review Security tab regularly for vulnerabilities
+6. **Update base images**: Keep Alpine and Debian base images up to date
 
 ## References
 

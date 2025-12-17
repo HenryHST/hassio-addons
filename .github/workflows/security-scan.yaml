@@ -1,0 +1,237 @@
+---
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'netboot_xyz/**'
+      - 'nut/**'
+      - '.github/workflows/security-scan.yaml'
+  pull_request:
+    paths:
+      - 'netboot_xyz/**'
+      - 'nut/**'
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  scan-netboot-xyz:
+    name: Scan netboot.xyz Image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]  # Scan representative architecture
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build netboot.xyz image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./netboot_xyz
+          file: ./netboot_xyz/Dockerfile
+          tags: local/netboot_xyz:scan
+          load: true
+          cache-from: type=gha,scope=netboot_xyz-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=scan
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            BUILD_REF=${{ github.sha }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: local/netboot_xyz:scan
+          format: sarif
+          output: trivy-netboot-xyz-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-netboot-xyz-results.sarif
+          category: netboot-xyz
+
+      - name: Run Trivy vulnerability scanner (table output)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: local/netboot_xyz:scan
+          format: table
+          severity: CRITICAL,HIGH
+          vuln-type: os,library
+          exit-code: 1
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## Security Scan: netboot.xyz" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** netboot_xyz" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base:** Alpine 3.20" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+
+  scan-nut:
+    name: Scan NUT Image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]  # Scan representative architecture
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build NUT image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./nut
+          file: ./nut/Dockerfile
+          tags: local/nut:scan
+          load: true
+          cache-from: type=gha,scope=nut-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=scan
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            BUILD_REF=${{ github.sha }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: local/nut:scan
+          format: sarif
+          output: trivy-nut-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-nut-results.sarif
+          category: nut
+
+      - name: Run Trivy vulnerability scanner (table output)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: local/nut:scan
+          format: table
+          severity: CRITICAL,HIGH
+          vuln-type: os,library
+          exit-code: 1
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## Security Scan: NUT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** nut" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base:** Debian Bookworm Slim" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+
+  scan-dockerfiles:
+    name: Scan Dockerfiles for Misconfigurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Run Trivy config scanner on netboot.xyz
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: netboot_xyz/Dockerfile
+          format: sarif
+          output: trivy-config-netboot-xyz.sarif
+          exit-code: 0
+
+      - name: Upload config scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-config-netboot-xyz.sarif
+          category: config-netboot-xyz
+
+      - name: Run Trivy config scanner on NUT
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: config
+          scan-ref: nut/Dockerfile
+          format: sarif
+          output: trivy-config-nut.sarif
+          exit-code: 0
+
+      - name: Upload config scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-config-nut.sarif
+          category: config-nut
+
+      - name: Run Trivy config scanner (table output)
+        run: |
+          echo "### Dockerfile Misconfigurations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### netboot.xyz Dockerfile" >> $GITHUB_STEP_SUMMARY
+          docker run --rm -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest config /workspace/netboot_xyz/Dockerfile \
+            --severity CRITICAL,HIGH,MEDIUM || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### NUT Dockerfile" >> $GITHUB_STEP_SUMMARY
+          docker run --rm -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest config /workspace/nut/Dockerfile \
+            --severity CRITICAL,HIGH,MEDIUM || true
+
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [scan-netboot-xyz, scan-nut, scan-dockerfiles]
+    if: always()
+    steps:
+      - name: Generate overall summary
+        run: |
+          echo "# 🔒 Security Scan Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| netboot.xyz Image | ${{ needs.scan-netboot-xyz.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NUT Image | ${{ needs.scan-nut.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dockerfile Config | ${{ needs.scan-dockerfiles.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review findings in the **Security** tab" >> $GITHUB_STEP_SUMMARY
+          echo "2. Update base images if vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+          echo "3. Apply security patches as needed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "Scan completed at $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+

@@ -88,6 +88,7 @@ This repository uses GitHub Actions for continuous integration and deployment:
 
 - **🏗️ Automated Builds**: Docker images are automatically built for all architectures
 - **🔏 Image Signing**: All images are signed with Cosign for security
+- **🔒 Security Scanning**: Daily vulnerability scans with Trivy
 - **✅ Quality Checks**: Automated linting (YAML, Shell, Dockerfile)
 - **📦 Multi-Arch Support**: Images for aarch64, amd64, and armv7
 
@@ -95,10 +96,19 @@ This repository uses GitHub Actions for continuous integration and deployment:
 
 | Workflow | Description | Trigger |
 |----------|-------------|---------|
+| Security Scan | Trivy vulnerability scanning | Push, PR, Daily, Manual |
 | Build netboot.xyz | Builds netboot.xyz addon | Push, PR, Release |
 | Build NUT | Builds NUT addon | Push, PR, Release |
 | Lint | Code quality checks | Push, PR |
 | Release | Version management | Release, Manual |
+
+### Security
+
+All Docker images are automatically scanned for vulnerabilities:
+- **Daily Scans**: Automated security checks at 02:00 UTC
+- **PR Scans**: Security validation on pull requests
+- **SARIF Reports**: Results in GitHub Security tab
+- **Trivy Scanner**: Industry-standard vulnerability detection
 
 See [.github/workflows/README.md](.github/workflows/README.md) for details.
 
