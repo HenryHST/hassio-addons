@@ -46,13 +46,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Hadolint on netboot_xyz
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: netboot_xyz/Dockerfile
           failure-threshold: warning
 
       - name: Run Hadolint on nut
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: nut/Dockerfile
           failure-threshold: warning
