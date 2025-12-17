@@ -1,0 +1,71 @@
+---
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  update-versions:
+    name: Update addon versions
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update addon versions
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # Update netboot_xyz version
+          yq eval ".version = \"${VERSION}\"" -i netboot_xyz/config.yaml
+          
+          # Update nut version
+          yq eval ".version = \"${VERSION}\"" -i nut/config.yaml
+          
+          echo "Updated versions to ${VERSION}"
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add netboot_xyz/config.yaml nut/config.yaml
+          git commit -m "chore: bump versions to ${{ github.event.inputs.version }}" || echo "No changes to commit"
+          git push
+
+  create-release-notes:
+    name: Generate release notes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate release summary
+        run: |
+          echo "## Release ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Addons included:" >> $GITHUB_STEP_SUMMARY
+          echo "- netboot.xyz" >> $GITHUB_STEP_SUMMARY
+          echo "- Network UPS Tools (NUT)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Images:" >> $GITHUB_STEP_SUMMARY
+          echo "- ghcr.io/${{ github.repository }}/netboot_xyz:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ghcr.io/${{ github.repository }}/nut:${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
+

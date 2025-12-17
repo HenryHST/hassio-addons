@@ -1,0 +1,208 @@
+---
+name: Build NUT Addon
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'nut/**'
+      - '.github/workflows/build-nut.yaml'
+  pull_request:
+    paths:
+      - 'nut/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  ADDON_NAME: nut
+  REGISTRY: ghcr.io
+
+jobs:
+  information:
+    name: Gather addon information
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.information.outputs.version }}
+      build_date: ${{ steps.information.outputs.build_date }}
+      architectures: ${{ steps.information.outputs.architectures }}
+      description: ${{ steps.information.outputs.description }}
+      name: ${{ steps.information.outputs.name }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get addon information
+        id: information
+        run: |
+          # Read config.yaml
+          version=$(yq eval '.version' nut/config.yaml)
+          name=$(yq eval '.name' nut/config.yaml)
+          description=$(yq eval '.description' nut/config.yaml)
+          architectures=$(yq eval -o=json '.arch' nut/config.yaml | jq -c)
+          build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "name=${name}" >> $GITHUB_OUTPUT
+          echo "description=${description}" >> $GITHUB_OUTPUT
+          echo "architectures=${architectures}" >> $GITHUB_OUTPUT
+          echo "build_date=${build_date}" >> $GITHUB_OUTPUT
+          
+          echo "### Addon Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Name:** ${name}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${version}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architectures:** ${architectures}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Date:** ${build_date}" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: Build ${{ matrix.arch }} image
+    needs: information
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, amd64, armv7]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Map architecture to Docker platform
+        id: platform
+        run: |
+          case "${{ matrix.arch }}" in
+            aarch64)
+              echo "platform=linux/arm64" >> $GITHUB_OUTPUT
+              ;;
+            amd64)
+              echo "platform=linux/amd64" >> $GITHUB_OUTPUT
+              ;;
+            armv7)
+              echo "platform=linux/arm/v7" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+          
+          TAGS="${IMAGE_NAME}:${{ needs.information.outputs.version }}-${{ matrix.arch }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            TAGS="${TAGS},${IMAGE_NAME}:latest-${{ matrix.arch }}"
+          fi
+          
+          echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nut
+          file: ./nut/Dockerfile
+          platforms: ${{ steps.platform.outputs.platform }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=${{ needs.information.outputs.name }}
+            org.opencontainers.image.description=${{ needs.information.outputs.description }}
+            org.opencontainers.image.version=${{ needs.information.outputs.version }}
+            org.opencontainers.image.created=${{ needs.information.outputs.build_date }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          build-args: |
+            BUILD_VERSION=${{ needs.information.outputs.version }}
+            BUILD_DATE=${{ needs.information.outputs.build_date }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_NAME=${{ needs.information.outputs.name }}
+            BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
+            BUILD_REPOSITORY=${{ github.repository }}
+          cache-from: type=gha,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image with Cosign
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          IMAGE_DIGEST="${{ steps.build.outputs.digest }}"
+          cosign sign --yes "${{ steps.meta.outputs.image_name }}@${IMAGE_DIGEST}"
+
+      - name: Generate build summary
+        run: |
+          echo "### Build Summary - ${{ matrix.arch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** ${{ steps.build.outputs.digest }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform:** ${{ steps.platform.outputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Signed:** ${{ github.event_name != 'pull_request' }}" >> $GITHUB_STEP_SUMMARY
+
+  manifest:
+    name: Create multi-arch manifest
+    if: github.event_name != 'pull_request'
+    needs: [information, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push manifest
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+          VERSION="${{ needs.information.outputs.version }}"
+          
+          # Create version manifest
+          docker manifest create "${IMAGE_NAME}:${VERSION}" \
+            "${IMAGE_NAME}:${VERSION}-aarch64" \
+            "${IMAGE_NAME}:${VERSION}-amd64" \
+            "${IMAGE_NAME}:${VERSION}-armv7"
+          
+          docker manifest push "${IMAGE_NAME}:${VERSION}"
+          
+          # Create latest manifest if on main branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            docker manifest create "${IMAGE_NAME}:latest" \
+              "${IMAGE_NAME}:latest-aarch64" \
+              "${IMAGE_NAME}:latest-amd64" \
+              "${IMAGE_NAME}:latest-armv7"
+            
+            docker manifest push "${IMAGE_NAME}:latest"
+          fi
+          
+          echo "### Manifest Created" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${IMAGE_NAME}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architectures:** aarch64, amd64, armv7" >> $GITHUB_STEP_SUMMARY
+

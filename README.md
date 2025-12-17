@@ -82,6 +82,26 @@ You have several options to get them answered:
 
 In case you've found a bug, please [open an issue on GitHub][issue].
 
+## CI/CD & Automation
+
+This repository uses GitHub Actions for continuous integration and deployment:
+
+- **🏗️ Automated Builds**: Docker images are automatically built for all architectures
+- **🔏 Image Signing**: All images are signed with Cosign for security
+- **✅ Quality Checks**: Automated linting (YAML, Shell, Dockerfile)
+- **📦 Multi-Arch Support**: Images for aarch64, amd64, and armv7
+
+### Available Workflows
+
+| Workflow | Description | Trigger |
+|----------|-------------|---------|
+| Build netboot.xyz | Builds netboot.xyz addon | Push, PR, Release |
+| Build NUT | Builds NUT addon | Push, PR, Release |
+| Lint | Code quality checks | Push, PR |
+| Release | Version management | Release, Manual |
+
+See [.github/workflows/README.md](.github/workflows/README.md) for details.
+
 ## Contributing
 
 This is an active open-source project. We are always open to people who want to
