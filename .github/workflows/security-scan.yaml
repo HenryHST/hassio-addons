@@ -180,7 +180,9 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Corosync QNetd image for scanning
+        id: build_corosyncd
         uses: docker/build-push-action@v6
+        continue-on-error: true
         with:
           context: ./corosyncd
           file: ./corosyncd/Dockerfile
@@ -193,6 +195,7 @@ jobs:
             BUILD_REF=${{ github.sha }}
 
       - name: Run Trivy vulnerability scanner
+        if: steps.build_corosyncd.outcome == 'success'
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_DISABLE_VEX_NOTICE: "true"
@@ -205,13 +208,14 @@ jobs:
           exit-code: 0
 
       - name: Upload Trivy results to GitHub Security
+        if: steps.build_corosyncd.outcome == 'success' && always()
         uses: github/codeql-action/upload-sarif@v4
-        if: always()
         with:
           sarif_file: trivy-corosyncd-results.sarif
           category: corosyncd
 
       - name: Run Trivy vulnerability scanner (table output)
+        if: steps.build_corosyncd.outcome == 'success'
         uses: aquasecurity/trivy-action@master
         env:
           TRIVY_DISABLE_VEX_NOTICE: "true"
@@ -227,12 +231,22 @@ jobs:
         run: |
           echo "## Security Scan: Corosync QNetd" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image:** corosyncd" >> $GITHUB_STEP_SUMMARY
-          echo "- **Base:** Debian Bookworm Slim" >> $GITHUB_STEP_SUMMARY
-          echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.build_corosyncd.outcome }}" != "success" ]]; then
+            echo "### ⚠️ Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "The Docker image could not be built. Skipping security scan." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Possible causes:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Package `corosync-qnetd` not available in Debian repositories" >> $GITHUB_STEP_SUMMARY
+            echo "- Dockerfile syntax error" >> $GITHUB_STEP_SUMMARY
+            echo "- Missing dependencies" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
+            echo "- **Image:** corosyncd" >> $GITHUB_STEP_SUMMARY
+            echo "- **Base:** Debian Bookworm Slim" >> $GITHUB_STEP_SUMMARY
+            echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+          fi
 
   scan-dockerfiles:
     name: Scan Dockerfiles for Misconfigurations
