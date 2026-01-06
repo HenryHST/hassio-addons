@@ -21,6 +21,10 @@ bashio::log.info " Add-on Version: ${ADDON_VERSION:-unknown}"
 bashio::log.info " NUT Core Version: ${NUT_VERSION:-unknown}"
 bashio::log.info "-----------------------------------------------------------"
 
+# Create /run/nut directory if it doesn't exist (symlinked to /var/run/nut)
+mkdir -p /var/run/nut
+mkdir -p /run/nut
+
 chown root:root /var/run/nut
 chmod 0770 /var/run/nut
 
@@ -39,7 +43,11 @@ fi
 
 if bashio::config.equals 'mode' 'netserver' ;then
     bashio::log.info "Generating ${USERS_CONF}..."
-
+    
+    # Debug: Log device count
+    device_count=$(bashio::config 'devices|length')
+    bashio::log.info "[DEBUG] Device count from config: ${device_count}"
+    
     # Create Monitor User
     upsmonpwd=$(shuf -ze -n20  {A..Z} {a..z} {0..9}|tr -d '\0')
     if [[ -z "${upsmonpwd}" ]]; then
@@ -95,8 +103,10 @@ if bashio::config.equals 'mode' 'netserver' ;then
         upsport=$(bashio::config "devices[${device}].port")
         if bashio::config.has_value "devices[${device}].powervalue"; then
             upspowervalue=$(bashio::config "devices[${device}].powervalue")
+            bashio::log.info "[DEBUG] Device ${upsname}: powervalue from config = ${upspowervalue}"
         else
             upspowervalue="1"
+            bashio::log.info "[DEBUG] Device ${upsname}: using default powervalue = 1"
         fi
 
         bashio::log.info "Configuring Device named ${upsname}..."
@@ -114,9 +124,15 @@ if bashio::config.equals 'mode' 'netserver' ;then
         done
         IFS="$OIFS"
 
+        monitor_line="MONITOR ${upsname}@localhost ${upspowervalue} upsmonmaster [PASSWORD_HIDDEN] master"
+        bashio::log.info "[DEBUG] Writing MONITOR line: ${monitor_line}"
         echo "MONITOR ${upsname}@localhost ${upspowervalue} upsmonmaster ${upsmonpwd} master" \
             >> /etc/nut/upsmon.conf
     done
+    
+    # Debug: Count MONITOR lines written
+    monitor_count=$(grep -c "^MONITOR" /etc/nut/upsmon.conf 2>/dev/null || echo 0)
+    bashio::log.info "[DEBUG] Total MONITOR lines in upsmon.conf: ${monitor_count}"
 
     bashio::log.info "Starting the UPS drivers..."
     # Run upsdrvctl
@@ -137,4 +153,10 @@ if bashio::config.true 'shutdown_host'; then
     shutdowncmd="/usr/bin/shutdownhost"
 fi
 
+bashio::log.info "[DEBUG] Writing SHUTDOWNCMD: ${shutdowncmd}"
 echo "SHUTDOWNCMD  ${shutdowncmd}" >> /etc/nut/upsmon.conf
+
+# Final debug check
+final_monitor_count=$(grep -c "^MONITOR" /etc/nut/upsmon.conf 2>/dev/null || echo 0)
+bashio::log.info "[DEBUG] Final MONITOR line count: ${final_monitor_count}"
+bashio::log.info "[DEBUG] upsmon.conf has $(wc -l < /etc/nut/upsmon.conf) total lines"
