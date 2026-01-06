@@ -1,0 +1,194 @@
+---
+name: Build Corosync QNetd
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'corosyncd/**'
+      - '.github/workflows/build-corosyncd.yaml'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'corosyncd/**'
+      - '.github/workflows/build-corosyncd.yaml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  ADDON_NAME: corosyncd
+
+jobs:
+  information:
+    name: Gather addon information
+    outputs:
+      version: ${{ steps.get_info.outputs.version }}
+      name: ${{ steps.get_info.outputs.name }}
+      description: ${{ steps.get_info.outputs.description }}
+      architectures: ${{ steps.get_info.outputs.architectures }}
+      build_date: ${{ steps.get_info.outputs.build_date }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Get addon information
+        id: get_info
+        run: |
+          version=$(yq eval '.version' corosyncd/config.yaml)
+          name=$(yq eval '.name' corosyncd/config.yaml)
+          description=$(yq eval '.description' corosyncd/config.yaml)
+          architectures=$(yq eval -o=json '.arch' corosyncd/config.yaml | jq -c)
+          build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "name=${name}" >> $GITHUB_OUTPUT
+          echo "description=${description}" >> $GITHUB_OUTPUT
+          echo "architectures=${architectures}" >> $GITHUB_OUTPUT
+          echo "build_date=${build_date}" >> $GITHUB_OUTPUT
+
+          echo "### Addon Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Name:** ${name}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${version}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architectures:** ${architectures}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Date:** ${build_date}" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: Build ${{ matrix.arch }}
+    needs: information
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ["aarch64", "amd64", "armv7"]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get platform for architecture
+        id: platform
+        run: |
+          case "${{ matrix.arch }}" in
+            aarch64) echo "platform=linux/arm64" >> $GITHUB_OUTPUT ;;
+            amd64) echo "platform=linux/amd64" >> $GITHUB_OUTPUT ;;
+            armv7) echo "platform=linux/arm/v7" >> $GITHUB_OUTPUT ;;
+            *) echo "Unsupported architecture: ${{ matrix.arch }}" && exit 1 ;;
+          esac
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+
+          TAGS="${IMAGE_NAME}:${{ needs.information.outputs.version }}-${{ matrix.arch }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            TAGS="${TAGS},${IMAGE_NAME}:latest-${{ matrix.arch }}"
+          fi
+
+          echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./corosyncd
+          file: ./corosyncd/Dockerfile
+          platforms: ${{ steps.platform.outputs.platform }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=${{ needs.information.outputs.version }}
+            BUILD_DATE=${{ needs.information.outputs.build_date }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_NAME=${{ needs.information.outputs.name }}
+            BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
+            BUILD_REPOSITORY=${{ github.repository }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+
+      - name: Sign the published Docker image
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          echo "Signing image: ${{ steps.meta.outputs.image_name }}:${{ needs.information.outputs.version }}-${{ matrix.arch }}"
+          cosign sign --yes ${{ steps.meta.outputs.image_name }}:${{ needs.information.outputs.version }}-${{ matrix.arch }}
+
+  create-manifest:
+    name: Create multi-arch manifest
+    needs: [build, information]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push manifest
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+          VERSION="${{ needs.information.outputs.version }}"
+
+          # Create version manifest
+          docker manifest create "${IMAGE_NAME}:${VERSION}" \
+            "${IMAGE_NAME}:${VERSION}-aarch64" \
+            "${IMAGE_NAME}:${VERSION}-amd64" \
+            "${IMAGE_NAME}:${VERSION}-armv7"
+
+          docker manifest push "${IMAGE_NAME}:${VERSION}"
+
+          # Create latest manifest if on main branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            docker manifest create "${IMAGE_NAME}:latest" \
+              "${IMAGE_NAME}:latest-aarch64" \
+              "${IMAGE_NAME}:latest-amd64" \
+              "${IMAGE_NAME}:latest-armv7"
+
+            docker manifest push "${IMAGE_NAME}:latest"
+          fi
+
+          echo "### Manifest Created" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${IMAGE_NAME}:${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architectures:** aarch64, amd64, armv7" >> $GITHUB_STEP_SUMMARY
+

@@ -65,3 +65,5 @@ Both versions are displayed at add-on startup:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
+
+

@@ -59,6 +59,12 @@ jobs:
           dockerfile: nut/Dockerfile
           failure-threshold: warning
 
+      - name: Run Hadolint on corosyncd
+        uses: hadolint/hadolint-action@v3.3.0
+        with:
+          dockerfile: corosyncd/Dockerfile
+          failure-threshold: warning
+
   validate-config:
     name: Validate addon configs
     runs-on: ubuntu-latest
@@ -96,3 +102,16 @@ jobs:
           yq eval '.arch' nut/config.yaml
 
           echo "✓ nut config is valid"
+
+      - name: Validate corosyncd config
+        run: |
+          echo "Validating corosyncd/config.yaml..."
+          yq eval '.' corosyncd/config.yaml > /dev/null
+
+          # Check required fields
+          yq eval '.name' corosyncd/config.yaml
+          yq eval '.version' corosyncd/config.yaml
+          yq eval '.slug' corosyncd/config.yaml
+          yq eval '.arch' corosyncd/config.yaml
+
+          echo "✓ corosyncd config is valid"

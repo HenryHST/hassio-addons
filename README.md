@@ -71,6 +71,27 @@ Network UPS Tools (NUT) provides support for monitoring and managing Uninterrupt
 
 [:books: Read the full add-on documentation][addon-doc-nut]
 
+### ✓ [Corosync QNetd][addon-corosyncd]
+
+![Version][corosyncd-version-shield]
+![Supports aarch64 Architecture][corosyncd-aarch64-shield]
+![Supports amd64 Architecture][corosyncd-amd64-shield]
+![Supports armv7 Architecture][corosyncd-armv7-shield]
+
+_External quorum device for Proxmox VE clusters_
+
+Corosync QNetd (Quorum Network Daemon) provides an external vote for cluster quorum calculations. Essential for 2-node Proxmox VE clusters and preventing split-brain scenarios.
+
+**Features:**
+- External quorum vote for Proxmox VE clusters
+- Prevents split-brain in 2-node clusters
+- Support for even-numbered clusters (2, 4, 6+ nodes)
+- TLS certificate management
+- Configurable port and logging
+- High availability support
+
+[:books: Read the full add-on documentation][addon-doc-corosyncd]
+
 ## Support
 
 Got questions?
@@ -99,6 +120,7 @@ This repository uses GitHub Actions for continuous integration and deployment:
 | Security Scan | Trivy vulnerability scanning | Push, PR, Daily, Manual |
 | Build netboot.xyz | Builds netboot.xyz addon | Push, PR, Release |
 | Build NUT | Builds NUT addon | Push, PR, Release |
+| Build Corosync QNetd | Builds corosyncd addon | Push, PR, Release |
 | Lint | Code quality checks | Push, PR |
 | Release | Version management | Release, Manual |
 
@@ -146,6 +168,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[addon-corosyncd]: https://github.com/henryhst/hassio-addons/tree/master/corosyncd
+[addon-doc-corosyncd]: https://github.com/henryhst/hassio-addons/blob/master/corosyncd/DOCS.md
 [addon-doc-netboot]: https://github.com/henryhst/hassio-addons/blob/master/netboot_xyz/DOCS.md
 [addon-doc-nut]: https://github.com/henryhst/hassio-addons/blob/master/nut/DOCS.md
 [addon-netboot]: https://github.com/henryhst/hassio-addons/tree/master/netboot_xyz
@@ -158,6 +182,10 @@ SOFTWARE.
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [netboot-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [netboot-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
+[corosyncd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[corosyncd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[corosyncd-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
+[corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [nut-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg

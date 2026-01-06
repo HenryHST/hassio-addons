@@ -144,3 +144,5 @@ SOFTWARE.
 [discord]: https://discord.me/hassioaddons
 [forum]: https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516
 
+
+

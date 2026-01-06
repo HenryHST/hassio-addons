@@ -1,0 +1,29 @@
+---
+name: Corosync QNetd
+version: 1.0.0
+slug: corosyncd
+description: >-
+  Corosync QNetd (Quorum Network Daemon) provides an external vote for cluster
+  quorum calculations. Essential for 2-node Proxmox VE clusters and preventing
+  split-brain scenarios.
+url: https://github.com/henryhst/hassio-addons/tree/master/corosyncd
+startup: system
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+hassio_api: true
+hassio_role: manager
+homeassistant_api: false
+ports:
+  5403/tcp: 5403
+ports_description:
+  5403/tcp: Corosync QNetd Quorum Device
+options:
+  qnetd_port: 5403
+  log_level: info
+schema:
+  qnetd_port: port
+  log_level: list(trace|debug|info|notice|warning|error|fatal)?
+  tls_enabled: bool?

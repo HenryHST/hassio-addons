@@ -16,6 +16,7 @@ We will respond within 48 hours and work with you to understand and address the 
 |-------|---------|-----------|
 | netboot.xyz | 1.0.x | ✅ Yes |
 | Network UPS Tools | 1.0.x | ✅ Yes |
+| Corosync QNetd | 1.0.x | ✅ Yes |
 
 ## Security Measures
 
@@ -98,6 +99,18 @@ Check the [Security tab](../../security) for current vulnerability status.
 - **Note**: Debian team has marked this as will_not_fix
 - **Mitigation**: Monitor for future updates
 
+#### Corosync QNetd Security Fixes (v1.0.0)
+- **Severity**: CRITICAL
+- **Component**: SSH server with hardcoded credentials
+- **Fixed in**: Version 1.0.0
+- **Details**: 
+  - Removed SSH server (openssh-server package)
+  - Removed hardcoded root password ('root:proxmox')
+  - Removed PermitRootLogin yes configuration
+  - Removed password authentication exposure
+  - Removed port 22 (SSH) from exposed ports
+- **Resolution**: Complete removal of SSH functionality. Service now only exposes Corosync QNetd port 5403.
+
 ## Security Best Practices
 
 ### For Users
@@ -136,6 +149,10 @@ trivy image netboot_xyz:test
 # Scan NUT image
 docker build -t nut:test ./nut
 trivy image nut:test
+
+# Scan Corosync QNetd image
+docker build -t corosyncd:test ./corosyncd
+trivy image corosyncd:test
 
 # Scan with specific severity
 trivy image --severity CRITICAL,HIGH netboot_xyz:test
@@ -184,6 +201,6 @@ npm audit fix
 
 ---
 
-**Last Updated**: 2025-12-17
+**Last Updated**: 2025-01-06
 
 For questions about this security policy, please open a discussion or contact the maintainer.

@@ -1,0 +1,66 @@
+# Home Assistant Add-on: Corosync QNetd
+
+![Version](https://img.shields.io/badge/version-{{ version }}-blue.svg)
+{% for arch in supported_architectures %}
+![Supports {{ arch }} Architecture](https://img.shields.io/badge/{{ arch }}-yes-green.svg)
+{% endfor %}
+
+Corosync QNetd (Quorum Network Daemon) for Home Assistant - provides an external vote for Proxmox VE cluster quorum calculations.
+
+## About
+
+This add-on runs **Corosync QNetd**, a daemon that provides a quorum vote to Corosync-based clusters (particularly Proxmox VE). It's essential for:
+
+- **2-node Proxmox VE clusters**: Provides the third vote needed for quorum
+- **Even-numbered clusters**: Prevents split-brain scenarios in 2, 4, 6+ node clusters
+- **High availability**: Ensures cluster remains operational even when network partitions occur
+
+## Installation
+
+1. Navigate to **Supervisor** → **Add-on Store** in Home Assistant
+2. Add this repository: `{{ repository }}`
+3. Find **Corosync QNetd** in the add-on list
+4. Click **Install**
+5. Configure the add-on
+6. Start the add-on
+7. Check the logs to verify startup
+
+## Configuration
+
+```yaml
+qnetd_port: 5403
+log_level: info
+```
+
+See [DOCS.md](DOCS.md) for detailed configuration options.
+
+## Proxmox VE Integration
+
+### Quick Setup
+
+On **one** Proxmox node:
+
+```bash
+pvecm qdevice setup <HOME_ASSISTANT_IP>
+pvecm status
+```
+
+See [DOCS.md](DOCS.md) for complete integration guide.
+
+## Version Information
+
+- **Addon Version**: {{ version }}
+- **Corosync Version**: {{ corosync_version }}
+
+See [VERSIONING.md](VERSIONING.md) for versioning strategy.
+
+## Support
+
+- **Documentation**: [DOCS.md](DOCS.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **Issues**: [{{ repository }}/issues]({{ repository }}/issues)
+
+## License
+
+MIT License - see repository for details.
+

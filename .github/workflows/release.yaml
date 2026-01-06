@@ -39,13 +39,16 @@ jobs:
           # Update nut version
           yq eval ".version = \"${VERSION}\"" -i nut/config.yaml
 
+          # Update corosyncd version
+          yq eval ".version = \"${VERSION}\"" -i corosyncd/config.yaml
+
           echo "Updated versions to ${VERSION}"
 
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add netboot_xyz/config.yaml nut/config.yaml
+          git add netboot_xyz/config.yaml nut/config.yaml corosyncd/config.yaml
           git commit -m "chore: bump versions to ${{ github.event.inputs.version }}" || echo "No changes to commit"
           git push
 
@@ -64,9 +67,12 @@ jobs:
           echo "### Addons included:" >> $GITHUB_STEP_SUMMARY
           echo "- netboot.xyz" >> $GITHUB_STEP_SUMMARY
           echo "- Network UPS Tools (NUT)" >> $GITHUB_STEP_SUMMARY
+          echo "- Corosync QNetd" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Images:" >> $GITHUB_STEP_SUMMARY
           IMG_NB="ghcr.io/${{ github.repository }}/netboot_xyz:${{ github.event.release.tag_name }}"
           IMG_NUT="ghcr.io/${{ github.repository }}/nut:${{ github.event.release.tag_name }}"
+          IMG_COROSYNC="ghcr.io/${{ github.repository }}/corosyncd:${{ github.event.release.tag_name }}"
           echo "- ${IMG_NB}" >> $GITHUB_STEP_SUMMARY
           echo "- ${IMG_NUT}" >> $GITHUB_STEP_SUMMARY
+          echo "- ${IMG_COROSYNC}" >> $GITHUB_STEP_SUMMARY
