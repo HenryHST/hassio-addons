@@ -185,7 +185,7 @@ jobs:
           VERSION="${{ needs.information.outputs.version }}"
 
           # Create version manifest
-          docker manifest create "${IMAGE_NAME}:${VERSION}" \
+          docker manifest create --amend "${IMAGE_NAME}:${VERSION}" \
             "${IMAGE_NAME}:${VERSION}-aarch64" \
             "${IMAGE_NAME}:${VERSION}-amd64" \
             "${IMAGE_NAME}:${VERSION}-armv7"
@@ -194,7 +194,7 @@ jobs:
 
           # Create latest manifest if on main branch
           if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            docker manifest create "${IMAGE_NAME}:latest" \
+            docker manifest create --amend "${IMAGE_NAME}:latest" \
               "${IMAGE_NAME}:latest-aarch64" \
               "${IMAGE_NAME}:latest-amd64" \
               "${IMAGE_NAME}:latest-armv7"

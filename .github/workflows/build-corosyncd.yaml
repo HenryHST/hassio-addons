@@ -171,47 +171,17 @@ jobs:
           IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
           VERSION="${{ needs.information.outputs.version }}"
 
-          # #region agent log
-          echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:173\",\"message\":\"Manifest creation start\",\"data\":{\"image\":\"${IMAGE_NAME}\",\"version\":\"${VERSION}\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-          # #endregion
-
-          # Inspect each architecture image before manifest creation
-          for arch in aarch64 amd64 armv7; do
-            # #region agent log
-            echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:180\",\"message\":\"Inspecting arch image\",\"data\":{\"arch\":\"${arch}\",\"tag\":\"${IMAGE_NAME}:${VERSION}-${arch}\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-            # #endregion
-            
-            docker manifest inspect "${IMAGE_NAME}:${VERSION}-${arch}" > "/tmp/inspect-${arch}.json" 2>&1 || echo "Failed to inspect ${arch}"
-            
-            # #region agent log
-            MANIFEST_COUNT=$(cat "/tmp/inspect-${arch}.json" | jq -r '.manifests | length' 2>/dev/null || echo "0")
-            echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:188\",\"message\":\"Arch image inspection result\",\"data\":{\"arch\":\"${arch}\",\"manifest_count\":\"${MANIFEST_COUNT}\",\"is_manifest_list\":\"$([ ${MANIFEST_COUNT} -gt 1 ] && echo true || echo false)\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-            # #endregion
-          done
-
-          # Create version manifest
-          # #region agent log
-          echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:196\",\"message\":\"Attempting manifest create\",\"data\":{\"sources\":[\"${IMAGE_NAME}:${VERSION}-aarch64\",\"${IMAGE_NAME}:${VERSION}-amd64\",\"${IMAGE_NAME}:${VERSION}-armv7\"]},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"E\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-          # #endregion
-          
-          docker manifest create "${IMAGE_NAME}:${VERSION}" \
+          # Create version manifest using --amend to handle manifest lists
+          docker manifest create --amend "${IMAGE_NAME}:${VERSION}" \
             "${IMAGE_NAME}:${VERSION}-aarch64" \
             "${IMAGE_NAME}:${VERSION}-amd64" \
             "${IMAGE_NAME}:${VERSION}-armv7"
-
-          # #region agent log
-          echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:205\",\"message\":\"Manifest create successful\",\"data\":{\"target\":\"${IMAGE_NAME}:${VERSION}\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"E\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-          # #endregion
 
           docker manifest push "${IMAGE_NAME}:${VERSION}"
 
           # Create latest manifest if on main branch
           if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            # #region agent log
-            echo "{\"timestamp\":$(date +%s)000,\"location\":\"build-corosyncd.yaml:215\",\"message\":\"Creating latest manifest\",\"data\":{\"ref\":\"${{ github.ref }}\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"C\"}" >> /Users/henry/hassio-addons/.cursor/debug.log
-            # #endregion
-            
-            docker manifest create "${IMAGE_NAME}:latest" \
+            docker manifest create --amend "${IMAGE_NAME}:latest" \
               "${IMAGE_NAME}:latest-aarch64" \
               "${IMAGE_NAME}:latest-amd64" \
               "${IMAGE_NAME}:latest-armv7"
