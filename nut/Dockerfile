@@ -69,6 +69,15 @@ RUN \
 # Copy root filesystem
 COPY rootfs /
 
+# Set executable permissions for service scripts
+RUN chmod +x /etc/cont-init.d/* \
+    && chmod +x /etc/services.d/upsmon/run \
+    && chmod +x /etc/services.d/upsmon/finish \
+    && chmod +x /etc/services.d/upsd/run \
+    && chmod +x /etc/services.d/upsd/finish \
+    && chmod +x /usr/bin/notify \
+    && chmod +x /usr/bin/shutdownhost
+
 # Build arguments
 ARG BUILD_ARCH
 ARG BUILD_DATE

@@ -5,6 +5,18 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.3] - 2025-01-06
+
+### Fixed
+
+- Fixed s6-supervise permission denied errors for upsmon and upsd services
+- Added explicit executable permissions for all service scripts in Dockerfile
+- Service scripts now properly executable: run, finish, notify, shutdownhost
+
+### Changed
+
+- Improved Dockerfile to set correct permissions after COPY rootfs
+
 ## [1.0.2] - 2025-12-17
 
 ### Security
