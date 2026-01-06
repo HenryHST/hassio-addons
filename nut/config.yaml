@@ -62,7 +62,7 @@ schema:
   remote_ups_user: str?
   upsd_maxage: int?
   upsmon_deadtime: int?
-  certverify: int(0|1)?
-  forcessl: int(0|1)?
+  certverify: list(0|1)?
+  forcessl: list(0|1)?
   i_like_to_be_pwned: bool?
   leave_front_door_open: bool?
