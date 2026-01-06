@@ -12,7 +12,7 @@ readonly CONFIG_PATH=/data/options.json
 echo "-----------------------------------------------------------"
 echo " Corosync QNetd Add-on"
 echo " Add-on Version: ${ADDON_VERSION}"
-echo " Corosync Version: ${COROSYNC_VERSION}"
+echo " Corosync Version: $(corosync-qnetd -v 2>&1 | head -n1 || echo 'unknown')"
 echo "-----------------------------------------------------------"
 
 # Parse configuration

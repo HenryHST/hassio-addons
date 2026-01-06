@@ -38,25 +38,24 @@ The Corosync QNetd Home Assistant Add-on uses a **dual versioning** approach to 
 ### 2. Corosync Core Version
 
 **Format:** Upstream Version (MAJOR.MINOR.PATCH-DEBIAN_REVISION)  
-**Example:** `3.1.7-1`  
+**Example:** `3.1.7-1` (Debian Bookworm default)  
 **Visible in:**
-- Startup logs: "Corosync Version: 3.1.7"
-- Docker container labels: `io.hass.corosync.version`
-- Environment variable: `COROSYNC_VERSION`
+- Startup logs: "Corosync Version: corosync-qnetd 3.1.7-1"
+- Available via `corosync-qnetd -v` command
 - Documentation
 
 **What it tracks:**
-- Upstream Corosync QNetd version
+- Upstream Corosync QNetd version from Debian repositories
 - Core functionality of QNetd
 - Protocol improvements
 - Upstream bug fixes
 - Debian package version
 
 **Update policy:**
-- Updated when new stable Corosync releases are available
-- Tested before integration into add-on
-- Security updates applied immediately
-- May update independently of addon version
+- Uses the latest version available in Debian Bookworm repositories
+- Automatically updated when Debian releases security updates
+- Version is determined at build time from apt repositories
+- Tested before integration into addon
 
 ## Version Display
 
@@ -66,15 +65,16 @@ The Corosync QNetd Home Assistant Add-on uses a **dual versioning** approach to 
 -----------------------------------------------------------
  Corosync QNetd Add-on
  Add-on Version: 1.0.0
- Corosync Version: 3.1.7
+ Corosync Version: corosync-qnetd 3.1.7-1
 -----------------------------------------------------------
 ```
 
-### In Container Labels
+### In Container Environment
 
-```dockerfile
-LABEL io.hass.version=1.0.0
-LABEL io.hass.corosync.version="3.1.7"
+Corosync version is available at runtime via:
+```bash
+corosync-qnetd -v
+# Output: corosync-qnetd 3.1.7-1
 ```
 
 ### In Documentation

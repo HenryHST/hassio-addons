@@ -5,6 +5,21 @@ All notable changes to the Corosync QNetd Home Assistant Add-on will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-01-06
+
+### Fixed
+
+- Fixed corosync-qnetd binary not found error by removing version pinning
+- Corosync QNetd now uses latest version from Debian Bookworm repositories
+- Improved error handling during package installation
+- Version detection now happens at runtime for better flexibility
+
+### Changed
+
+- Removed hardcoded COROSYNC_VERSION environment variable
+- Version is now detected dynamically at build time from Debian repositories
+- Startup banner now displays actual installed corosync-qnetd version
+
 ## [1.0.0] - 2025-01-06
 
 ### Security

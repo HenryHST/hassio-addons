@@ -4,11 +4,9 @@ FROM debian:bookworm-slim
 ARG BUILD_VERSION
 ARG BUILD_DATE
 ARG BUILD_REF
-ARG COROSYNC_VERSION="3.1.7-1"
 
 # Store versions for runtime access
-ENV ADDON_VERSION="${BUILD_VERSION}" \
-    COROSYNC_VERSION="${COROSYNC_VERSION}"
+ENV ADDON_VERSION="${BUILD_VERSION}"
 
 # Set shell with pipefail option for safer script execution
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
@@ -25,9 +23,12 @@ RUN \
         jq \
         netcat-openbsd \
         procps \
-        corosync-qnetd=${COROSYNC_VERSION} \
+        corosync-qnetd \
     && echo "Installed Corosync QNetd version:" \
-    && corosync-qnetd -v || true \
+    && COROSYNC_VERSION=$(dpkg -l | grep corosync-qnetd | awk '{print $3}') \
+    && echo "  Version: ${COROSYNC_VERSION}" \
+    && export COROSYNC_VERSION \
+    && corosync-qnetd -v \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -48,7 +49,6 @@ LABEL \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
-    io.hass.corosync.version="${COROSYNC_VERSION}" \
     maintainer="henryhst" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \

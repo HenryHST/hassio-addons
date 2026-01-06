@@ -1,6 +1,6 @@
 ---
 name: Corosync QNetd
-version: 1.0.0
+version: 1.0.1
 slug: corosyncd
 description: >-
   Corosync QNetd (Quorum Network Daemon) provides an external vote for cluster
