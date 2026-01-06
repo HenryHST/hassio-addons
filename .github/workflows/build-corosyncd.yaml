@@ -136,7 +136,7 @@ jobs:
             BUILD_REPOSITORY=${{ github.repository }}
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.7.0
+        uses: sigstore/cosign-installer@v3.10.1
 
       - name: Sign the published Docker image
         env:
