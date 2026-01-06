@@ -32,6 +32,17 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Install bashio (Home Assistant add-on utility)
+ARG BASHIO_VERSION="0.16.2"
+RUN \
+    curl -L -o /tmp/bashio.tar.gz \
+        "https://github.com/hassio-addons/bashio/archive/v${BASHIO_VERSION}.tar.gz" \
+    && mkdir -p /tmp/bashio \
+    && tar -xzf /tmp/bashio.tar.gz -C /tmp/bashio --strip-components=1 \
+    && mv /tmp/bashio/lib /usr/lib/bashio \
+    && ln -s /usr/lib/bashio/bashio /usr/bin/bashio \
+    && rm -rf /tmp/*
+
 # Install s6-overlay for service management
 ARG S6_OVERLAY_VERSION="3.1.6.2"
 RUN \

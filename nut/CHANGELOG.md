@@ -5,6 +5,20 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.4] - 2025-01-06
+
+### Fixed
+
+- Fixed "unable to exec bashio: No such file or directory" error
+- Added bashio installation (Home Assistant add-on utility library)
+- Scripts using `#!/command/with-contenv bashio` now work correctly
+
+### Added
+
+- Installed bashio v0.16.2 from hassio-addons repository
+- Bashio library installed to `/usr/lib/bashio`
+- Bashio binary symlinked to `/usr/bin/bashio`
+
 ## [1.0.3] - 2025-01-06
 
 ### Fixed
