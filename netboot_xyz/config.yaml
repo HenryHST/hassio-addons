@@ -38,8 +38,8 @@ services:
 ports:
   3000/tcp: 3000
   69/udp: 69
-  8080/tcp: 80
+  80/tcp: 8080
 ports_description:
   3000/tcp: Web configuration interface
   69/udp: TFTP Port
-  8080/tcp: NGINX server for hosting assets
+  80/tcp: NGINX server for hosting assets
