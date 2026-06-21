@@ -5,8 +5,11 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import calculator, db, open_food_facts
 from app.models import (
@@ -28,9 +31,12 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
+
+STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 def _settings() -> Settings:
@@ -56,20 +62,8 @@ def health() -> dict[str, Any]:
 
 
 @app.get("/", response_class=HTMLResponse)
-def index() -> str:
-    return """
-    <!DOCTYPE html>
-    <html lang="de">
-    <head><meta charset="utf-8"><title>BLS Nährwertdatenbank</title></head>
-    <body>
-      <h1>BLS Nährwertdatenbank</h1>
-      <p>REST-API läuft. Endpunkte: <code>/health</code>, <code>/foods/search</code>,
-      <code>/foods/barcode/{ean}</code>, <code>/calculate/portion</code>, <code>/calculate/recipe</code></p>
-      <p>Daten: Max Rubner-Institut BLS 4.0 (CC BY 4.0), Open Food Facts (ODbL)</p>
-      <p><em>Keine medizinische Beratung.</em></p>
-    </body>
-    </html>
-    """
+def index() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/foods/search")
@@ -80,6 +74,22 @@ def search_foods(
     settings = _settings()
     with db.get_connection(settings.db_path) as conn:
         return db.search_foods(conn, q, limit, settings.language)
+
+
+@app.get("/foods/barcode/{barcode}")
+def lookup_barcode(barcode: str) -> dict[str, Any]:
+    settings = _settings()
+    with db.get_connection(settings.db_path) as conn:
+        product = open_food_facts.lookup_barcode(
+            conn,
+            barcode,
+            enable_network=settings.enable_open_food_facts,
+            cache_ttl_days=settings.off_cache_ttl_days,
+        )
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    key = db.get_key_nutrients(product["nutrients"])
+    return {**product, "nutrients": key, "all_nutrients": product["nutrients"]}
 
 
 @app.get("/foods/{bls_code}")
@@ -98,22 +108,6 @@ def get_food(bls_code: str) -> dict[str, Any]:
             "nutrients": key,
             "all_nutrients": nutrients,
         }
-
-
-@app.get("/foods/barcode/{barcode}")
-def lookup_barcode(barcode: str) -> dict[str, Any]:
-    settings = _settings()
-    with db.get_connection(settings.db_path) as conn:
-        product = open_food_facts.lookup_barcode(
-            conn,
-            barcode,
-            enable_network=settings.enable_open_food_facts,
-            cache_ttl_days=settings.off_cache_ttl_days,
-        )
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    key = db.get_key_nutrients(product["nutrients"])
-    return {**product, "nutrients": key, "all_nutrients": product["nutrients"]}
 
 
 @app.post("/calculate/portion", response_model=CalculationResult)

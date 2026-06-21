@@ -5,6 +5,20 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-06-21
+
+### Added
+
+- Ingress-Web-UI im diabetes-fokussierten Design (WETID-Stil)
+- Hero-Tiles für gKH, BE, KE und FPE mit Bottom-Navigation
+- Lebensmittelsuche, Barcode-Lookup, Portion- und Rezeptrechner in der Web-UI
+- Dark-Mode-Unterstützung via `prefers-color-scheme`
+
+### Changed
+
+- Ingress-Startseite ersetzt minimale Status-HTML durch vollwertige Web-App
+- Barcode-Route vor generischer Food-Route registriert
+
 ## [1.0.0] - 2025-06-21
 
 ### Added

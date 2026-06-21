@@ -35,6 +35,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY root/app /app/app
+COPY root/static /app/static
 COPY root/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

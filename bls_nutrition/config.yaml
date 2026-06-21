@@ -1,6 +1,6 @@
 ---
 name: BLS Nährwertdatenbank
-version: 1.0.0
+version: 1.1.0
 slug: bls_nutrition
 description: >-
   Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Open Food Facts

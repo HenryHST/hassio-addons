@@ -1,0 +1,197 @@
+:root {
+  --color-bg: #f0f4f0;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #5f6368;
+  --color-border: #e0e0e0;
+  --color-header-start: #1b5e20;
+  --color-header-end: #43a047;
+  --color-header-text: #ffffff;
+  --color-badge-bg: rgba(255, 255, 255, 0.2);
+  --color-badge-text: #ffffff;
+  --color-primary: #2e7d32;
+  --color-primary-text: #ffffff;
+  --color-error-bg: #ffebee;
+  --color-error-text: #c62828;
+  --color-tile-kh: #fff3e0;
+  --color-tile-kh-accent: #e65100;
+  --color-tile-be: #e8f5e9;
+  --color-tile-be-accent: #2e7d32;
+  --color-tile-ke: #e3f2fd;
+  --color-tile-ke-accent: #1565c0;
+  --color-tile-fpe: #ede7f6;
+  --color-tile-fpe-accent: #4527a0;
+  --color-nav-active: #2e7d32;
+  --color-nav-inactive: #757575;
+  --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-text: #e8eaed;
+    --color-text-muted: #9aa0a6;
+    --color-border: #3c4043;
+    --color-header-start: #1b5e20;
+    --color-header-end: #2e7d32;
+    --color-badge-bg: rgba(255, 255, 255, 0.15);
+    --color-primary: #66bb6a;
+    --color-primary-text: #000000;
+    --color-error-bg: #3e2723;
+    --color-error-text: #ef9a9a;
+    --color-tile-kh: #3e2723;
+    --color-tile-kh-accent: #ffb74d;
+    --color-tile-be: #1b3320;
+    --color-tile-be-accent: #81c784;
+    --color-tile-ke: #1a237e;
+    --color-tile-ke-accent: #64b5f6;
+    --color-tile-fpe: #311b92;
+    --color-tile-fpe-accent: #b39ddb;
+    --color-nav-active: #81c784;
+    --color-nav-inactive: #9aa0a6;
+    --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.header {
+  background: linear-gradient(135deg, var(--color-header-start), var(--color-header-end));
+  color: var(--color-header-text);
+}
+
+.status-badge {
+  background: var(--color-badge-bg);
+  color: var(--color-badge-text);
+}
+
+.hero-tile {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-tile);
+}
+
+.hero-tile-kh .hero-tile-label,
+.hero-tile-kh .hero-tile-value {
+  color: var(--color-tile-kh-accent);
+}
+
+.hero-tile-kh {
+  background: var(--color-tile-kh);
+}
+
+.hero-tile-be .hero-tile-label,
+.hero-tile-be .hero-tile-value {
+  color: var(--color-tile-be-accent);
+}
+
+.hero-tile-be {
+  background: var(--color-tile-be);
+}
+
+.hero-tile-ke .hero-tile-label,
+.hero-tile-ke .hero-tile-value {
+  color: var(--color-tile-ke-accent);
+}
+
+.hero-tile-ke {
+  background: var(--color-tile-ke);
+}
+
+.hero-tile-fpe .hero-tile-label,
+.hero-tile-fpe .hero-tile-value {
+  color: var(--color-tile-fpe-accent);
+}
+
+.hero-tile-fpe {
+  background: var(--color-tile-fpe);
+}
+
+.panel-title {
+  color: var(--color-text);
+}
+
+.input {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+}
+
+.btn-primary:active {
+  filter: brightness(0.92);
+}
+
+.ingredient-fieldset {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+.result-item {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-tile);
+}
+
+.result-item:active {
+  filter: brightness(0.95);
+}
+
+.barcode-result {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.details {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.details-toggle {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.nutrient-table td {
+  border-bottom-color: var(--color-border);
+}
+
+.error-msg {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.bottom-nav {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.nav-btn {
+  color: var(--color-nav-inactive);
+}
+
+.nav-btn.active {
+  color: var(--color-nav-active);
+  background: color-mix(in srgb, var(--color-nav-active) 12%, transparent);
+}
+
+.footer {
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+}
+
+.footer a {
+  color: var(--color-primary);
+}

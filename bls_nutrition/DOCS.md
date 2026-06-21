@@ -14,6 +14,26 @@ Das Add-on stellt die deutsche BLS 4.0 Nährwertdatenbank lokal in Home Assistan
 
 Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de/download). Das kann 5–15 Minuten dauern.
 
+## Ingress-Web-UI (Hauptoberfläche)
+
+Das Add-on stellt über **Ingress** eine mobil-optimierte Web-App bereit — in der Home-Assistant-App
+unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel **BLS Nährwert**.
+
+### Bedienung
+
+| Bereich | Funktion |
+|---------|----------|
+| **Suche** | BLS-Lebensmittel suchen; Treffer antippen → wechselt zur Portion mit vorausgefüllter ID |
+| **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen und berechnen |
+| **Portion** | Quelle (BLS/OFF/Eigenes), ID und Menge in Gramm → Berechnung |
+| **Rezept** | Bis zu 3 Zutaten (BLS-Codes + Gramm) und Portionenanzahl |
+
+Oben werden **gKH, BE, KE und FPE** als große Kacheln angezeigt. Nährwertdetails (kcal, Protein,
+Fett, KH) erscheinen in der einklappbaren Sektion **Details**.
+
+> Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
+> und feste Sensoren (siehe unten).
+
 ### Custom Integration
 
 > **HACS-Hinweis:** Das Repository `henryhst/hassio-addons` ist ein **Add-on Repository**
