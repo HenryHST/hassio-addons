@@ -10,6 +10,7 @@ SERVICE_CALCULATE_PORTION = "calculate_portion"
 SERVICE_CALCULATE_RECIPE = "calculate_recipe"
 SERVICE_SAVE_RECIPE = "save_recipe"
 SERVICE_SAVE_CUSTOM_FOOD = "save_custom_food"
+SERVICE_ADD_TO_TODO_LIST = "add_to_todo_list"
 
 EVENT_SEARCH_RESULT = "bls_nutrition_search_result"
 EVENT_CALCULATION_RESULT = "bls_nutrition_calculation_result"

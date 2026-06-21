@@ -89,6 +89,25 @@ Nova-Score und Eco-Score stammen ebenfalls aus Open Food Facts.
 
 Im Lovelace-Dashboard stehen die Sensoren `sensor.bls_nutrition_nutriscore`, `_nova` und `_ecoscore` bereit.
 
+### Einkaufsliste (To-do)
+
+OFF-Produkte können per Button **„Zur Einkaufsliste“** in eine Home-Assistant-To-do-Liste importiert werden:
+
+- OFF-Suchergebnisse (rechte Spalte)
+- Barcode-Ergebnis
+- Portion-Details (nach OFF-Berechnung)
+
+Der Eintrag enthält den Produktnamen; in der Beschreibung stehen Barcode und Marke (`OFF · EAN · Marke`).
+
+**Entity-ID finden:** Einstellungen → To-do-Listen → Liste öffnen → Entwicklerwerkzeuge → Zustand (`todo.einkaufsliste` o. ä.).
+
+Add-on-Optionen:
+
+| Option | Default | Beschreibung |
+|--------|---------|--------------|
+| `todo_list_enabled` | `true` | Button anzeigen |
+| `todo_list_entity_id` | `todo.einkaufsliste` | Ziel-To-do-Entity |
+
 > Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
 > und feste Sensoren (siehe unten).
 
@@ -125,11 +144,15 @@ language: de
 enable_open_food_facts: true
 off_cache_ttl_days: 90
 search_layout: stacked
+todo_list_enabled: true
+todo_list_entity_id: todo.einkaufsliste
 ```
 
 | Option | Werte | Beschreibung |
 |--------|-------|--------------|
 | `search_layout` | `stacked`, `side_by_side` | `stacked`: BLS und OFF untereinander; `side_by_side`: nebeneinander |
+| `todo_list_enabled` | `true`, `false` | Button „Zur Einkaufsliste“ in der Ingress-UI |
+| `todo_list_entity_id` | z. B. `todo.einkaufsliste` | Ziel-Entity der HA-To-do-Liste |
 
 ## Services
 
@@ -177,6 +200,19 @@ data:
     - source: bls
       id: "M711000"
       amount_g: 50
+```
+
+### `bls_nutrition.add_to_todo_list`
+
+Fügt ein OFF-Produkt zur konfigurierten Home-Assistant-To-do-Liste hinzu (auch per Automatisierung nutzbar):
+
+```yaml
+service: bls_nutrition.add_to_todo_list
+data:
+  name: Kölln Haferflocken
+  barcode: "4008400407321"
+  brand: Kölln
+  entity_id: todo.einkaufsliste
 ```
 
 ## Dashboard

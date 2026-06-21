@@ -138,6 +138,22 @@ body {
   filter: brightness(0.92);
 }
 
+.btn-todo {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-todo:active {
+  filter: brightness(0.95);
+}
+
+.error-msg.status-success {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
 .ingredient-fieldset {
   background: var(--color-surface);
   border-color: var(--color-border);

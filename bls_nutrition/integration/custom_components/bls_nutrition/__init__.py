@@ -19,6 +19,7 @@ from .const import (
     DOMAIN,
     EVENT_CALCULATION_RESULT,
     EVENT_SEARCH_RESULT,
+    SERVICE_ADD_TO_TODO_LIST,
     SERVICE_CALCULATE_PORTION,
     SERVICE_CALCULATE_RECIPE,
     SERVICE_LOOKUP_BARCODE,
@@ -163,6 +164,26 @@ def _register_services(hass: HomeAssistant) -> None:
             call.data.get("notes"),
         )
 
+    async def handle_add_to_todo_list(call: ServiceCall) -> None:
+        entity_id = call.data.get("entity_id", "todo.einkaufsliste")
+        name = call.data["name"]
+        desc_parts = ["OFF"]
+        if call.data.get("barcode"):
+            desc_parts.append(str(call.data["barcode"]).strip())
+        if call.data.get("brand"):
+            desc_parts.append(str(call.data["brand"]).strip())
+        description = " · ".join(desc_parts) if len(desc_parts) > 1 else None
+        service_data: dict[str, Any] = {"item": name[:200]}
+        if description:
+            service_data["description"] = description[:500]
+        await hass.services.async_call(
+            "todo",
+            "add_item",
+            service_data,
+            target={"entity_id": entity_id},
+            blocking=True,
+        )
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_SEARCH_FOOD,
@@ -230,6 +251,19 @@ def _register_services(hass: HomeAssistant) -> None:
                 vol.Required("name"): str,
                 vol.Required("nutrients"): dict,
                 vol.Optional("notes"): str,
+            }
+        ),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_ADD_TO_TODO_LIST,
+        handle_add_to_todo_list,
+        schema=vol.Schema(
+            {
+                vol.Required("name"): str,
+                vol.Optional("barcode"): str,
+                vol.Optional("brand"): str,
+                vol.Optional("entity_id", default="todo.einkaufsliste"): str,
             }
         ),
     )

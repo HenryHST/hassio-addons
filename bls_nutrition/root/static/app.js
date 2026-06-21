@@ -14,6 +14,7 @@
 
   let barcodeProduct = null;
   let offEnabled = true;
+  let todoListEnabled = false;
 
   const SEARCH_LIMIT = 10;
 
@@ -26,15 +27,53 @@
     return n.toLocaleString("de-DE", { maximumFractionDigits: 2 });
   }
 
-  function showError(message) {
+  function showStatus(message, isError) {
     const el = $("error-msg");
     if (!message) {
       el.hidden = true;
       el.textContent = "";
+      el.classList.remove("status-success");
       return;
     }
     el.textContent = message;
     el.hidden = false;
+    el.classList.toggle("status-success", isError === false);
+  }
+
+  function showError(message) {
+    if (!message) {
+      showStatus(null);
+      return;
+    }
+    showStatus(message, true);
+  }
+
+  async function addToTodoList(product) {
+    if (!product?.name) return;
+    showStatus(null);
+    try {
+      await apiPost("todo-list/items", {
+        name: product.name,
+        barcode: product.id || product.barcode || null,
+        brand: product.brand || null,
+      });
+      showStatus(`„${product.name}" zur Einkaufsliste hinzugefügt.`, false);
+    } catch (err) {
+      showStatus(err.message, true);
+    }
+  }
+
+  function createTodoButton(product) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-todo";
+    btn.textContent = "Zur Einkaufsliste";
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      addToTodoList(product);
+    });
+    return btn;
   }
 
   async function apiGet(path) {
@@ -148,6 +187,23 @@
       scoresEl.hidden = !scoresEl.innerHTML;
     }
 
+    const todoEl = $("result-todo-action");
+    if (todoEl) {
+      todoEl.innerHTML = "";
+      if (todoListEnabled && result.source === "off" && result.name) {
+        todoEl.appendChild(
+          createTodoButton({
+            name: result.name,
+            id: result.id,
+            brand: result.brand || null,
+          })
+        );
+        todoEl.hidden = false;
+      } else {
+        todoEl.hidden = true;
+      }
+    }
+
     rowsEl.innerHTML = "";
     const nutrients = result.nutrients || {};
     const order = ["ENERCC", "PROT625", "FAT", "CHO", "FIBT", "NACL"];
@@ -212,6 +268,7 @@
     }
     for (const item of items) {
       const li = document.createElement("li");
+      li.className = showScores ? "result-item-row" : "";
       const button = document.createElement("button");
       button.type = "button";
       button.className = "result-item";
@@ -227,6 +284,9 @@
         selectFoodForPortion(item.source || "bls", item.id, item.name);
       });
       li.appendChild(button);
+      if (showScores && todoListEnabled) {
+        li.appendChild(createTodoButton(item));
+      }
       container.appendChild(li);
     }
   }
@@ -240,6 +300,7 @@
       const blsVer = health.bls_version || "4.0";
       $("bls-version").textContent = `BLS ${blsVer}`;
       offEnabled = health.open_food_facts_enabled !== false;
+      todoListEnabled = health.todo_list_enabled !== false;
       applySearchLayout(health.search_layout || "stacked");
     } catch (_) {
       $("food-count-badge").textContent = "offline";
@@ -309,6 +370,12 @@
         `<strong>${escapeHtml(product.name || "Unbekannt")}</strong>` +
         (product.brand ? `<br><span class="result-item-meta">${escapeHtml(product.brand)}</span>` : "") +
         renderScoreBadges(product);
+      if (todoListEnabled) {
+        const actions = document.createElement("div");
+        actions.className = "result-item-actions";
+        actions.appendChild(createTodoButton(product));
+        resultEl.appendChild(actions);
+      }
       $("barcode-portion-form").hidden = false;
     } catch (err) {
       showError(err.message);

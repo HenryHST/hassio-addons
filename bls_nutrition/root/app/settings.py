@@ -18,6 +18,8 @@ class Settings:
     enable_open_food_facts: bool
     off_cache_ttl_days: int
     search_layout: str
+    todo_list_enabled: bool
+    todo_list_entity_id: str
     bls_version: str
     addon_version: str
 
@@ -38,6 +40,11 @@ def get_settings() -> Settings:
         == "true",
         off_cache_ttl_days=int(os.environ.get("BLS_OFF_CACHE_TTL_DAYS", "90")),
         search_layout=layout,
+        todo_list_enabled=os.environ.get("BLS_TODO_LIST_ENABLED", "true").lower()
+        == "true",
+        todo_list_entity_id=os.environ.get(
+            "BLS_TODO_LIST_ENTITY_ID", "todo.einkaufsliste"
+        ),
         bls_version=os.environ.get("BLS_VERSION", "4.0"),
         addon_version=os.environ.get("ADDON_VERSION", "1.0.0"),
     )

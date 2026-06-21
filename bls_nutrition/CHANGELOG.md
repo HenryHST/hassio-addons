@@ -5,6 +5,15 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-06-21
+
+### Added
+
+- Import OFF products to Home Assistant to-do list via **Zur Einkaufsliste** button in Ingress UI
+- Add-on options `todo_list_enabled` and `todo_list_entity_id` (default `todo.einkaufsliste`)
+- `POST /todo-list/items` API endpoint (Supervisor proxy to `todo.add_item`)
+- Integration service `bls_nutrition.add_to_todo_list`
+
 ## [1.3.0] - 2025-06-21
 
 ### Added

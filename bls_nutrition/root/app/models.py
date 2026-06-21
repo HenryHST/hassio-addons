@@ -45,6 +45,12 @@ class CustomRecipeCreate(BaseModel):
     ingredients: list[Ingredient] = Field(default_factory=list)
 
 
+class TodoListItemRequest(BaseModel):
+    name: str = Field(min_length=1)
+    barcode: str | None = None
+    brand: str | None = None
+
+
 class DiabetesUnits(BaseModel):
     g_kh: float | None = None
     be: float | None = None

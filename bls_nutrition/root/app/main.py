@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import calculator, db, open_food_facts
+from app import calculator, db, home_assistant, open_food_facts
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
@@ -21,6 +21,7 @@ from app.models import (
     DiabetesUnits,
     PortionRequest,
     RecipeRequest,
+    TodoListItemRequest,
 )
 from app.settings import Settings, get_settings
 
@@ -32,7 +33,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.3.0",
+    version="1.4.0",
     lifespan=lifespan,
 )
 
@@ -61,6 +62,8 @@ def health() -> dict[str, Any]:
             "food_count": db.food_count(conn),
             "open_food_facts_enabled": settings.enable_open_food_facts,
             "search_layout": settings.search_layout,
+            "todo_list_enabled": settings.todo_list_enabled,
+            "todo_list_entity_id": settings.todo_list_entity_id,
         }
 
 
@@ -117,6 +120,23 @@ def lookup_barcode(barcode: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Product not found")
     key = db.get_key_nutrients(product["nutrients"])
     return {**product, "nutrients": key, "all_nutrients": product["nutrients"]}
+
+
+@app.post("/todo-list/items")
+def add_todo_list_item(payload: TodoListItemRequest) -> dict[str, str]:
+    settings = _settings()
+    if not settings.todo_list_enabled:
+        raise HTTPException(status_code=403, detail="Einkaufsliste-Import ist deaktiviert")
+    description = home_assistant.build_todo_description(payload.barcode, payload.brand)
+    try:
+        home_assistant.add_todo_item(
+            settings.todo_list_entity_id,
+            payload.name.strip(),
+            description,
+        )
+    except home_assistant.HomeAssistantError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"status": "added", "item": payload.name}
 
 
 @app.get("/foods/{bls_code}")

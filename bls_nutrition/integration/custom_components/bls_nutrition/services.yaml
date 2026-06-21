@@ -116,3 +116,31 @@ fields:
     name: Notizen
     selector:
       text:
+
+---
+service: bls_nutrition.add_to_todo_list
+name: Zur Einkaufsliste hinzufügen
+description: Fügt ein Open-Food-Facts-Produkt zur Home-Assistant-To-do-Liste hinzu.
+fields:
+  name:
+    name: Produktname
+    required: true
+    example: Kölln Haferflocken
+    selector:
+      text:
+  barcode:
+    name: Barcode (EAN)
+    example: "4008400407321"
+    selector:
+      text:
+  brand:
+    name: Marke
+    example: Kölln
+    selector:
+      text:
+  entity_id:
+    name: To-do-Entity
+    description: Ziel-Liste, z. B. todo.einkaufsliste
+    default: todo.einkaufsliste
+    selector:
+      text:
