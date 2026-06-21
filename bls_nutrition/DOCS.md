@@ -19,6 +19,10 @@ Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de
 Das Add-on stellt über **Ingress** eine mobil-optimierte Web-App bereit — in der Home-Assistant-App
 unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel **BLS Nährwert**.
 
+Das Sidebar-Panel ist für **alle Home-Assistant-Benutzer** sichtbar (nicht nur Admins).
+Nach einem Update das Add-on neu starten. Fehlt der Eintrag in der Sidebar, unter
+**Add-on → Info → „Zur Sidebar hinzufügen“** erneut aktivieren.
+
 ### Bedienung
 
 | Bereich | Funktion |

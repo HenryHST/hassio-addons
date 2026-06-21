@@ -20,6 +20,7 @@ ingress: true
 ingress_port: 8090
 panel_icon: mdi:food-apple
 panel_title: BLS Nährwert
+panel_admin: false
 map:
   - data:rw
 ports:
