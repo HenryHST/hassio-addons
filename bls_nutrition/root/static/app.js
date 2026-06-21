@@ -83,6 +83,15 @@
     }
   }
 
+  function scoreBadgeItem(label, imgHtml) {
+    return (
+      `<span class="score-badge-item">` +
+      `<span class="score-badge-label">${escapeHtml(label)}</span>` +
+      imgHtml +
+      `</span>`
+    );
+  }
+
   function renderScoreBadges(scores) {
     if (!scores) return "";
     const parts = [];
@@ -92,17 +101,26 @@
 
     if (nutriscore) {
       parts.push(
-        `<img class="score-badge" src="static/assets/scores/nutriscore-${escapeHtml(nutriscore.toLowerCase())}.svg" alt="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}" title="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}">`
+        scoreBadgeItem(
+          "Nutri-Score",
+          `<img class="score-badge" src="static/assets/scores/nutriscore-${escapeHtml(nutriscore.toLowerCase())}.svg" alt="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}" title="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}">`
+        )
       );
     }
     if (novaGroup) {
       parts.push(
-        `<img class="score-badge" src="static/assets/scores/nova-${escapeHtml(String(novaGroup))}.svg" alt="Nova ${escapeHtml(String(novaGroup))}" title="Nova ${escapeHtml(String(novaGroup))}">`
+        scoreBadgeItem(
+          "Nova",
+          `<img class="score-badge" src="static/assets/scores/nova-${escapeHtml(String(novaGroup))}.svg" alt="Nova ${escapeHtml(String(novaGroup))}" title="Nova ${escapeHtml(String(novaGroup))}">`
+        )
       );
     }
     if (ecoscore) {
       parts.push(
-        `<img class="score-badge" src="static/assets/scores/ecoscore-${escapeHtml(ecoscore.toLowerCase())}.svg" alt="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}" title="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}">`
+        scoreBadgeItem(
+          "Eco-Score",
+          `<img class="score-badge" src="static/assets/scores/ecoscore-${escapeHtml(ecoscore.toLowerCase())}.svg" alt="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}" title="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}">`
+        )
       );
     }
     if (!parts.length) return "";
