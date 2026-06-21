@@ -16,9 +16,19 @@ Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de
 
 ### Custom Integration
 
-Kopiere den Ordner `integration/custom_components/bls_nutrition` nach `config/custom_components/bls_nutrition` und starte Home Assistant neu.
+> **HACS-Hinweis:** Das Repository `henryhst/hassio-addons` ist ein **Add-on Repository**
+> (`repository.json` im Root). HACS kann es **nicht** als Integration hinzufügen.
 
-Alternativ über HACS als Custom Repository (Subdirectory).
+#### Option A: Manuelle Installation (empfohlen)
+
+Kopiere den Ordner `integration/custom_components/bls_nutrition` nach
+`config/custom_components/bls_nutrition` und starte Home Assistant neu.
+
+#### Option B: HACS
+
+Verwende ein **separates** Integrations-Repository. Siehe
+[`integration/README.md`](integration/README.md) für die Veröffentlichung als
+eigenes GitHub-Repo (z. B. `homeassistant-bls-nutrition`).
 
 ### Integration einrichten
 

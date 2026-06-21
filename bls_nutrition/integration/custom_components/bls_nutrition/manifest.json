@@ -4,6 +4,7 @@
   "codeowners": ["@henryhst"],
   "config_flow": true,
   "documentation": "https://github.com/henryhst/hassio-addons/blob/master/bls_nutrition/DOCS.md",
+  "issue_tracker": "https://github.com/henryhst/hassio-addons/issues",
   "integration_type": "service",
   "iot_class": "local_polling",
   "requirements": ["aiohttp>=3.9"],

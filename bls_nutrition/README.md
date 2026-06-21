@@ -19,6 +19,9 @@ Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenban
 
 Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalten.
 
+> **HACS:** Das Add-on-Repository `henryhst/hassio-addons` kann in HACS **nicht** als
+> Integration hinzugefügt werden. Siehe [`integration/README.md`](integration/README.md).
+
 ## Installation
 
 1. Repository hinzufügen: `https://github.com/henryhst/hassio-addons`
