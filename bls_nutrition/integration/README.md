@@ -25,7 +25,8 @@ Home Assistant neu starten.
 
 1. Erstelle ein **neues** GitHub-Repository, z. B. `homeassistant-bls-nutrition`
 2. Kopiere den Inhalt **dieses Ordners** (`integration/`) als Root in das neue Repo:
-   - `custom_components/bls_nutrition/`
+   - `custom_components/bls_nutrition/` (inkl. `brand/icon.png`)
+   - `brand/icon.png` (für HACS-Store-Anzeige)
    - `hacs.json`
    - `README.md`
 3. **Kein** `repository.json` im neuen Repo!

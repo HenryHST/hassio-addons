@@ -22,7 +22,7 @@ Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de
 #### Option A: Manuelle Installation (empfohlen)
 
 Kopiere den Ordner `integration/custom_components/bls_nutrition` nach
-`config/custom_components/bls_nutrition` und starte Home Assistant neu.
+`config/custom_components/bls_nutrition` (inkl. `brand/icon.png`) und starte Home Assistant neu.
 
 #### Option B: HACS
 
