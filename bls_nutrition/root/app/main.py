@@ -127,6 +127,20 @@ def add_todo_list_item(payload: TodoListItemRequest) -> dict[str, str]:
     settings = _settings()
     if not settings.todo_list_enabled:
         raise HTTPException(status_code=403, detail="Einkaufsliste-Import ist deaktiviert")
+    # #region agent log
+    from app.home_assistant import _agent_log
+
+    _agent_log(
+        "main.py:add_todo_list_item:entry",
+        "todo-list endpoint hit",
+        {
+            "entity_id": settings.todo_list_entity_id,
+            "name_len": len(payload.name.strip()),
+            "has_barcode": payload.barcode is not None,
+        },
+        "H1",
+    )
+    # #endregion
     description = home_assistant.build_todo_description(payload.barcode, payload.brand)
     try:
         home_assistant.add_todo_item(
