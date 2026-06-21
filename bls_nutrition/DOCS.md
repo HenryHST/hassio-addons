@@ -23,7 +23,7 @@ unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel *
 
 | Bereich | Funktion |
 |---------|----------|
-| **Suche** | BLS-Lebensmittel suchen; Treffer antippen → wechselt zur Portion mit vorausgefüllter ID |
+| **Suche** | Parallele Suche in BLS 4.0 und Open Food Facts (2 Spalten); Treffer antippen → Portion |
 | **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen und berechnen |
 | **Portion** | Quelle (BLS/OFF/Eigenes), ID und Menge in Gramm → Berechnung |
 | **Rezept** | Bis zu 3 Zutaten (BLS-Codes + Gramm) und Portionenanzahl |
@@ -64,7 +64,12 @@ update_interval_days: 30
 language: de
 enable_open_food_facts: true
 off_cache_ttl_days: 90
+search_layout: stacked
 ```
+
+| Option | Werte | Beschreibung |
+|--------|-------|--------------|
+| `search_layout` | `stacked`, `side_by_side` | `stacked`: BLS und OFF untereinander; `side_by_side`: nebeneinander |
 
 ## Services
 

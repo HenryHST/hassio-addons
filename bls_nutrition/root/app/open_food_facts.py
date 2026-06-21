@@ -10,6 +10,8 @@ import httpx
 from app import db
 
 OFF_API = "https://world.openfoodfacts.org/api/v2/product/{barcode}"
+OFF_SEARCH_API = "https://world.openfoodfacts.org/cgi/search.pl"
+USER_AGENT = "BLS-Nutrition-HA-Addon/1.2"
 
 
 def _map_off_nutriments(nutriments: dict[str, Any]) -> dict[str, float | None]:
@@ -76,7 +78,7 @@ def lookup_barcode(
     with httpx.Client(timeout=20.0) as client:
         response = client.get(
             OFF_API.format(barcode=barcode),
-            headers={"User-Agent": "BLS-Nutrition-HA-Addon/1.0"},
+            headers={"User-Agent": USER_AGENT},
         )
         if response.status_code == 404:
             return None
@@ -93,3 +95,58 @@ def lookup_barcode(
 
     db.save_off_product(conn, barcode, name, brand, nutrients)
     return db.get_off_product(conn, barcode)
+
+
+def search_products(
+    conn,
+    query: str,
+    limit: int = 10,
+    *,
+    enable_network: bool,
+    language: str = "de",
+) -> list[dict[str, Any]]:
+    query = query.strip()
+    if not query or not enable_network:
+        return []
+
+    with httpx.Client(timeout=20.0) as client:
+        response = client.get(
+            OFF_SEARCH_API,
+            params={
+                "action": "process",
+                "search_terms": query,
+                "json": "true",
+                "page_size": limit,
+                "fields": "code,product_name,product_name_de,brands,nutriments",
+            },
+            headers={"User-Agent": USER_AGENT},
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+    results: list[dict[str, Any]] = []
+    for product in payload.get("products", []):
+        barcode = str(product.get("code", "")).strip()
+        if not barcode:
+            continue
+        name = (
+            product.get("product_name_de")
+            if language == "de"
+            else product.get("product_name")
+        ) or product.get("product_name") or product.get("product_name_de")
+        if not name:
+            continue
+        brand = product.get("brands")
+        nutrients = _map_off_nutriments(product.get("nutriments", {}))
+        db.save_off_product(conn, barcode, name, brand, nutrients)
+        results.append(
+            {
+                "source": "off",
+                "id": barcode,
+                "name": name,
+                "brand": brand,
+            }
+        )
+        if len(results) >= limit:
+            break
+    return results

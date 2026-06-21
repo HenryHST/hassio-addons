@@ -1,6 +1,6 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 ![Supports armv7 Architecture](https://img.shields.io/badge/armv7-yes-green.svg)
@@ -36,15 +36,17 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `auto_update` | `true` | BLS-Daten automatisch aktualisieren |
 | `update_interval_days` | `30` | Update-Intervall in Tagen |
 | `language` | `de` | Anzeigesprache (`de`/`en`) |
-| `enable_open_food_facts` | `true` | Barcode-Lookup aktivieren |
+| `enable_open_food_facts` | `true` | Barcode-Lookup und OFF-Suche aktivieren |
 | `off_cache_ttl_days` | `90` | OFF-Cache Gültigkeit |
+| `search_layout` | `stacked` | Suchergebnis-Layout: `stacked` oder `side_by_side` |
 
 ## API Endpoints
 
 | Endpoint | Beschreibung |
 |----------|--------------|
 | `GET /health` | Status und BLS-Version |
-| `GET /foods/search?q=` | Lebensmittelsuche |
+| `GET /foods/search?q=` | BLS-Lebensmittelsuche |
+| `GET /foods/search/off?q=` | Open Food Facts Textsuche |
 | `GET /foods/barcode/{ean}` | Barcode-Lookup |
 | `POST /calculate/portion` | Portion berechnen |
 | `POST /calculate/recipe` | Rezept aggregieren |

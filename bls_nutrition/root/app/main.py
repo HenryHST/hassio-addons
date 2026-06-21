@@ -32,7 +32,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.1.0",
+    version="1.2.0",
     lifespan=lifespan,
 )
 
@@ -60,6 +60,7 @@ def health() -> dict[str, Any]:
             "imported_at": db.get_meta(conn, "imported_at"),
             "food_count": db.food_count(conn),
             "open_food_facts_enabled": settings.enable_open_food_facts,
+            "search_layout": settings.search_layout,
         }
 
 
@@ -72,6 +73,24 @@ def index(request: Request) -> HTMLResponse:
         base_tag = f'<base href="{html_module.escape(base_href, quote=True)}">'
         html = html.replace("<head>", f"<head>{base_tag}", 1)
     return HTMLResponse(html)
+
+
+@app.get("/foods/search/off")
+def search_off_products(
+    q: str = Query(min_length=1),
+    limit: int = Query(default=10, ge=1, le=50),
+) -> list[dict[str, Any]]:
+    settings = _settings()
+    if not settings.enable_open_food_facts:
+        return []
+    with db.get_connection(settings.db_path) as conn:
+        return open_food_facts.search_products(
+            conn,
+            q,
+            limit,
+            enable_network=settings.enable_open_food_facts,
+            language=settings.language,
+        )
 
 
 @app.get("/foods/search")

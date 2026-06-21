@@ -19,12 +19,14 @@ if [[ -f "${CONFIG_PATH}" ]]; then
     export BLS_LANGUAGE=$(jq -r '.language // "de"' "${CONFIG_PATH}")
     export BLS_ENABLE_OFF=$(jq -r '.enable_open_food_facts // true' "${CONFIG_PATH}")
     export BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
+    export BLS_SEARCH_LAYOUT=$(jq -r '.search_layout // "stacked"' "${CONFIG_PATH}")
 else
     export BLS_AUTO_UPDATE=true
     export BLS_UPDATE_INTERVAL_DAYS=30
     export BLS_LANGUAGE=de
     export BLS_ENABLE_OFF=true
     export BLS_OFF_CACHE_TTL_DAYS=90
+    export BLS_SEARCH_LAYOUT=stacked
 fi
 
 echo "[bls_nutrition] Configuration:"
@@ -32,6 +34,7 @@ echo "  - auto_update: ${BLS_AUTO_UPDATE}"
 echo "  - update_interval_days: ${BLS_UPDATE_INTERVAL_DAYS}"
 echo "  - language: ${BLS_LANGUAGE}"
 echo "  - enable_open_food_facts: ${BLS_ENABLE_OFF}"
+echo "  - search_layout: ${BLS_SEARCH_LAYOUT}"
 
 echo "[bls_nutrition] Ensuring database is ready..."
 python -m app.bootstrap

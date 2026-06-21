@@ -17,12 +17,16 @@ class Settings:
     language: str
     enable_open_food_facts: bool
     off_cache_ttl_days: int
+    search_layout: str
     bls_version: str
     addon_version: str
 
 
 def get_settings() -> Settings:
     data_dir = Path(os.environ.get("BLS_DATA_DIR", "/data"))
+    layout = os.environ.get("BLS_SEARCH_LAYOUT", "stacked")
+    if layout not in ("stacked", "side_by_side"):
+        layout = "stacked"
     return Settings(
         data_dir=data_dir,
         db_path=data_dir / "bls.sqlite",
@@ -33,6 +37,7 @@ def get_settings() -> Settings:
         enable_open_food_facts=os.environ.get("BLS_ENABLE_OFF", "true").lower()
         == "true",
         off_cache_ttl_days=int(os.environ.get("BLS_OFF_CACHE_TTL_DAYS", "90")),
+        search_layout=layout,
         bls_version=os.environ.get("BLS_VERSION", "4.0"),
         addon_version=os.environ.get("ADDON_VERSION", "1.0.0"),
     )

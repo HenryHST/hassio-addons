@@ -13,6 +13,9 @@
   };
 
   let barcodeProduct = null;
+  let offEnabled = true;
+
+  const SEARCH_LIMIT = 10;
 
   const $ = (id) => document.getElementById(id);
 
@@ -139,6 +142,43 @@
     }
   }
 
+  function applySearchLayout(layout) {
+    const grid = $("search-results-grid");
+    grid.classList.remove("search-layout-stacked", "search-layout-side-by-side");
+    if (layout === "side_by_side") {
+      grid.classList.add("search-layout-side-by-side");
+    } else {
+      grid.classList.add("search-layout-stacked");
+    }
+  }
+
+  function renderResultList(container, items, emptyMessage) {
+    container.innerHTML = "";
+    if (!items.length) {
+      const li = document.createElement("li");
+      li.innerHTML = `<p class="result-item-meta">${escapeHtml(emptyMessage)}</p>`;
+      container.appendChild(li);
+      return;
+    }
+    for (const item of items) {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "result-item";
+      const meta = item.brand
+        ? `${escapeHtml(item.id)} · ${escapeHtml(item.brand)}`
+        : escapeHtml(item.id);
+      button.innerHTML =
+        `<span class="result-item-name">${escapeHtml(item.name)}</span>` +
+        `<span class="result-item-meta">${meta}</span>`;
+      button.addEventListener("click", () => {
+        selectFoodForPortion(item.source || "bls", item.id, item.name);
+      });
+      li.appendChild(button);
+      container.appendChild(li);
+    }
+  }
+
   async function loadHealth() {
     try {
       const health = await apiGet("health");
@@ -147,6 +187,8 @@
         count != null ? `${count.toLocaleString("de-DE")} LM` : "—";
       const blsVer = health.bls_version || "4.0";
       $("bls-version").textContent = `BLS ${blsVer}`;
+      offEnabled = health.open_food_facts_enabled !== false;
+      applySearchLayout(health.search_layout || "stacked");
     } catch (_) {
       $("food-count-badge").textContent = "offline";
     }
@@ -158,35 +200,37 @@
     const query = $("search-query").value.trim();
     if (!query) return;
 
-    const list = $("search-results");
-    list.innerHTML = "";
+    const grid = $("search-results-grid");
+    const blsList = $("search-results-bls");
+    const offList = $("search-results-off");
+    blsList.innerHTML = "";
+    offList.innerHTML = "";
+    grid.hidden = false;
+
     const btn = $("search-form").querySelector("button");
     btn.disabled = true;
 
     try {
-      const results = await apiGet(
-        `foods/search?q=${encodeURIComponent(query)}&limit=20`
+      const blsPromise = apiGet(
+        `foods/search?q=${encodeURIComponent(query)}&limit=${SEARCH_LIMIT}`
       );
-      if (!results.length) {
-        list.innerHTML = "<li><p class=\"result-item-meta\">Keine Treffer.</p></li>";
-        return;
-      }
-      for (const item of results) {
-        const li = document.createElement("li");
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "result-item";
-        button.innerHTML =
-          `<span class="result-item-name">${escapeHtml(item.name)}</span>` +
-          `<span class="result-item-meta">${escapeHtml(item.id)}</span>`;
-        button.addEventListener("click", () => {
-          selectFoodForPortion(item.source || "bls", item.id, item.name);
-        });
-        li.appendChild(button);
-        list.appendChild(li);
+      const offPromise = offEnabled
+        ? apiGet(
+            `foods/search/off?q=${encodeURIComponent(query)}&limit=${SEARCH_LIMIT}`
+          ).catch(() => [])
+        : Promise.resolve([]);
+
+      const [blsResults, offResults] = await Promise.all([blsPromise, offPromise]);
+
+      renderResultList(blsList, blsResults, "Keine Treffer.");
+      if (!offEnabled) {
+        renderResultList(offList, [], "Open Food Facts deaktiviert.");
+      } else {
+        renderResultList(offList, offResults, "Keine Treffer.");
       }
     } catch (err) {
       showError(err.message);
+      grid.hidden = true;
     } finally {
       btn.disabled = false;
     }

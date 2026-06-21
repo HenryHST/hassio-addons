@@ -48,7 +48,16 @@
           <input type="search" id="search-query" class="input" placeholder="z. B. Apfel" autocomplete="off" required>
           <button type="submit" class="btn btn-primary">Suchen</button>
         </form>
-        <ul class="result-list" id="search-results"></ul>
+        <div class="search-results-grid search-layout-stacked" id="search-results-grid" hidden>
+          <section class="search-column">
+            <h3 class="search-column-title">BLS 4.0</h3>
+            <ul class="result-list" id="search-results-bls"></ul>
+          </section>
+          <section class="search-column">
+            <h3 class="search-column-title">Open Food Facts</h3>
+            <ul class="result-list" id="search-results-off"></ul>
+          </section>
+        </div>
       </div>
 
       <div class="panel" id="panel-barcode" role="tabpanel" hidden>

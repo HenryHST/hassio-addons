@@ -110,6 +110,10 @@ body {
   background: var(--color-tile-fpe);
 }
 
+.search-column-title {
+  color: var(--color-text-muted);
+}
+
 .panel-title {
   color: var(--color-text);
 }
