@@ -8,5 +8,12 @@
   "integration_type": "service",
   "iot_class": "local_polling",
   "requirements": ["aiohttp>=3.9"],
-  "version": "1.0.0"
+  "version": "1.1.0",
+  "dashboards": {
+    "bls-nutrition": {
+      "mode": "yaml",
+      "filename": "dashboards/bls_nutrition.yaml",
+      "title": "BLS Nährwert"
+    }
+  }
 }

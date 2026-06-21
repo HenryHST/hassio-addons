@@ -96,25 +96,45 @@ data:
 
 ## Dashboard
 
-Importiere `integration/custom_components/bls_nutrition/dashboards/bls_nutrition.yaml` oder erstelle diese Helper:
+Nach Installation der Integration und des Helper-Pakets steht das Dashboard **BLS Nährwert**
+unter **Dashboards** zur Verfügung (wird über `manifest.json` automatisch registriert).
+
+### 1. Helper-Paket einbinden
+
+Kopiere [`integration/packages/bls_nutrition.yaml`](integration/packages/bls_nutrition.yaml) nach
+`config/packages/bls_nutrition.yaml` und aktiviere Packages in `configuration.yaml`:
 
 ```yaml
-input_text:
-  bls_search_query:
-    name: BLS Suche
-  bls_barcode:
-    name: Barcode
-  bls_food_id:
-    name: Lebensmittel ID
-
-input_number:
-  bls_amount_g:
-    name: Menge g
-    min: 1
-    max: 5000
-    step: 1
-    unit_of_measurement: g
+homeassistant:
+  packages: !include_dir_named packages
 ```
+
+Home Assistant neu starten.
+
+### 2. Dashboard öffnen
+
+**Dashboards → BLS Nährwert** (Pfad: `/lovelace/bls-nutrition`)
+
+### Funktionen
+
+| Bereich | Beschreibung |
+|---------|--------------|
+| Suche | Lebensmittel in BLS suchen, Trefferliste anzeigen |
+| Barcode | Open-Food-Facts-Lookup (pro 100 g) |
+| Portion | Quelle + ID + Menge → gKH/BE/KE/FPE + Nährwerte |
+| Rezept | Bis zu 3 Zutaten, Script aggregiert und berechnet |
+
+### Sensoren (feste Entity-IDs)
+
+| Entity | Bedeutung |
+|--------|-----------|
+| `sensor.bls_nutrition_food_count` | Anzahl BLS-Lebensmittel |
+| `sensor.bls_nutrition_g_kh` | Letzte Berechnung: gKH |
+| `sensor.bls_nutrition_be` | Letzte Berechnung: BE |
+| `sensor.bls_nutrition_ke` | Letzte Berechnung: KE |
+| `sensor.bls_nutrition_fpe` | Letzte Berechnung: FPE |
+
+Sensoren aktualisieren sich automatisch nach Service-Aufrufen vom Dashboard.
 
 ## Diabetes-Einheiten
 

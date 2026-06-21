@@ -6,9 +6,11 @@ import logging
 from datetime import timedelta
 from typing import Any
 
+import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers.dispatcher import dispatcher_send
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -23,7 +25,9 @@ from .const import (
     SERVICE_SAVE_CUSTOM_FOOD,
     SERVICE_SAVE_RECIPE,
     SERVICE_SEARCH_FOOD,
+    SIGNAL_RESULT_UPDATED,
 )
+from .data import BlsRuntimeData
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR]
@@ -32,6 +36,17 @@ PLATFORMS: list[Platform] = [Platform.SENSOR]
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up integration via YAML is not supported."""
     return True
+
+
+def _get_runtime(hass: HomeAssistant) -> BlsRuntimeData | None:
+    domain_data = hass.data.get(DOMAIN)
+    if not domain_data:
+        return None
+    return next(iter(domain_data.values()))
+
+
+def _notify_updated(hass: HomeAssistant, entry_id: str) -> None:
+    dispatcher_send(hass, SIGNAL_RESULT_UPDATED, entry_id)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -54,13 +69,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        "client": client,
-        "coordinator": coordinator,
-    }
+    runtime = BlsRuntimeData(client=client, coordinator=coordinator)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = runtime
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    _register_services(hass, client)
+    _register_services(hass)
     return True
 
 
@@ -72,48 +85,79 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-def _register_services(hass: HomeAssistant, client: BlsNutritionClient) -> None:
+def _register_services(hass: HomeAssistant) -> None:
     if hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
         return
 
     async def handle_search(call: ServiceCall) -> None:
-        results = await client.search_food(
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        results = await runtime.client.search_food(
             call.data["query"], call.data.get("limit", 20)
         )
+        entry_id = _entry_id_for_runtime(hass, runtime)
+        runtime.set_search(call.data["query"], results)
+        _notify_updated(hass, entry_id)
         hass.bus.async_fire(
             EVENT_SEARCH_RESULT,
             {"query": call.data["query"], "results": results},
         )
 
     async def handle_barcode(call: ServiceCall) -> None:
-        result = await client.lookup_barcode(call.data["barcode"])
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        product = await runtime.client.lookup_barcode(call.data["barcode"])
+        result = await runtime.client.calculate_portion("off", product["id"], 100.0)
+        entry_id = _entry_id_for_runtime(hass, runtime)
+        runtime.set_calculation("barcode", result)
+        _notify_updated(hass, entry_id)
         hass.bus.async_fire(EVENT_CALCULATION_RESULT, {"type": "barcode", "result": result})
 
     async def handle_portion(call: ServiceCall) -> None:
-        result = await client.calculate_portion(
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        result = await runtime.client.calculate_portion(
             call.data["source"], call.data["id"], call.data["amount_g"]
         )
+        entry_id = _entry_id_for_runtime(hass, runtime)
+        runtime.set_calculation("portion", result)
+        _notify_updated(hass, entry_id)
         hass.bus.async_fire(
             EVENT_CALCULATION_RESULT, {"type": "portion", "result": result}
         )
 
     async def handle_recipe(call: ServiceCall) -> None:
-        result = await client.calculate_recipe(
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        result = await runtime.client.calculate_recipe(
             call.data["ingredients"], call.data.get("servings", 1)
         )
+        entry_id = _entry_id_for_runtime(hass, runtime)
+        runtime.set_calculation("recipe", result)
+        _notify_updated(hass, entry_id)
         hass.bus.async_fire(
             EVENT_CALCULATION_RESULT, {"type": "recipe", "result": result}
         )
 
     async def handle_save_recipe(call: ServiceCall) -> None:
-        await client.save_recipe(
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        await runtime.client.save_recipe(
             call.data["name"],
             call.data["ingredients"],
             call.data.get("servings", 1),
         )
 
     async def handle_save_custom_food(call: ServiceCall) -> None:
-        await client.save_custom_food(
+        runtime = _get_runtime(hass)
+        if not runtime:
+            return
+        await runtime.client.save_custom_food(
             call.data["name"],
             call.data["nutrients"],
             call.data.get("notes"),
@@ -123,99 +167,76 @@ def _register_services(hass: HomeAssistant, client: BlsNutritionClient) -> None:
         DOMAIN,
         SERVICE_SEARCH_FOOD,
         handle_search,
-        schema=voluptuous_schema_search(),
+        schema=vol.Schema(
+            {
+                vol.Required("query"): str,
+                vol.Optional("limit", default=20): vol.All(
+                    vol.Coerce(int), vol.Range(min=1, max=100)
+                ),
+            }
+        ),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_LOOKUP_BARCODE,
         handle_barcode,
-        schema=voluptuous_schema_barcode(),
+        schema=vol.Schema({vol.Required("barcode"): str}),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_CALCULATE_PORTION,
         handle_portion,
-        schema=voluptuous_schema_portion(),
+        schema=vol.Schema(
+            {
+                vol.Required("source"): vol.In(["bls", "off", "custom"]),
+                vol.Required("id"): str,
+                vol.Required("amount_g"): vol.Coerce(float),
+            }
+        ),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_CALCULATE_RECIPE,
         handle_recipe,
-        schema=voluptuous_schema_recipe(),
+        schema=vol.Schema(
+            {
+                vol.Required("ingredients"): [dict],
+                vol.Optional("servings", default=1): vol.All(
+                    vol.Coerce(int), vol.Range(min=1)
+                ),
+            }
+        ),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_SAVE_RECIPE,
         handle_save_recipe,
-        schema=voluptuous_schema_save_recipe(),
+        schema=vol.Schema(
+            {
+                vol.Required("name"): str,
+                vol.Required("ingredients"): [dict],
+                vol.Optional("servings", default=1): vol.All(
+                    vol.Coerce(int), vol.Range(min=1)
+                ),
+            }
+        ),
     )
     hass.services.async_register(
         DOMAIN,
         SERVICE_SAVE_CUSTOM_FOOD,
         handle_save_custom_food,
-        schema=voluptuous_schema_save_custom_food(),
+        schema=vol.Schema(
+            {
+                vol.Required("name"): str,
+                vol.Required("nutrients"): dict,
+                vol.Optional("notes"): str,
+            }
+        ),
     )
 
 
-def voluptuous_schema_search():
-    import voluptuous as vol
-
-    return vol.Schema(
-        {
-            vol.Required("query"): str,
-            vol.Optional("limit", default=20): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
-        }
-    )
-
-
-def voluptuous_schema_barcode():
-    import voluptuous as vol
-
-    return vol.Schema({vol.Required("barcode"): str})
-
-
-def voluptuous_schema_portion():
-    import voluptuous as vol
-
-    return vol.Schema(
-        {
-            vol.Required("source"): vol.In(["bls", "off", "custom"]),
-            vol.Required("id"): str,
-            vol.Required("amount_g"): vol.Coerce(float),
-        }
-    )
-
-
-def voluptuous_schema_recipe():
-    import voluptuous as vol
-
-    return vol.Schema(
-        {
-            vol.Required("ingredients"): [dict],
-            vol.Optional("servings", default=1): vol.All(vol.Coerce(int), vol.Range(min=1)),
-        }
-    )
-
-
-def voluptuous_schema_save_recipe():
-    import voluptuous as vol
-
-    return vol.Schema(
-        {
-            vol.Required("name"): str,
-            vol.Required("ingredients"): [dict],
-            vol.Optional("servings", default=1): vol.All(vol.Coerce(int), vol.Range(min=1)),
-        }
-    )
-
-
-def voluptuous_schema_save_custom_food():
-    import voluptuous as vol
-
-    return vol.Schema(
-        {
-            vol.Required("name"): str,
-            vol.Required("nutrients"): dict,
-            vol.Optional("notes"): str,
-        }
-    )
+def _entry_id_for_runtime(hass: HomeAssistant, runtime: BlsRuntimeData) -> str:
+    for entry_id, data in hass.data.get(DOMAIN, {}).items():
+        if data is runtime:
+            return entry_id
+    return next(iter(hass.data.get(DOMAIN, {})), "")

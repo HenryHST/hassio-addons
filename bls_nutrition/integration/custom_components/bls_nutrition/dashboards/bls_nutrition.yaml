@@ -1,21 +1,20 @@
-bls_nutrition:
-  bls-nutrition:
-    mode: yaml
-    title: BLS Nährwert
-    icon: mdi:food-apple
+views:
+  - title: BLS Nährwert
     path: bls-nutrition
+    icon: mdi:food-apple
     cards:
       - type: markdown
         content: |
           ## BLS Nährwertrechner
-          Suche Lebensmittel, scanne Barcodes und berechne gKH, BE, KE und FPE.
+          Lebensmittel suchen, Barcode scannen, Portionen und Rezepte berechnen.
           *Keine medizinische Beratung.*
 
       - type: entities
-        title: Status
+        title: Datenbank
+        show_header_toggle: false
         entities:
-          - sensor.bls_lebensmittel_anzahl
-          - sensor.bls_bls_version
+          - entity: sensor.bls_nutrition_food_count
+          - entity: sensor.bls_nutrition_bls_version
 
       - type: horizontal-stack
         cards:
@@ -24,11 +23,28 @@ bls_nutrition:
             name: Suche
           - type: button
             name: Suchen
+            icon: mdi:magnify
             tap_action:
               action: call-service
               service: bls_nutrition.search_food
               data:
                 query: "{{ states('input_text.bls_search_query') }}"
+
+      - type: entity
+        entity: sensor.bls_nutrition_search_hits
+        name: Suchtreffer
+
+      - type: markdown
+        title: Suchergebnisse
+        content: >
+          {% set results = state_attr('sensor.bls_nutrition_search_hits', 'results') or [] %}
+          {% if results | length == 0 %}
+          *Keine Suche ausgeführt oder keine Treffer.*
+          {% else %}
+          {% for item in results[:8] %}
+          - **{{ item.name }}** (`{{ item.id }}`, {{ item.source }})
+          {% endfor %}
+          {% endif %}
 
       - type: horizontal-stack
         cards:
@@ -36,7 +52,8 @@ bls_nutrition:
             entity: input_text.bls_barcode
             name: Barcode (EAN)
           - type: button
-            name: Barcode suchen
+            name: Scannen
+            icon: mdi:barcode
             tap_action:
               action: call-service
               service: bls_nutrition.lookup_barcode
@@ -46,26 +63,84 @@ bls_nutrition:
       - type: horizontal-stack
         cards:
           - type: entity
+            entity: input_select.bls_food_source
+            name: Quelle
+          - type: entity
             entity: input_text.bls_food_id
-            name: BLS/OFF/Custom ID
+            name: ID
           - type: entity
             entity: input_number.bls_amount_g
             name: Menge (g)
-          - type: button
-            name: Portion berechnen
-            tap_action:
-              action: call-service
-              service: bls_nutrition.calculate_portion
-              data:
-                source: bls
-                id: "{{ states('input_text.bls_food_id') }}"
-                amount_g: "{{ states('input_number.bls_amount_g') | float }}"
+
+      - type: button
+        name: Portion berechnen
+        icon: mdi:calculator
+        tap_action:
+          action: call-service
+          service: bls_nutrition.calculate_portion
+          data:
+            source: "{{ states('input_select.bls_food_source') }}"
+            id: "{{ states('input_text.bls_food_id') }}"
+            amount_g: "{{ states('input_number.bls_amount_g') | float }}"
+
+      - type: glance
+        title: Diabetes-Einheiten
+        show_name: true
+        entities:
+          - entity: sensor.bls_nutrition_g_kh
+          - entity: sensor.bls_nutrition_be
+          - entity: sensor.bls_nutrition_ke
+          - entity: sensor.bls_nutrition_fpe
+
+      - type: entities
+        title: Nährwerte (letzte Berechnung)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.bls_nutrition_last_food
+          - entity: sensor.bls_nutrition_energy_kcal
+          - entity: sensor.bls_nutrition_protein
+          - entity: sensor.bls_nutrition_fat
+          - entity: sensor.bls_nutrition_carbs
 
       - type: markdown
-        title: Diabetes-Einheiten
+        title: Rezept (bis zu 3 Zutaten)
         content: |
-          Nutze die Entwicklerwerkzeuge oder Automatisierungen, um Ergebnisse
-          aus dem Event `bls_nutrition_calculation_result` anzuzeigen.
+          Trage Quelle (`bls`, `off`, `custom`), ID und Menge ein, dann **Rezept berechnen**.
+
+      - type: grid
+        columns: 3
+        square: false
+        cards:
+          - type: entities
+            title: Zutat 1
+            entities:
+              - input_select.bls_ingredient_1_source
+              - input_text.bls_ingredient_1_id
+              - input_number.bls_ingredient_1_g
+          - type: entities
+            title: Zutat 2
+            entities:
+              - input_select.bls_ingredient_2_source
+              - input_text.bls_ingredient_2_id
+              - input_number.bls_ingredient_2_g
+          - type: entities
+            title: Zutat 3
+            entities:
+              - input_select.bls_ingredient_3_source
+              - input_text.bls_ingredient_3_id
+              - input_number.bls_ingredient_3_g
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_number.bls_recipe_servings
+            name: Portionen
+          - type: button
+            name: Rezept berechnen
+            icon: mdi:food
+            tap_action:
+              action: call-service
+              service: script.bls_nutrition_calculate_recipe
 
       - type: markdown
         content: |
