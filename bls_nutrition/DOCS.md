@@ -25,24 +25,56 @@ Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de
 Das Add-on stellt über **Ingress** eine mobil-optimierte Web-App bereit — in der Home-Assistant-App
 unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel **BLS Nährwert**.
 
-Das Sidebar-Panel ist für **alle Home-Assistant-Benutzer** sichtbar (nicht nur Admins).
-Nach einem Update das Add-on neu starten. Fehlt der Eintrag in der Sidebar, unter
-**Add-on → Info → „Zur Sidebar hinzufügen“** erneut aktivieren.
+### Zugriff
 
-### Bedienung
+- **Sidebar-Panel** „BLS Nährwert“ — für **alle Home-Assistant-Benutzer** sichtbar (nicht nur Admins)
+- Nach einem Update das Add-on neu starten
+- Fehlt der Eintrag in der Sidebar: **Add-on → Info → „Zur Sidebar hinzufügen“**
 
-| Bereich | Funktion |
-|---------|----------|
-| **Suche** | Parallele Suche in BLS 4.0 und Open Food Facts (2 Spalten); Treffer antippen → Portion |
-| **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen und berechnen |
-| **Portion** | Quelle (BLS/OFF/Eigenes), ID und Menge in Gramm → Berechnung |
+![Ingress-Überblick](docs/images/ingress-navigation.png)
+
+### Oberfläche im Überblick
+
+| Bereich | Beschreibung |
+|---------|--------------|
+| **Header** | Logo, Titel, BLS-Version, Badge mit Anzahl Lebensmittel (z. B. „7.140 LM“) |
+| **Hero-Tiles** | gKH, BE, KE, FPE — WETID-inspirierte Diabetes-Einheiten, immer sichtbar |
+| **Hauptbereich** | Suche, Scan, Portion oder Rezept (je nach Tab) |
+| **Bottom-Nav** | Suche · Scan · Portion · Rezept |
+
+### Lebensmittelsuche (Dual-Column)
+
+Parallele Suche in zwei Spalten — links **BLS 4.0** (lokal), rechts **Open Food Facts** (Internet):
+
+![Dual-Column-Suche](docs/images/ingress-search.png)
+
+1. Suchbegriff eingeben (z. B. „Apfel“) und **Suchen** tippen
+2. Treffer in der passenden Spalte antippen → wechselt zur **Portion** mit vorausgefüllter Quelle und ID
+3. Layout der Spalten über Add-on-Option `search_layout` steuerbar (`stacked` oder `side_by_side`)
+
+### Portion und Ergebnis
+
+Nach der Berechnung aktualisieren sich die Hero-Tiles. Nährwertdetails erscheinen unter **Details**:
+
+![Portion mit Ergebnis](docs/images/ingress-portion.png)
+
+| Schritt | Aktion |
+|---------|--------|
+| Quelle wählen | BLS, Open Food Facts oder eigenes Lebensmittel |
+| ID / Code | BLS-Code (z. B. `F110000`) oder OFF-Barcode |
+| Menge | Gramm eingeben → **Berechnen** |
+
+### Weitere Bereiche
+
+| Tab | Funktion |
+|-----|----------|
+| **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen, berechnen |
 | **Rezept** | Bis zu 3 Zutaten (BLS-Codes + Gramm) und Portionenanzahl |
-
-Oben werden **gKH, BE, KE und FPE** als große Kacheln angezeigt. Nährwertdetails (kcal, Protein,
-Fett, KH) erscheinen in der einklappbaren Sektion **Details**.
 
 > Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
 > und feste Sensoren (siehe unten).
+
+Screenshots neu erzeugen (Maintainer): `bls_nutrition/docs/snapshots/capture.sh`
 
 ### Custom Integration
 

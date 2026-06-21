@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BLS Nährwertdatenbank – Portion (Demo)</title>
+  <link rel="stylesheet" href="../../root/static/styles/base.css">
+  <link rel="stylesheet" href="../../root/static/styles/theme-diabetes.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-brand">
+        <img src="../../root/static/icon.png" alt="BLS" class="header-logo" width="44" height="44">
+        <div class="header-titles">
+          <h1 class="header-title">BLS Nährwertdatenbank</h1>
+          <p class="header-subtitle">BLS 4.0</p>
+        </div>
+      </div>
+      <span class="status-badge">7.140 LM</span>
+    </header>
+
+    <section class="hero-tiles" aria-label="Diabetes-Einheiten">
+      <div class="hero-tile hero-tile-kh">
+        <span class="hero-tile-label">gKH</span>
+        <span class="hero-tile-value">15,2</span>
+      </div>
+      <div class="hero-tile hero-tile-be">
+        <span class="hero-tile-label">BE</span>
+        <span class="hero-tile-value">1,27</span>
+      </div>
+      <div class="hero-tile hero-tile-ke">
+        <span class="hero-tile-label">KE</span>
+        <span class="hero-tile-value">1,52</span>
+      </div>
+      <div class="hero-tile hero-tile-fpe">
+        <span class="hero-tile-label">FPE</span>
+        <span class="hero-tile-value">0,8</span>
+      </div>
+    </section>
+
+    <main class="main">
+      <div class="panel active" role="tabpanel">
+        <h2 class="panel-title">Portion berechnen</h2>
+        <form class="form">
+          <label class="label" for="portion-source">Quelle</label>
+          <select id="portion-source" class="input">
+            <option value="bls" selected>BLS</option>
+          </select>
+          <label class="label" for="portion-id">ID / BLS-Code</label>
+          <input type="text" id="portion-id" class="input" value="F110000" readonly>
+          <label class="label" for="portion-amount">Menge (g)</label>
+          <input type="number" id="portion-amount" class="input" value="150" readonly>
+          <button type="button" class="btn btn-primary">Berechnen</button>
+        </form>
+      </div>
+
+      <section class="details">
+        <button type="button" class="details-toggle" aria-expanded="true">
+          Details <span class="details-chevron">▼</span>
+        </button>
+        <div class="details-content">
+          <p class="result-name">Apfel, roh · 150 g</p>
+          <table class="nutrient-table">
+            <tbody>
+              <tr><td>Energie (kcal)</td><td>78</td></tr>
+              <tr><td>Protein (g)</td><td>0,3</td></tr>
+              <tr><td>Fett (g)</td><td>0,2</td></tr>
+              <tr><td>Kohlenhydrate (g)</td><td>15,2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigation">
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">🔍</span>
+        <span class="nav-label">Suche</span>
+      </button>
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">📷</span>
+        <span class="nav-label">Scan</span>
+      </button>
+      <button type="button" class="nav-btn active" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">🍽</span>
+        <span class="nav-label">Portion</span>
+      </button>
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">📋</span>
+        <span class="nav-label">Rezept</span>
+      </button>
+    </nav>
+
+    <footer class="footer">
+      <p>Daten: Max Rubner-Institut BLS 4.0 (CC BY 4.0)</p>
+      <p><em>Keine medizinische Beratung.</em></p>
+    </footer>
+  </div>
+</body>
+</html>

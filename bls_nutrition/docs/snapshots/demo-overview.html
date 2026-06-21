@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BLS Nährwertdatenbank – Überblick (Demo)</title>
+  <link rel="stylesheet" href="../../root/static/styles/base.css">
+  <link rel="stylesheet" href="../../root/static/styles/theme-diabetes.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-brand">
+        <img src="../../root/static/icon.png" alt="BLS" class="header-logo" width="44" height="44">
+        <div class="header-titles">
+          <h1 class="header-title">BLS Nährwertdatenbank</h1>
+          <p class="header-subtitle">BLS 4.0</p>
+        </div>
+      </div>
+      <span class="status-badge">7.140 LM</span>
+    </header>
+
+    <section class="hero-tiles" aria-label="Diabetes-Einheiten">
+      <div class="hero-tile hero-tile-kh">
+        <span class="hero-tile-label">gKH</span>
+        <span class="hero-tile-value">—</span>
+      </div>
+      <div class="hero-tile hero-tile-be">
+        <span class="hero-tile-label">BE</span>
+        <span class="hero-tile-value">—</span>
+      </div>
+      <div class="hero-tile hero-tile-ke">
+        <span class="hero-tile-label">KE</span>
+        <span class="hero-tile-value">—</span>
+      </div>
+      <div class="hero-tile hero-tile-fpe">
+        <span class="hero-tile-label">FPE</span>
+        <span class="hero-tile-value">—</span>
+      </div>
+    </section>
+
+    <main class="main">
+      <div class="panel active" role="tabpanel">
+        <h2 class="panel-title">Lebensmittel suchen</h2>
+        <form class="form">
+          <input type="search" class="input" placeholder="z. B. Apfel">
+          <button type="button" class="btn btn-primary">Suchen</button>
+        </form>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigation">
+      <button type="button" class="nav-btn active" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">🔍</span>
+        <span class="nav-label">Suche</span>
+      </button>
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">📷</span>
+        <span class="nav-label">Scan</span>
+      </button>
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">🍽</span>
+        <span class="nav-label">Portion</span>
+      </button>
+      <button type="button" class="nav-btn">
+        <span class="nav-icon" aria-hidden="true">📋</span>
+        <span class="nav-label">Rezept</span>
+      </button>
+    </nav>
+
+    <footer class="footer">
+      <p>Daten: <a href="https://blsdb.de" target="_blank" rel="noopener">Max Rubner-Institut BLS 4.0</a> (CC BY 4.0)</p>
+      <p>Barcode: <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (ODbL)</p>
+      <p><em>Keine medizinische Beratung.</em></p>
+    </footer>
+  </div>
+</body>
+</html>

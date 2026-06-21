@@ -11,6 +11,8 @@ Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Diabetes-Einheiten
 
 ## About
 
+![Ingress Web-UI](docs/images/ingress-navigation.png)
+
 Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenbank (7.140 Lebensmittel, CC BY 4.0) und stellt eine REST-API bereit für:
 
 - Lebensmittelsuche

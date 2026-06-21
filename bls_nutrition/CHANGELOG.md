@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dual-column search in Ingress UI: BLS 4.0 (left) and Open Food Facts (right)
 - `GET /foods/search/off` endpoint for Open Food Facts text search
 - Add-on option `search_layout`: `stacked` (default) or `side_by_side`
+- Documentation screenshots for Ingress Web-UI (`docs/images/`)
 
 ### Changed
 
