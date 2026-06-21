@@ -165,7 +165,7 @@ def _register_services(hass: HomeAssistant) -> None:
         )
 
     async def handle_add_to_todo_list(call: ServiceCall) -> None:
-        entity_id = call.data.get("entity_id", "todo.einkaufsliste")
+        entity_id = call.data.get("entity_id", "todo.shopping_list")
         name = call.data["name"]
         desc_parts = ["OFF"]
         if call.data.get("barcode"):
@@ -173,13 +173,15 @@ def _register_services(hass: HomeAssistant) -> None:
         if call.data.get("brand"):
             desc_parts.append(str(call.data["brand"]).strip())
         description = " · ".join(desc_parts) if len(desc_parts) > 1 else None
-        service_data: dict[str, Any] = {"item": name[:200]}
+        item_text = name.strip()
         if description:
-            service_data["description"] = description[:500]
+            suffix = f" [{description}]"
+            max_name = max(1, 200 - len(suffix))
+            item_text = name.strip()[:max_name] + suffix
         await hass.services.async_call(
             "todo",
             "add_item",
-            service_data,
+            {"item": item_text[:200]},
             target={"entity_id": entity_id},
             blocking=True,
         )
@@ -263,7 +265,7 @@ def _register_services(hass: HomeAssistant) -> None:
                 vol.Required("name"): str,
                 vol.Optional("barcode"): str,
                 vol.Optional("brand"): str,
-                vol.Optional("entity_id", default="todo.einkaufsliste"): str,
+                vol.Optional("entity_id", default="todo.shopping_list"): str,
             }
         ),
     )

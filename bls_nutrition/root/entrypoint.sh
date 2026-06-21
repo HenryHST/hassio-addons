@@ -21,7 +21,7 @@ if [[ -f "${CONFIG_PATH}" ]]; then
     BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
     BLS_SEARCH_LAYOUT=$(jq -r '.search_layout // "stacked"' "${CONFIG_PATH}")
     BLS_TODO_LIST_ENABLED=$(jq -r '.todo_list_enabled // true' "${CONFIG_PATH}")
-    BLS_TODO_LIST_ENTITY_ID=$(jq -r '.todo_list_entity_id // "todo.einkaufsliste"' "${CONFIG_PATH}")
+    BLS_TODO_LIST_ENTITY_ID=$(jq -r '.todo_list_entity_id // "todo.shopping_list"' "${CONFIG_PATH}")
 else
     BLS_AUTO_UPDATE=true
     BLS_UPDATE_INTERVAL_DAYS=30
@@ -30,7 +30,7 @@ else
     BLS_OFF_CACHE_TTL_DAYS=90
     BLS_SEARCH_LAYOUT=stacked
     BLS_TODO_LIST_ENABLED=true
-    BLS_TODO_LIST_ENTITY_ID=todo.einkaufsliste
+    BLS_TODO_LIST_ENTITY_ID=todo.shopping_list
 fi
 
 export BLS_AUTO_UPDATE

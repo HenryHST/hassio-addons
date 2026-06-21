@@ -43,7 +43,7 @@ def get_settings() -> Settings:
         todo_list_enabled=os.environ.get("BLS_TODO_LIST_ENABLED", "true").lower()
         == "true",
         todo_list_entity_id=os.environ.get(
-            "BLS_TODO_LIST_ENTITY_ID", "todo.einkaufsliste"
+            "BLS_TODO_LIST_ENTITY_ID", "todo.shopping_list"
         ),
         bls_version=os.environ.get("BLS_VERSION", "4.0"),
         addon_version=os.environ.get("ADDON_VERSION", "1.0.0"),

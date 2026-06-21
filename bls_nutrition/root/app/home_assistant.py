@@ -46,23 +46,38 @@ def _agent_log(
     # #endregion
 
 
+def build_todo_item_text(name: str, description: str | None = None) -> str:
+    """Build item text without using the HA description field.
+
+    Many todo entities (e.g. the built-in shopping list) do not support
+    SET_DESCRIPTION_ON_ITEM; sending ``description`` causes HA to return 500.
+    """
+    item = name.strip()
+    if description:
+        suffix = f" [{description}]"
+        max_name = max(1, 200 - len(suffix))
+        item = item[:max_name] + suffix
+    return item[:200]
+
+
 def add_todo_item(
     entity_id: str,
     item: str,
     description: str | None = None,
 ) -> None:
     token = os.environ.get("SUPERVISOR_TOKEN")
+    item_text = build_todo_item_text(item, description)
     # #region agent log
     _agent_log(
         "home_assistant.py:add_todo_item:entry",
         "todo add_item called",
         {
             "entity_id": entity_id,
-            "item_len": len(item),
-            "has_description": description is not None,
+            "item_len": len(item_text),
+            "metadata_in_item": description is not None,
             "has_supervisor_token": bool(token),
         },
-        "H1",
+        "H5",
     )
     # #endregion
     if not token:
@@ -74,17 +89,19 @@ def add_todo_item(
     url = f"{base}/core/api/services/todo/add_item"
     payload: dict[str, str] = {
         "entity_id": entity_id,
-        "item": item[:200],
+        "item": item_text,
     }
-    if description:
-        payload["description"] = description[:500]
 
     # #region agent log
     _agent_log(
         "home_assistant.py:add_todo_item:request",
         "calling supervisor HA proxy",
-        {"url": url, "payload_keys": sorted(payload.keys())},
-        "H2",
+        {
+            "url": url,
+            "payload_keys": sorted(payload.keys()),
+            "sends_description_field": False,
+        },
+        "H5",
     )
     # #endregion
 
@@ -114,14 +131,14 @@ def add_todo_item(
             "status_code": response.status_code,
             "body_preview": response.text.strip()[:300],
         },
-        "H1",
+        "H5",
     )
     # #endregion
 
     if response.status_code == 404:
         raise HomeAssistantError(
             f"To-do-Liste nicht gefunden: {entity_id}. "
-            "Entity-ID in den Add-on-Optionen prüfen."
+            "Entity-ID in den Add-on-Optionen prüfen (z. B. todo.shopping_list)."
         )
     if response.status_code >= 400:
         detail = response.text.strip() or response.reason_phrase

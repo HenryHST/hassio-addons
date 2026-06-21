@@ -36,7 +36,7 @@ options:
   off_cache_ttl_days: 90
   search_layout: stacked
   todo_list_enabled: true
-  todo_list_entity_id: todo.einkaufsliste
+  todo_list_entity_id: todo.shopping_list
 schema:
   auto_update: bool
   update_interval_days: int(7,365)?
