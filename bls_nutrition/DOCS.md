@@ -20,6 +20,16 @@ Das Add-on stellt die deutsche BLS 4.0 Nährwertdatenbank lokal in Home Assistan
 
 Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de/download). Das kann 5–15 Minuten dauern.
 
+### Add-on aktualisieren
+
+Updates werden als vorgefertigtes Container-Image von GitHub Container Registry bezogen (`ghcr.io/henryhst/hassio-addons/bls_nutrition`).
+
+1. **Einstellungen** → **Add-ons** → **Add-on Store** → **⋮** → **Aktualisieren** (Repository neu einlesen)
+2. **BLS Nährwertdatenbank** → **Update** (falls angeboten)
+3. Nach dem Update das Add-on **neu starten**
+
+Bei Fehlern: **Einstellungen** → **System** → **Protokolle** → **Supervisor** — typische Meldungen sind `manifest unknown` (Image noch nicht gebaut) oder `Failed to build` (lokaler Fallback-Build).
+
 ## Ingress-Web-UI (Hauptoberfläche)
 
 Das Add-on stellt über **Ingress** eine mobil-optimierte Web-App bereit — in der Home-Assistant-App

@@ -149,6 +149,7 @@ jobs:
   create-manifest:
     name: Create multi-arch manifest
     needs: [build, information]
+    if: ${{ always() && !cancelled() && needs.information.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -171,22 +172,38 @@ jobs:
           IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
           VERSION="${{ needs.information.outputs.version }}"
 
-          docker manifest create --amend "${IMAGE_NAME}:${VERSION}" \
-            "${IMAGE_NAME}:${VERSION}-aarch64" \
-            "${IMAGE_NAME}:${VERSION}-amd64" \
-            "${IMAGE_NAME}:${VERSION}-armv7"
+          collect_tags() {
+            local prefix="$1"
+            local -n out_ref="$2"
+            out_ref=()
+            for arch in aarch64 amd64 armv7; do
+              tag="${IMAGE_NAME}:${prefix}${arch}"
+              if docker manifest inspect "${tag}" >/dev/null 2>&1; then
+                out_ref+=("${tag}")
+                echo "Including ${tag}"
+              else
+                echo "Skipping missing ${tag}"
+              fi
+            done
+          }
 
+          collect_tags "${VERSION}-" version_tags
+          if [[ ${#version_tags[@]} -lt 2 ]]; then
+            echo "Need at least 2 architecture images for ${IMAGE_NAME}:${VERSION}"
+            exit 1
+          fi
+
+          docker manifest create --amend "${IMAGE_NAME}:${VERSION}" "${version_tags[@]}"
           docker manifest push "${IMAGE_NAME}:${VERSION}"
 
           if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
-            docker manifest create --amend "${IMAGE_NAME}:latest" \
-              "${IMAGE_NAME}:latest-aarch64" \
-              "${IMAGE_NAME}:latest-amd64" \
-              "${IMAGE_NAME}:latest-armv7"
-
-            docker manifest push "${IMAGE_NAME}:latest"
+            collect_tags "latest-" latest_tags
+            if [[ ${#latest_tags[@]} -ge 2 ]]; then
+              docker manifest create --amend "${IMAGE_NAME}:latest" "${latest_tags[@]}"
+              docker manifest push "${IMAGE_NAME}:latest"
+            fi
           fi
 
           echo "### Manifest Created" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** ${IMAGE_NAME}:${VERSION}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Architectures:** aarch64, amd64, armv7" >> $GITHUB_STEP_SUMMARY
+          echo "- **Architectures in manifest:** ${#version_tags[@]}" >> $GITHUB_STEP_SUMMARY

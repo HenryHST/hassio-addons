@@ -1,12 +1,13 @@
 ---
 name: BLS Nährwertdatenbank
-version: 1.4.0
+version: 1.4.1
 slug: bls_nutrition
 description: >-
   Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Open Food Facts
   Barcode-Lookup, Diabetes-Einheiten (gKH, BE, KE, FPE) und REST-API für
   Home Assistant.
-url: https://github.com/henryhst/hassio-addons/tree/master/bls_nutrition
+url: https://github.com/henryhst/hassio-addons/tree/main/bls_nutrition
+image: ghcr.io/henryhst/hassio-addons/bls_nutrition
 startup: application
 arch:
   - aarch64

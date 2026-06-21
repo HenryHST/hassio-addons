@@ -5,6 +5,18 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-06-21
+
+### Fixed
+
+- Add-on updates via Home Assistant: pre-built GHCR image (`image:` in config.yaml)
+- Docker build on armv7: removed `uvicorn[standard]` (uvloop/httptools cross-compile failure)
+- CI publishes multi-arch manifest even when individual arch builds fail
+
+### Changed
+
+- Added `build.yaml` for Supervisor local-build fallback
+
 ## [1.4.0] - 2025-06-21
 
 ### Added
