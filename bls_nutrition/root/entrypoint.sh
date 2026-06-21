@@ -14,20 +14,27 @@ echo "-----------------------------------------------------------"
 mkdir -p "${DATA_DIR}/downloads" "${DATA_DIR}/cache"
 
 if [[ -f "${CONFIG_PATH}" ]]; then
-    export BLS_AUTO_UPDATE=$(jq -r '.auto_update // true' "${CONFIG_PATH}")
-    export BLS_UPDATE_INTERVAL_DAYS=$(jq -r '.update_interval_days // 30' "${CONFIG_PATH}")
-    export BLS_LANGUAGE=$(jq -r '.language // "de"' "${CONFIG_PATH}")
-    export BLS_ENABLE_OFF=$(jq -r '.enable_open_food_facts // true' "${CONFIG_PATH}")
-    export BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
-    export BLS_SEARCH_LAYOUT=$(jq -r '.search_layout // "stacked"' "${CONFIG_PATH}")
+    BLS_AUTO_UPDATE=$(jq -r '.auto_update // true' "${CONFIG_PATH}")
+    BLS_UPDATE_INTERVAL_DAYS=$(jq -r '.update_interval_days // 30' "${CONFIG_PATH}")
+    BLS_LANGUAGE=$(jq -r '.language // "de"' "${CONFIG_PATH}")
+    BLS_ENABLE_OFF=$(jq -r '.enable_open_food_facts // true' "${CONFIG_PATH}")
+    BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
+    BLS_SEARCH_LAYOUT=$(jq -r '.search_layout // "stacked"' "${CONFIG_PATH}")
 else
-    export BLS_AUTO_UPDATE=true
-    export BLS_UPDATE_INTERVAL_DAYS=30
-    export BLS_LANGUAGE=de
-    export BLS_ENABLE_OFF=true
-    export BLS_OFF_CACHE_TTL_DAYS=90
-    export BLS_SEARCH_LAYOUT=stacked
+    BLS_AUTO_UPDATE=true
+    BLS_UPDATE_INTERVAL_DAYS=30
+    BLS_LANGUAGE=de
+    BLS_ENABLE_OFF=true
+    BLS_OFF_CACHE_TTL_DAYS=90
+    BLS_SEARCH_LAYOUT=stacked
 fi
+
+export BLS_AUTO_UPDATE
+export BLS_UPDATE_INTERVAL_DAYS
+export BLS_LANGUAGE
+export BLS_ENABLE_OFF
+export BLS_OFF_CACHE_TTL_DAYS
+export BLS_SEARCH_LAYOUT
 
 echo "[bls_nutrition] Configuration:"
 echo "  - auto_update: ${BLS_AUTO_UPDATE}"
