@@ -4,6 +4,12 @@
 
 Das Add-on stellt die deutsche BLS 4.0 Nährwertdatenbank lokal in Home Assistant bereit — mit WETID-inspirierten Diabetes-Einheiten und Barcode-Scanner über Open Food Facts.
 
+## Einschränkungen
+
+- BLS enthält ~7.140 Grundlebensmittel (keine 350k wie WETID)
+- Barcode-Lookup benötigt Internet und deckt primär Packungsprodukte ab
+- Keine Insulin-Dosierungsempfehlung — nur Nährwertberechnung
+
 ## Installation
 
 ### Add-on
@@ -180,12 +186,6 @@ Sensoren aktualisieren sich automatisch nach Service-Aufrufen vom Dashboard.
 |--------|--------|-------------|
 | BLS 4.0 | CC BY 4.0 | Max Rubner-Institut, DOI: 10.25826/Data20251217-134202-0 |
 | Open Food Facts | ODbL | openfoodfacts.org |
-
-## Einschränkungen
-
-- BLS enthält ~7.140 Grundlebensmittel (keine 350k wie WETID)
-- Barcode-Lookup benötigt Internet und deckt primär Packungsprodukte ab
-- Keine Insulin-Dosierungsempfehlung — nur Nährwertberechnung
 
 ## Support
 
