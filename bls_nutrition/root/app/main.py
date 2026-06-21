@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 import html as html_module
-import json
-import time
 from typing import Any, AsyncIterator
 
 from pathlib import Path
@@ -39,26 +37,6 @@ app = FastAPI(
 )
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
-DEBUG_LOG = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
-
-
-def _agent_log(location: str, message: str, data: dict[str, Any], hypothesis_id: str) -> None:
-    # region agent log
-    try:
-        payload = {
-            "sessionId": "92f7bb",
-            "timestamp": int(time.time() * 1000),
-            "location": location,
-            "message": message,
-            "data": data,
-            "hypothesisId": hypothesis_id,
-        }
-        with DEBUG_LOG.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(payload) + "\n")
-    except OSError:
-        pass
-    # endregion
-
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -89,27 +67,10 @@ def health() -> dict[str, Any]:
 def index(request: Request) -> HTMLResponse:
     html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
     ingress_path = request.headers.get("x-ingress-path")
-    base_injected = False
     if ingress_path:
         base_href = ingress_path if ingress_path.endswith("/") else f"{ingress_path}/"
         base_tag = f'<base href="{html_module.escape(base_href, quote=True)}">'
         html = html.replace("<head>", f"<head>{base_tag}", 1)
-        base_injected = True
-    # region agent log
-    _agent_log(
-        "main.py:index",
-        "Serving index.html",
-        {
-            "x_ingress_path": ingress_path,
-            "base_injected": base_injected,
-            "static_dir": str(STATIC_DIR),
-            "icon_exists": (STATIC_DIR / "icon.png").exists(),
-            "request_path": str(request.url.path),
-            "runId": "post-fix",
-        },
-        "A",
-    )
-    # endregion
     return HTMLResponse(html)
 
 
