@@ -101,10 +101,15 @@ views:
           - entity: sensor.bls_nutrition_protein
           - entity: sensor.bls_nutrition_fat
           - entity: sensor.bls_nutrition_carbs
+          - entity: sensor.bls_nutrition_nutriscore
+          - entity: sensor.bls_nutrition_nova
+          - entity: sensor.bls_nutrition_ecoscore
 
       - type: markdown
         title: Rezept (bis zu 3 Zutaten)
         content: |
+          *Nutri-Score, Nova-Score und Eco-Score nur bei Open-Food-Facts-Produkten (Quelle OFF).*
+
           Trage Quelle (`bls`, `off`, `custom`), ID und Menge ein, dann **Rezept berechnen**.
 
       - type: grid

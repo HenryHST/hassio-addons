@@ -69,3 +69,6 @@ class CalculationResult(BaseModel):
     nutrients: dict[str, float | None]
     diabetes: DiabetesUnits
     ingredients: list[dict[str, Any]] | None = None
+    nutriscore: str | None = None
+    nova_group: int | None = None
+    ecoscore: str | None = None

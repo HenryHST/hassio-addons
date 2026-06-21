@@ -1,6 +1,6 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 ![Supports armv7 Architecture](https://img.shields.io/badge/armv7-yes-green.svg)
@@ -18,7 +18,7 @@ Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenban
 - Lebensmittelsuche
 - Portions- und Rezeptberechnung
 - Diabetes-Einheiten: **gKH**, **BE**, **KE**, **FPE** (WETID-inspiriert)
-- Barcode-Lookup über **Open Food Facts**
+- Barcode-Lookup über **Open Food Facts** (inkl. Nutri-Score, Nova-Score, Eco-Score)
 - Eigene Lebensmittel und Rezepte
 
 Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalten.

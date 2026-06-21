@@ -43,6 +43,9 @@ def calculate_portion(
     diabetes_units = diabetes.compute_diabetes_units(key_nutrients)
 
     name = None
+    nutriscore = None
+    nova_group = None
+    ecoscore = None
     if source == "bls":
         name = db.get_food_name(conn, item_id, language)
     elif source == "custom":
@@ -50,7 +53,11 @@ def calculate_portion(
         name = row["name"] if row else None
     elif source == "off":
         row = db.get_off_product(conn, item_id)
-        name = row["name"] if row else None
+        if row:
+            name = row["name"]
+            nutriscore = row.get("nutriscore")
+            nova_group = row.get("nova_group")
+            ecoscore = row.get("ecoscore")
 
     return {
         "source": source,
@@ -60,6 +67,9 @@ def calculate_portion(
         "nutrients": key_nutrients,
         "all_nutrients": scaled,
         "diabetes": diabetes_units,
+        "nutriscore": nutriscore,
+        "nova_group": nova_group,
+        "ecoscore": ecoscore,
     }
 
 

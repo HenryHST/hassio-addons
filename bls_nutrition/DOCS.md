@@ -71,6 +71,24 @@ Nach der Berechnung aktualisieren sich die Hero-Tiles. Nährwertdetails erschein
 | **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen, berechnen |
 | **Rezept** | Bis zu 3 Zutaten (BLS-Codes + Gramm) und Portionenanzahl |
 
+### Nutri-Score, Nova-Score und Eco-Score
+
+Bei **Open-Food-Facts-Produkten** zeigt die Ingress-UI optional drei Bewertungen als SVG-Badges:
+
+| Score | OFF-Feld | Werte |
+|-------|----------|-------|
+| Nutri-Score | `nutrition_grades` | A–E |
+| Nova-Score | `nova_group` | 1–4 |
+| Eco-Score | `ecoscore_grade` / `environmental_score_grade` | A–E |
+
+Anzeige in OFF-Suchergebnissen, nach Barcode-Scan und in den Portion-Details. BLS-Grundlebensmittel haben keine Scores.
+
+**Rechtlicher Hinweis:** Nutri-Score ist ein eingetragenes Kollektivzeichen (Santé publique France).
+Die Badges dienen der **Wiedergabe von OFF-Daten** zu Informationszwecken, nicht der eigenen Produktkennzeichnung.
+Nova-Score und Eco-Score stammen ebenfalls aus Open Food Facts.
+
+Im Lovelace-Dashboard stehen die Sensoren `sensor.bls_nutrition_nutriscore`, `_nova` und `_ecoscore` bereit.
+
 > Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
 > und feste Sensoren (siehe unten).
 

@@ -11,7 +11,50 @@ from app import db
 
 OFF_API = "https://world.openfoodfacts.org/api/v2/product/{barcode}"
 OFF_SEARCH_API = "https://world.openfoodfacts.org/cgi/search.pl"
-USER_AGENT = "BLS-Nutrition-HA-Addon/1.2"
+USER_AGENT = "BLS-Nutrition-HA-Addon/1.3"
+
+OFF_SEARCH_FIELDS = (
+    "code,product_name,product_name_de,brands,nutriments,"
+    "nutrition_grades,nova_group,ecoscore_grade,environmental_score_grade"
+)
+
+
+def _parse_grade(raw: Any) -> str | None:
+    if not raw or not isinstance(raw, str):
+        return None
+    grade = raw.strip().lower()
+    if grade in ("a", "b", "c", "d", "e"):
+        return grade
+    return None
+
+
+def _parse_nutriscore(product: dict[str, Any]) -> str | None:
+    return _parse_grade(product.get("nutrition_grades") or product.get("nutrition_grade_fr"))
+
+
+def _parse_nova_group(product: dict[str, Any]) -> int | None:
+    raw = product.get("nova_group")
+    if raw is None:
+        return None
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if 1 <= value <= 4 else None
+
+
+def _parse_ecoscore(product: dict[str, Any]) -> str | None:
+    return _parse_grade(
+        product.get("ecoscore_grade") or product.get("environmental_score_grade")
+    )
+
+
+def _parse_off_scores(product: dict[str, Any]) -> dict[str, str | int | None]:
+    return {
+        "nutriscore": _parse_nutriscore(product),
+        "nova_group": _parse_nova_group(product),
+        "ecoscore": _parse_ecoscore(product),
+    }
 
 
 def _map_off_nutriments(nutriments: dict[str, Any]) -> dict[str, float | None]:
@@ -93,7 +136,8 @@ def lookup_barcode(
     name = product.get("product_name") or product.get("product_name_de")
     brand = product.get("brands")
 
-    db.save_off_product(conn, barcode, name, brand, nutrients)
+    scores = _parse_off_scores(product)
+    db.save_off_product(conn, barcode, name, brand, nutrients, **scores)
     return db.get_off_product(conn, barcode)
 
 
@@ -117,7 +161,7 @@ def search_products(
                 "search_terms": query,
                 "json": "true",
                 "page_size": limit,
-                "fields": "code,product_name,product_name_de,brands,nutriments",
+                "fields": OFF_SEARCH_FIELDS,
             },
             headers={"User-Agent": USER_AGENT},
         )
@@ -138,13 +182,15 @@ def search_products(
             continue
         brand = product.get("brands")
         nutrients = _map_off_nutriments(product.get("nutriments", {}))
-        db.save_off_product(conn, barcode, name, brand, nutrients)
+        scores = _parse_off_scores(product)
+        db.save_off_product(conn, barcode, name, brand, nutrients, **scores)
         results.append(
             {
                 "source": "off",
                 "id": barcode,
                 "name": name,
                 "brand": brand,
+                **scores,
             }
         )
         if len(results) >= limit:

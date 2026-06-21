@@ -32,7 +32,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.2.0",
+    version="1.3.0",
     lifespan=lifespan,
 )
 
@@ -158,6 +158,9 @@ def calculate_portion(request: PortionRequest) -> CalculationResult:
         amount_g=result["amount_g"],
         nutrients=result["nutrients"],
         diabetes=_diabetes_model(result["diabetes"]),
+        nutriscore=result.get("nutriscore"),
+        nova_group=result.get("nova_group"),
+        ecoscore=result.get("ecoscore"),
     )
 
 

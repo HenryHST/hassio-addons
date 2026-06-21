@@ -102,10 +102,26 @@ def init_schema(conn: sqlite3.Connection) -> None:
             name TEXT,
             brand TEXT,
             nutrients_json TEXT NOT NULL,
-            fetched_at TEXT NOT NULL
+            fetched_at TEXT NOT NULL,
+            nutriscore TEXT,
+            nova_group INTEGER,
+            ecoscore TEXT
         );
         """
     )
+    _migrate_off_products(conn)
+
+
+def _migrate_off_products(conn: sqlite3.Connection) -> None:
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(off_products)").fetchall()
+    }
+    if "nutriscore" not in columns:
+        conn.execute("ALTER TABLE off_products ADD COLUMN nutriscore TEXT")
+    if "nova_group" not in columns:
+        conn.execute("ALTER TABLE off_products ADD COLUMN nova_group INTEGER")
+    if "ecoscore" not in columns:
+        conn.execute("ALTER TABLE off_products ADD COLUMN ecoscore TEXT")
 
 
 def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
@@ -229,16 +245,26 @@ def save_off_product(
     name: str | None,
     brand: str | None,
     nutrients: dict[str, float | None],
+    *,
+    nutriscore: str | None = None,
+    nova_group: int | None = None,
+    ecoscore: str | None = None,
 ) -> None:
     conn.execute(
         """
-        INSERT INTO off_products(barcode, name, brand, nutrients_json, fetched_at)
-        VALUES(?, ?, ?, ?, ?)
+        INSERT INTO off_products(
+            barcode, name, brand, nutrients_json, fetched_at,
+            nutriscore, nova_group, ecoscore
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(barcode) DO UPDATE SET
             name = excluded.name,
             brand = excluded.brand,
             nutrients_json = excluded.nutrients_json,
-            fetched_at = excluded.fetched_at
+            fetched_at = excluded.fetched_at,
+            nutriscore = excluded.nutriscore,
+            nova_group = excluded.nova_group,
+            ecoscore = excluded.ecoscore
         """,
         (
             barcode,
@@ -246,13 +272,20 @@ def save_off_product(
             brand,
             json.dumps(nutrients),
             datetime.now(timezone.utc).isoformat(),
+            nutriscore,
+            nova_group,
+            ecoscore,
         ),
     )
 
 
 def get_off_product(conn: sqlite3.Connection, barcode: str) -> dict[str, Any] | None:
     row = conn.execute(
-        "SELECT barcode, name, brand, nutrients_json, fetched_at FROM off_products WHERE barcode = ?",
+        """
+        SELECT barcode, name, brand, nutrients_json, fetched_at,
+               nutriscore, nova_group, ecoscore
+        FROM off_products WHERE barcode = ?
+        """,
         (barcode,),
     ).fetchone()
     if not row:
@@ -264,6 +297,9 @@ def get_off_product(conn: sqlite3.Connection, barcode: str) -> dict[str, Any] | 
         "brand": row["brand"],
         "nutrients": json.loads(row["nutrients_json"]),
         "fetched_at": row["fetched_at"],
+        "nutriscore": row["nutriscore"],
+        "nova_group": row["nova_group"],
+        "ecoscore": row["ecoscore"],
     }
 
 

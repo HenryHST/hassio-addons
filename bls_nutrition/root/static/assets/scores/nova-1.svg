@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 24" width="96" height="24" role="img" aria-label="Nova 1">
+<title>Nova 1</title>
+<path d="M 4 0 H 24.0 V 24 H 4 Q 0 24 0 20 V 4 Q 0 0 4 0 Z" fill="#00A651"/>
+<text x="12.0" y="17.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF">1</text>
+<path d="M 24.0 0 H 48.0 V 24 H 24.0 Z" fill="#CCCCCC"/>
+<text x="36.0" y="17.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#666666">2</text>
+<path d="M 48.0 0 H 72.0 V 24 H 48.0 Z" fill="#CCCCCC"/>
+<text x="60.0" y="17.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#666666">3</text>
+<path d="M 72.0 0 H 92 Q 96 0 96 4 V 20 Q 96 24 92 24 H 72.0 Z" fill="#CCCCCC"/>
+<text x="84.0" y="17.0" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="#666666">4</text>
+</svg>

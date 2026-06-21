@@ -18,6 +18,7 @@ from .const import (
     ENTITY_BE,
     ENTITY_BLS_VERSION,
     ENTITY_CARBS,
+    ENTITY_ECOSCORE,
     ENTITY_ENERGY,
     ENTITY_FAT,
     ENTITY_FOOD_COUNT,
@@ -25,6 +26,8 @@ from .const import (
     ENTITY_G_KH,
     ENTITY_KE,
     ENTITY_LAST_FOOD,
+    ENTITY_NOVA,
+    ENTITY_NUTRISCORE,
     ENTITY_PROTEIN,
     ENTITY_SEARCH_HITS,
     SIGNAL_RESULT_UPDATED,
@@ -52,6 +55,9 @@ async def async_setup_entry(
             BlsNutrientSensor(runtime, entry, ENTITY_PROTEIN, "PROT625", UnitOfMass.GRAMS),
             BlsNutrientSensor(runtime, entry, ENTITY_FAT, "FAT", UnitOfMass.GRAMS),
             BlsNutrientSensor(runtime, entry, ENTITY_CARBS, "CHO", UnitOfMass.GRAMS),
+            BlsNutriscoreSensor(runtime, entry),
+            BlsNovaSensor(runtime, entry),
+            BlsEcoscoreSensor(runtime, entry),
         ]
     )
 
@@ -173,6 +179,14 @@ class BlsLastFoodSensor(BlsSensorBase):
         attrs: dict[str, Any] = {
             "calculation_type": self._runtime.last_calculation_type or None,
         }
+        calc = self._runtime.last_calculation
+        if calc and calc.get("source") == "off":
+            if calc.get("nutriscore"):
+                attrs["nutriscore"] = str(calc["nutriscore"]).upper()
+            if calc.get("nova_group") is not None:
+                attrs["nova_group"] = calc["nova_group"]
+            if calc.get("ecoscore"):
+                attrs["ecoscore"] = str(calc["ecoscore"]).upper()
         if self._runtime.last_search:
             attrs["search_results"] = self._runtime.last_search[:10]
         return attrs
@@ -274,3 +288,76 @@ class BlsNutrientSensor(BlsSensorBase):
     def native_value(self) -> float | None:
         value = self._nutrients().get(self._nutrient_key)
         return float(value) if value is not None else None
+
+
+class BlsOffScoreSensorBase(BlsSensorBase):
+    _attr_state_class = None
+
+    def _off_calculation(self) -> dict[str, Any] | None:
+        calc = self._runtime.last_calculation
+        if not calc or calc.get("source") != "off":
+            return None
+        return calc
+
+
+class BlsNutriscoreSensor(BlsOffScoreSensorBase):
+    _attr_name = "BLS Nutri-Score"
+    _attr_icon = "mdi:food-apple-outline"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self._entry.entry_id}_{ENTITY_NUTRISCORE}"
+
+    @property
+    def suggested_object_id(self) -> str:
+        return ENTITY_NUTRISCORE
+
+    @property
+    def native_value(self) -> str | None:
+        calc = self._off_calculation()
+        if not calc:
+            return None
+        grade = calc.get("nutriscore")
+        return str(grade).upper() if grade else None
+
+
+class BlsNovaSensor(BlsOffScoreSensorBase):
+    _attr_name = "BLS Nova-Score"
+    _attr_icon = "mdi:food-variant"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self._entry.entry_id}_{ENTITY_NOVA}"
+
+    @property
+    def suggested_object_id(self) -> str:
+        return ENTITY_NOVA
+
+    @property
+    def native_value(self) -> int | None:
+        calc = self._off_calculation()
+        if not calc:
+            return None
+        value = calc.get("nova_group")
+        return int(value) if value is not None else None
+
+
+class BlsEcoscoreSensor(BlsOffScoreSensorBase):
+    _attr_name = "BLS Eco-Score"
+    _attr_icon = "mdi:leaf"
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self._entry.entry_id}_{ENTITY_ECOSCORE}"
+
+    @property
+    def suggested_object_id(self) -> str:
+        return ENTITY_ECOSCORE
+
+    @property
+    def native_value(self) -> str | None:
+        calc = self._off_calculation()
+        if not calc:
+            return None
+        grade = calc.get("ecoscore")
+        return str(grade).upper() if grade else None

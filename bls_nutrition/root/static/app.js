@@ -83,6 +83,32 @@
     }
   }
 
+  function renderScoreBadges(scores) {
+    if (!scores) return "";
+    const parts = [];
+    const nutriscore = scores.nutriscore;
+    const novaGroup = scores.nova_group;
+    const ecoscore = scores.ecoscore;
+
+    if (nutriscore) {
+      parts.push(
+        `<img class="score-badge" src="static/assets/scores/nutriscore-${escapeHtml(nutriscore.toLowerCase())}.svg" alt="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}" title="Nutri-Score ${escapeHtml(nutriscore.toUpperCase())}">`
+      );
+    }
+    if (novaGroup) {
+      parts.push(
+        `<img class="score-badge" src="static/assets/scores/nova-${escapeHtml(String(novaGroup))}.svg" alt="Nova ${escapeHtml(String(novaGroup))}" title="Nova ${escapeHtml(String(novaGroup))}">`
+      );
+    }
+    if (ecoscore) {
+      parts.push(
+        `<img class="score-badge" src="static/assets/scores/ecoscore-${escapeHtml(ecoscore.toLowerCase())}.svg" alt="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}" title="Eco-Score ${escapeHtml(ecoscore.toUpperCase())}">`
+      );
+    }
+    if (!parts.length) return "";
+    return `<span class="score-badges">${parts.join("")}</span>`;
+  }
+
   function showDetails(result) {
     const section = $("details-section");
     const nameEl = $("result-name");
@@ -97,6 +123,12 @@
       parts.push(`${result.servings} Portionen`);
     }
     nameEl.textContent = parts.join(" · ") || "Ergebnis";
+
+    const scoresEl = $("result-scores");
+    if (scoresEl) {
+      scoresEl.innerHTML = renderScoreBadges(result);
+      scoresEl.hidden = !scoresEl.innerHTML;
+    }
 
     rowsEl.innerHTML = "";
     const nutrients = result.nutrients || {};
@@ -152,7 +184,7 @@
     }
   }
 
-  function renderResultList(container, items, emptyMessage) {
+  function renderResultList(container, items, emptyMessage, showScores) {
     container.innerHTML = "";
     if (!items.length) {
       const li = document.createElement("li");
@@ -168,9 +200,11 @@
       const meta = item.brand
         ? `${escapeHtml(item.id)} · ${escapeHtml(item.brand)}`
         : escapeHtml(item.id);
+      const scoresHtml = showScores ? renderScoreBadges(item) : "";
       button.innerHTML =
         `<span class="result-item-name">${escapeHtml(item.name)}</span>` +
-        `<span class="result-item-meta">${meta}</span>`;
+        `<span class="result-item-meta">${meta}</span>` +
+        scoresHtml;
       button.addEventListener("click", () => {
         selectFoodForPortion(item.source || "bls", item.id, item.name);
       });
@@ -222,11 +256,11 @@
 
       const [blsResults, offResults] = await Promise.all([blsPromise, offPromise]);
 
-      renderResultList(blsList, blsResults, "Keine Treffer.");
+      renderResultList(blsList, blsResults, "Keine Treffer.", false);
       if (!offEnabled) {
-        renderResultList(offList, [], "Open Food Facts deaktiviert.");
+        renderResultList(offList, [], "Open Food Facts deaktiviert.", false);
       } else {
-        renderResultList(offList, offResults, "Keine Treffer.");
+        renderResultList(offList, offResults, "Keine Treffer.", true);
       }
     } catch (err) {
       showError(err.message);
@@ -255,7 +289,8 @@
       resultEl.hidden = false;
       resultEl.innerHTML =
         `<strong>${escapeHtml(product.name || "Unbekannt")}</strong>` +
-        (product.brand ? `<br><span class="result-item-meta">${escapeHtml(product.brand)}</span>` : "");
+        (product.brand ? `<br><span class="result-item-meta">${escapeHtml(product.brand)}</span>` : "") +
+        renderScoreBadges(product);
       $("barcode-portion-form").hidden = false;
     } catch (err) {
       showError(err.message);

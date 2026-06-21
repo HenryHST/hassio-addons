@@ -5,6 +5,21 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-06-21
+
+### Added
+
+- Nutri-Score, Nova-Score and Eco-Score from Open Food Facts (OFF)
+- OFF cache columns `nutriscore`, `nova_group`, `ecoscore` in SQLite
+- SVG score badges in Ingress UI (search, barcode, portion details)
+- Integration sensors `sensor.bls_nutrition_nutriscore`, `_nova`, `_ecoscore`
+- Lovelace dashboard entities for all three scores
+
+### Changed
+
+- OFF search API requests include score fields
+- Portion calculation returns scores for OFF products
+
 ## [1.2.0] - 2025-06-21
 
 ### Added
