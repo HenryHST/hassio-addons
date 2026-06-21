@@ -317,9 +317,72 @@
     });
   }
 
+  function debugLogoAssets() {
+    const logo = document.querySelector(".header-logo");
+    if (!logo) return;
+
+    // region agent log
+    const log = (message, data, hypothesisId) => {
+      fetch("http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Debug-Session-Id": "92f7bb",
+        },
+        body: JSON.stringify({
+          sessionId: "92f7bb",
+          location: "app.js:debugLogoAssets",
+          message,
+          data,
+          timestamp: Date.now(),
+          hypothesisId,
+        }),
+      }).catch(() => {});
+    };
+
+    log("Page context for logo", {
+      pathname: window.location.pathname,
+      href: window.location.href,
+      imgSrc: logo.getAttribute("src"),
+      resolvedSrc: logo.src,
+    }, "A");
+
+    logo.addEventListener("load", () => {
+      log("Logo loaded", {
+        resolvedSrc: logo.src,
+        naturalWidth: logo.naturalWidth,
+        naturalHeight: logo.naturalHeight,
+      }, "B");
+    });
+
+    logo.addEventListener("error", () => {
+      log("Logo failed to load", {
+        resolvedSrc: logo.src,
+        pathname: window.location.pathname,
+      }, "A");
+    });
+
+    Promise.all([
+      fetch("/static/icon.png").then((res) => ({
+        path: "/static/icon.png",
+        status: res.status,
+        url: res.url,
+      })).catch((err) => ({ path: "/static/icon.png", error: String(err) })),
+      fetch("static/icon.png").then((res) => ({
+        path: "static/icon.png",
+        status: res.status,
+        url: res.url,
+      })).catch((err) => ({ path: "static/icon.png", error: String(err) })),
+    ]).then((results) => {
+      log("Icon fetch probe", { results }, "A");
+    });
+    // endregion
+  }
+
   function init() {
     initNavigation();
     initDetailsToggle();
+    debugLogoAssets();
     $("search-form").addEventListener("submit", handleSearch);
     $("barcode-form").addEventListener("submit", handleBarcodeLookup);
     $("barcode-portion-form").addEventListener("submit", handleBarcodePortion);

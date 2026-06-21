@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import json
+import time
 from typing import Any, AsyncIterator
 
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -36,6 +38,27 @@ app = FastAPI(
 )
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+DEBUG_LOG = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
+
+
+def _agent_log(location: str, message: str, data: dict[str, Any], hypothesis_id: str) -> None:
+    # region agent log
+    try:
+        payload = {
+            "sessionId": "92f7bb",
+            "timestamp": int(time.time() * 1000),
+            "location": location,
+            "message": message,
+            "data": data,
+            "hypothesisId": hypothesis_id,
+        }
+        with DEBUG_LOG.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload) + "\n")
+    except OSError:
+        pass
+    # endregion
+
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
@@ -62,7 +85,20 @@ def health() -> dict[str, Any]:
 
 
 @app.get("/", response_class=HTMLResponse)
-def index() -> FileResponse:
+def index(request: Request) -> FileResponse:
+    # region agent log
+    _agent_log(
+        "main.py:index",
+        "Serving index.html",
+        {
+            "x_ingress_path": request.headers.get("x-ingress-path"),
+            "static_dir": str(STATIC_DIR),
+            "icon_exists": (STATIC_DIR / "icon.png").exists(),
+            "request_path": str(request.url.path),
+        },
+        "A",
+    )
+    # endregion
     return FileResponse(STATIC_DIR / "index.html")
 
 
