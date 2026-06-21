@@ -7,6 +7,8 @@
 
 Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Diabetes-Einheiten und Barcode-Lookup für Home Assistant.
 
+**Hinweis:** Keine medizinische Beratung. Diabetes-Berechnungen dienen nur der Information.
+
 ## About
 
 Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenbank (7.140 Lebensmittel, CC BY 4.0) und stellt eine REST-API bereit für:
@@ -56,7 +58,6 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 - **BLS 4.0:** Max Rubner-Institut (2025), CC BY 4.0, DOI: 10.25826/Data20251217-134202-0
 - **Open Food Facts:** ODbL
 
-**Hinweis:** Keine medizinische Beratung. Diabetes-Berechnungen dienen nur der Information.
 
 ## Support
 
