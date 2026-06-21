@@ -141,7 +141,7 @@
 
   async function loadHealth() {
     try {
-      const health = await apiGet("/health");
+      const health = await apiGet("health");
       const count = health.food_count;
       $("food-count-badge").textContent =
         count != null ? `${count.toLocaleString("de-DE")} LM` : "—";
@@ -165,7 +165,7 @@
 
     try {
       const results = await apiGet(
-        `/foods/search?q=${encodeURIComponent(query)}&limit=20`
+        `foods/search?q=${encodeURIComponent(query)}&limit=20`
       );
       if (!results.length) {
         list.innerHTML = "<li><p class=\"result-item-meta\">Keine Treffer.</p></li>";
@@ -205,7 +205,7 @@
     barcodeProduct = null;
 
     try {
-      const product = await apiGet(`/foods/barcode/${encodeURIComponent(barcode)}`);
+      const product = await apiGet(`foods/barcode/${encodeURIComponent(barcode)}`);
       barcodeProduct = product;
       const resultEl = $("barcode-result");
       resultEl.hidden = false;
@@ -230,7 +230,7 @@
       return;
     }
     try {
-      const result = await apiPost("/calculate/portion", {
+      const result = await apiPost("calculate/portion", {
         source: barcodeProduct.source || "off",
         id: barcodeProduct.id || barcodeProduct.barcode,
         amount_g: amount,
@@ -253,7 +253,7 @@
       return;
     }
     try {
-      const result = await apiPost("/calculate/portion", {
+      const result = await apiPost("calculate/portion", {
         source,
         id,
         amount_g: amount,
@@ -284,7 +284,7 @@
       return;
     }
     try {
-      const result = await apiPost("/calculate/recipe", {
+      const result = await apiPost("calculate/recipe", {
         ingredients,
         servings,
       });
@@ -336,6 +336,7 @@
           data,
           timestamp: Date.now(),
           hypothesisId,
+          runId: "post-fix",
         }),
       }).catch(() => {});
     };
@@ -363,11 +364,6 @@
     });
 
     Promise.all([
-      fetch("/static/icon.png").then((res) => ({
-        path: "/static/icon.png",
-        status: res.status,
-        url: res.url,
-      })).catch((err) => ({ path: "/static/icon.png", error: String(err) })),
       fetch("static/icon.png").then((res) => ({
         path: "static/icon.png",
         status: res.status,
