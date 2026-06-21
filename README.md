@@ -29,6 +29,26 @@ https://github.com/henryhst/hassio-addons
 
 This repository contains the following add-ons:
 
+### ✓ [BLS Nährwertdatenbank][addon-bls]
+
+![Version][bls-version-shield]
+![Supports aarch64 Architecture][bls-aarch64-shield]
+![Supports amd64 Architecture][bls-amd64-shield]
+![Supports armv7 Architecture][bls-armv7-shield]
+
+_Bundeslebensmittelschlüssel (BLS) 4.0 mit Diabetes-Einheiten und Barcode-Scanner_
+
+Deutsche Nährwertdatenbank für Home Assistant mit gKH/BE/KE/FPE-Berechnung (WETID-inspiriert), Open Food Facts Barcode-Lookup und Rezeptrechner.
+
+**Features:**
+- Automatischer BLS 4.0 Download und SQLite-Import
+- REST-API und Home Assistant Integration
+- Diabetes-Einheiten: gKH, BE, KE, FPE
+- Barcode-Scanner via Open Food Facts
+- Eigene Lebensmittel und Rezepte
+
+[:books: Read the full add-on documentation][addon-doc-bls]
+
 ### ✓ [netboot.xyz][addon-netboot]
 
 ![Version][netboot-version-shield]
@@ -118,6 +138,7 @@ This repository uses GitHub Actions for continuous integration and deployment:
 | Workflow | Description | Trigger |
 |----------|-------------|---------|
 | Security Scan | Trivy vulnerability scanning | Push, PR, Daily, Manual |
+| Build BLS Nährwertdatenbank | Builds bls_nutrition addon | Push, PR, Release |
 | Build netboot.xyz | Builds netboot.xyz addon | Push, PR, Release |
 | Build NUT | Builds NUT addon | Push, PR, Release |
 | Build Corosync QNetd | Builds corosyncd addon | Push, PR, Release |
@@ -168,6 +189,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[addon-bls]: https://github.com/henryhst/hassio-addons/tree/master/bls_nutrition
+[addon-doc-bls]: https://github.com/henryhst/hassio-addons/blob/master/bls_nutrition/DOCS.md
 [addon-corosyncd]: https://github.com/henryhst/hassio-addons/tree/master/corosyncd
 [addon-doc-corosyncd]: https://github.com/henryhst/hassio-addons/blob/master/corosyncd/DOCS.md
 [addon-doc-netboot]: https://github.com/henryhst/hassio-addons/blob/master/netboot_xyz/DOCS.md
@@ -182,6 +205,10 @@ SOFTWARE.
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [netboot-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [netboot-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
+[bls-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[bls-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[bls-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
+[bls-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [corosyncd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [corosyncd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [corosyncd-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg

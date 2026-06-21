@@ -10,12 +10,14 @@ on:
       - 'netboot_xyz/**'
       - 'nut/**'
       - 'corosyncd/**'
+      - 'bls_nutrition/**'
       - '.github/workflows/security-scan.yaml'
   pull_request:
     paths:
       - 'netboot_xyz/**'
       - 'nut/**'
       - 'corosyncd/**'
+      - 'bls_nutrition/**'
   schedule:
     # Run daily at 02:00 UTC
     - cron: '0 2 * * *'

@@ -1,0 +1,1 @@
+"""BLS Nährwertdatenbank application package."""

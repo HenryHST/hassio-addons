@@ -1,0 +1,40 @@
+#!/bin/bash
+# shellcheck shell=bash
+set -e
+
+readonly CONFIG_PATH=/data/options.json
+readonly DATA_DIR=/data
+
+echo "-----------------------------------------------------------"
+echo " BLS Nährwertdatenbank Add-on"
+echo " Add-on Version: ${ADDON_VERSION:-unknown}"
+echo " BLS Version: ${BLS_VERSION:-4.0}"
+echo "-----------------------------------------------------------"
+
+mkdir -p "${DATA_DIR}/downloads" "${DATA_DIR}/cache"
+
+if [[ -f "${CONFIG_PATH}" ]]; then
+    export BLS_AUTO_UPDATE=$(jq -r '.auto_update // true' "${CONFIG_PATH}")
+    export BLS_UPDATE_INTERVAL_DAYS=$(jq -r '.update_interval_days // 30' "${CONFIG_PATH}")
+    export BLS_LANGUAGE=$(jq -r '.language // "de"' "${CONFIG_PATH}")
+    export BLS_ENABLE_OFF=$(jq -r '.enable_open_food_facts // true' "${CONFIG_PATH}")
+    export BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
+else
+    export BLS_AUTO_UPDATE=true
+    export BLS_UPDATE_INTERVAL_DAYS=30
+    export BLS_LANGUAGE=de
+    export BLS_ENABLE_OFF=true
+    export BLS_OFF_CACHE_TTL_DAYS=90
+fi
+
+echo "[bls_nutrition] Configuration:"
+echo "  - auto_update: ${BLS_AUTO_UPDATE}"
+echo "  - update_interval_days: ${BLS_UPDATE_INTERVAL_DAYS}"
+echo "  - language: ${BLS_LANGUAGE}"
+echo "  - enable_open_food_facts: ${BLS_ENABLE_OFF}"
+
+echo "[bls_nutrition] Ensuring database is ready..."
+python -m app.bootstrap
+
+echo "[bls_nutrition] Starting API on port 8090..."
+exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8090

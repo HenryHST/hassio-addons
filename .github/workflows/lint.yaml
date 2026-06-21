@@ -65,6 +65,12 @@ jobs:
           dockerfile: corosyncd/Dockerfile
           failure-threshold: warning
 
+      - name: Run Hadolint on bls_nutrition
+        uses: hadolint/hadolint-action@v3.3.0
+        with:
+          dockerfile: bls_nutrition/Dockerfile
+          failure-threshold: warning
+
   validate-config:
     name: Validate addon configs
     runs-on: ubuntu-latest
@@ -115,3 +121,15 @@ jobs:
           yq eval '.arch' corosyncd/config.yaml
 
           echo "✓ corosyncd config is valid"
+
+      - name: Validate bls_nutrition config
+        run: |
+          echo "Validating bls_nutrition/config.yaml..."
+          yq eval '.' bls_nutrition/config.yaml > /dev/null
+
+          yq eval '.name' bls_nutrition/config.yaml
+          yq eval '.version' bls_nutrition/config.yaml
+          yq eval '.slug' bls_nutrition/config.yaml
+          yq eval '.arch' bls_nutrition/config.yaml
+
+          echo "✓ bls_nutrition config is valid"

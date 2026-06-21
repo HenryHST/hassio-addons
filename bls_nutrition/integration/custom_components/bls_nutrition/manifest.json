@@ -1,0 +1,11 @@
+{
+  "domain": "bls_nutrition",
+  "name": "BLS Nährwertdatenbank",
+  "codeowners": ["@henryhst"],
+  "config_flow": true,
+  "documentation": "https://github.com/henryhst/hassio-addons/blob/master/bls_nutrition/DOCS.md",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "requirements": ["aiohttp>=3.9"],
+  "version": "1.0.0"
+}

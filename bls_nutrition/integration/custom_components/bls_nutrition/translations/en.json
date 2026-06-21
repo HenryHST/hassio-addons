@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "BLS Nutrition Database",
+        "description": "Connect to the BLS nutrition add-on.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to add-on. Is it running?"
+    },
+    "abort": {
+      "already_configured": "This connection is already configured."
+    }
+  }
+}

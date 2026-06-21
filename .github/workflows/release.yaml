@@ -42,13 +42,16 @@ jobs:
           # Update corosyncd version
           yq eval ".version = \"${VERSION}\"" -i corosyncd/config.yaml
 
+          # Update bls_nutrition version
+          yq eval ".version = \"${VERSION}\"" -i bls_nutrition/config.yaml
+
           echo "Updated versions to ${VERSION}"
 
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add netboot_xyz/config.yaml nut/config.yaml corosyncd/config.yaml
+          git add netboot_xyz/config.yaml nut/config.yaml corosyncd/config.yaml bls_nutrition/config.yaml
           git commit -m "chore: bump versions to ${{ github.event.inputs.version }}" || echo "No changes to commit"
           git push
 

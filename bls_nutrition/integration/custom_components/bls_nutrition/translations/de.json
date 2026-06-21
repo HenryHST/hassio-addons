@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "BLS Nährwertdatenbank",
+        "description": "Verbindung zum BLS-Nährwert-Add-on herstellen.",
+        "data": {
+          "host": "Host",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Add-on fehlgeschlagen. Läuft das Add-on?"
+    },
+    "abort": {
+      "already_configured": "Diese Verbindung ist bereits eingerichtet."
+    }
+  }
+}

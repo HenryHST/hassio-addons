@@ -1,0 +1,73 @@
+bls_nutrition:
+  bls-nutrition:
+    mode: yaml
+    title: BLS Nährwert
+    icon: mdi:food-apple
+    path: bls-nutrition
+    cards:
+      - type: markdown
+        content: |
+          ## BLS Nährwertrechner
+          Suche Lebensmittel, scanne Barcodes und berechne gKH, BE, KE und FPE.
+          *Keine medizinische Beratung.*
+
+      - type: entities
+        title: Status
+        entities:
+          - sensor.bls_lebensmittel_anzahl
+          - sensor.bls_bls_version
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_text.bls_search_query
+            name: Suche
+          - type: button
+            name: Suchen
+            tap_action:
+              action: call-service
+              service: bls_nutrition.search_food
+              data:
+                query: "{{ states('input_text.bls_search_query') }}"
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_text.bls_barcode
+            name: Barcode (EAN)
+          - type: button
+            name: Barcode suchen
+            tap_action:
+              action: call-service
+              service: bls_nutrition.lookup_barcode
+              data:
+                barcode: "{{ states('input_text.bls_barcode') }}"
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_text.bls_food_id
+            name: BLS/OFF/Custom ID
+          - type: entity
+            entity: input_number.bls_amount_g
+            name: Menge (g)
+          - type: button
+            name: Portion berechnen
+            tap_action:
+              action: call-service
+              service: bls_nutrition.calculate_portion
+              data:
+                source: bls
+                id: "{{ states('input_text.bls_food_id') }}"
+                amount_g: "{{ states('input_number.bls_amount_g') | float }}"
+
+      - type: markdown
+        title: Diabetes-Einheiten
+        content: |
+          Nutze die Entwicklerwerkzeuge oder Automatisierungen, um Ergebnisse
+          aus dem Event `bls_nutrition_calculation_result` anzuzeigen.
+
+      - type: markdown
+        content: |
+          **Datenquellen:** Max Rubner-Institut BLS 4.0 (CC BY 4.0),
+          Open Food Facts (ODbL)
