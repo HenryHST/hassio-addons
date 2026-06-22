@@ -155,6 +155,7 @@ enable_open_food_facts: true
 off_cache_ttl_days: 90
 off_search_cache_ttl_days: 7
 search_layout: stacked
+search_recents_enabled: true
 todo_list_enabled: true
 todo_list_entity_id: todo.shopping_list
 ```
@@ -164,6 +165,7 @@ todo_list_entity_id: todo.shopping_list
 | `off_cache_ttl_days` | `1`–`365` | Gültigkeit des **Barcode**-Caches in SQLite (`off_products`, `off_barcode_miss`) |
 | `off_search_cache_ttl_days` | `1`–`90` | Gültigkeit des **Textsuche**-Caches (`off_search_cache`); kürzer als Barcode-Cache empfohlen |
 | `search_layout` | `stacked`, `side_by_side` | `stacked`: BLS und OFF untereinander; `side_by_side`: nebeneinander |
+| `search_recents_enabled` | `true`, `false` | Chips „Zuletzt berechnet“ unter dem Suchfeld in der Ingress-UI |
 | `todo_list_enabled` | `true`, `false` | Button „Zur Einkaufsliste“ in der Ingress-UI |
 | `todo_list_entity_id` | z. B. `todo.shopping_list` | Ziel-Entity der HA-To-do-Liste |
 

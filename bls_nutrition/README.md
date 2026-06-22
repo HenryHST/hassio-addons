@@ -1,6 +1,6 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 ![Supports armv7 Architecture](https://img.shields.io/badge/armv7-yes-green.svg)
@@ -44,6 +44,7 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `off_cache_ttl_days` | `90` | OFF-Barcode-Cache (Tage) |
 | `off_search_cache_ttl_days` | `7` | OFF-Textsuche-Cache (Tage) |
 | `search_layout` | `stacked` | Suchergebnis-Layout: `stacked` oder `side_by_side` |
+| `search_recents_enabled` | `true` | Chips „Zuletzt berechnet“ in der Suche anzeigen |
 | `todo_list_enabled` | `true` | OFF-Produkte zur HA-To-do-Liste hinzufügen |
 | `todo_list_entity_id` | `todo.shopping_list` | Ziel-To-do-Entity |
 

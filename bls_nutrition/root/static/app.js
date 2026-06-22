@@ -23,6 +23,7 @@
   let barcodeProduct = null;
   let offEnabled = true;
   let todoListEnabled = false;
+  let searchRecentsEnabled = true;
   let searchAbortController = null;
   let searchDebounceTimer = null;
   let ingredientCounter = 0;
@@ -135,6 +136,7 @@
   }
 
   function saveRecent(entry) {
+    if (!searchRecentsEnabled) return;
     const recents = loadRecents().filter(
       (r) => !(r.source === entry.source && r.id === entry.id && r.amount_g === entry.amount_g)
     );
@@ -147,6 +149,10 @@
     const wrap = $("search-recents");
     const chips = $("search-recents-chips");
     if (!wrap || !chips) return;
+    if (!searchRecentsEnabled) {
+      wrap.hidden = true;
+      return;
+    }
     const recents = loadRecents();
     if (!recents.length) {
       wrap.hidden = true;
@@ -840,7 +846,9 @@
       $("bls-version").textContent = `BLS ${health.bls_version || "4.0"}`;
       offEnabled = health.open_food_facts_enabled !== false;
       todoListEnabled = health.todo_list_enabled !== false;
+      searchRecentsEnabled = health.search_recents_enabled !== false;
       applySearchLayout(health.search_layout || "stacked");
+      renderRecents();
     } catch (_) {
       $("food-count-badge").textContent = "offline";
     }
@@ -869,7 +877,6 @@
     initLiveSearch();
     initRecipeIngredients();
     updateScannerAvailability();
-    renderRecents();
 
     $("search-form")?.addEventListener("submit", handleSearchSubmit);
     $("barcode-form")?.addEventListener("submit", handleBarcodeLookup);

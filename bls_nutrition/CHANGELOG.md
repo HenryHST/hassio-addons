@@ -5,6 +5,12 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2025-06-21
+
+### Added
+
+- Add-on option `search_recents_enabled` (default `true`) to show or hide „Zuletzt berechnet“ chips in the Ingress search UI
+
 ## [1.6.0] - 2025-06-21
 
 ### Added

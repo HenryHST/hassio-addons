@@ -33,7 +33,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.6.0",
+    version="1.6.1",
     lifespan=lifespan,
 )
 
@@ -62,6 +62,7 @@ def health() -> dict[str, Any]:
             "food_count": db.food_count(conn),
             "open_food_facts_enabled": settings.enable_open_food_facts,
             "search_layout": settings.search_layout,
+            "search_recents_enabled": settings.search_recents_enabled,
             "todo_list_enabled": settings.todo_list_enabled,
             "todo_list_entity_id": settings.todo_list_entity_id,
         }

@@ -19,6 +19,7 @@ class Settings:
     off_cache_ttl_days: int
     off_search_cache_ttl_days: int
     search_layout: str
+    search_recents_enabled: bool
     todo_list_enabled: bool
     todo_list_entity_id: str
     bls_version: str
@@ -44,6 +45,10 @@ def get_settings() -> Settings:
             os.environ.get("BLS_OFF_SEARCH_CACHE_TTL_DAYS", "7")
         ),
         search_layout=layout,
+        search_recents_enabled=os.environ.get(
+            "BLS_SEARCH_RECENTS_ENABLED", "true"
+        ).lower()
+        == "true",
         todo_list_enabled=os.environ.get("BLS_TODO_LIST_ENABLED", "true").lower()
         == "true",
         todo_list_entity_id=os.environ.get(
