@@ -5,6 +5,20 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2025-06-21
+
+### Added
+
+- SQLite FTS5 full-text index for BLS food search (~7.140 items)
+- OFF text search: local cache lookup in `off_products` before API call
+- OFF search query cache (`off_search_cache` table) with option `off_search_cache_ttl_days` (default 7)
+- Negative barcode cache (`off_barcode_miss`) to avoid repeated OFF API calls for unknown EANs
+
+### Changed
+
+- Ingress UI shows BLS search results immediately; OFF column loads separately
+- BLS search uses FTS5 with LIKE fallback for edge cases
+
 ## [1.4.1] - 2025-06-21
 
 ### Fixed

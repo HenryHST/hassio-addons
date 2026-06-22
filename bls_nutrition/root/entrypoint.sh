@@ -19,6 +19,7 @@ if [[ -f "${CONFIG_PATH}" ]]; then
     BLS_LANGUAGE=$(jq -r '.language // "de"' "${CONFIG_PATH}")
     BLS_ENABLE_OFF=$(jq -r '.enable_open_food_facts // true' "${CONFIG_PATH}")
     BLS_OFF_CACHE_TTL_DAYS=$(jq -r '.off_cache_ttl_days // 90' "${CONFIG_PATH}")
+    BLS_OFF_SEARCH_CACHE_TTL_DAYS=$(jq -r '.off_search_cache_ttl_days // 7' "${CONFIG_PATH}")
     BLS_SEARCH_LAYOUT=$(jq -r '.search_layout // "stacked"' "${CONFIG_PATH}")
     BLS_TODO_LIST_ENABLED=$(jq -r '.todo_list_enabled // true' "${CONFIG_PATH}")
     BLS_TODO_LIST_ENTITY_ID=$(jq -r '.todo_list_entity_id // "todo.shopping_list"' "${CONFIG_PATH}")
@@ -28,6 +29,7 @@ else
     BLS_LANGUAGE=de
     BLS_ENABLE_OFF=true
     BLS_OFF_CACHE_TTL_DAYS=90
+    BLS_OFF_SEARCH_CACHE_TTL_DAYS=7
     BLS_SEARCH_LAYOUT=stacked
     BLS_TODO_LIST_ENABLED=true
     BLS_TODO_LIST_ENTITY_ID=todo.shopping_list
@@ -38,6 +40,7 @@ export BLS_UPDATE_INTERVAL_DAYS
 export BLS_LANGUAGE
 export BLS_ENABLE_OFF
 export BLS_OFF_CACHE_TTL_DAYS
+export BLS_OFF_SEARCH_CACHE_TTL_DAYS
 export BLS_SEARCH_LAYOUT
 export BLS_TODO_LIST_ENABLED
 export BLS_TODO_LIST_ENTITY_ID
@@ -47,6 +50,8 @@ echo "  - auto_update: ${BLS_AUTO_UPDATE}"
 echo "  - update_interval_days: ${BLS_UPDATE_INTERVAL_DAYS}"
 echo "  - language: ${BLS_LANGUAGE}"
 echo "  - enable_open_food_facts: ${BLS_ENABLE_OFF}"
+echo "  - off_cache_ttl_days: ${BLS_OFF_CACHE_TTL_DAYS}"
+echo "  - off_search_cache_ttl_days: ${BLS_OFF_SEARCH_CACHE_TTL_DAYS}"
 echo "  - search_layout: ${BLS_SEARCH_LAYOUT}"
 echo "  - todo_list_enabled: ${BLS_TODO_LIST_ENABLED}"
 echo "  - todo_list_entity_id: ${BLS_TODO_LIST_ENTITY_ID}"

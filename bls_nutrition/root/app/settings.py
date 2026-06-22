@@ -17,6 +17,7 @@ class Settings:
     language: str
     enable_open_food_facts: bool
     off_cache_ttl_days: int
+    off_search_cache_ttl_days: int
     search_layout: str
     todo_list_enabled: bool
     todo_list_entity_id: str
@@ -39,6 +40,9 @@ def get_settings() -> Settings:
         enable_open_food_facts=os.environ.get("BLS_ENABLE_OFF", "true").lower()
         == "true",
         off_cache_ttl_days=int(os.environ.get("BLS_OFF_CACHE_TTL_DAYS", "90")),
+        off_search_cache_ttl_days=int(
+            os.environ.get("BLS_OFF_SEARCH_CACHE_TTL_DAYS", "7")
+        ),
         search_layout=layout,
         todo_list_enabled=os.environ.get("BLS_TODO_LIST_ENABLED", "true").lower()
         == "true",

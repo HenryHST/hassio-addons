@@ -154,6 +154,7 @@ def import_data(conn: sqlite3.Connection, data_path: Path) -> int:
 
     _flush_batches(conn, batch_foods, batch_values)
     workbook.close()
+    db.rebuild_foods_fts(conn)
     return imported
 
 

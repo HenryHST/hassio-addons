@@ -323,23 +323,32 @@
     const btn = $("search-form").querySelector("button");
     btn.disabled = true;
 
+    if (offEnabled) {
+      offList.innerHTML = '<li><p class="result-item-meta">Open Food Facts wird geladen…</p></li>';
+    }
+
     try {
-      const blsPromise = apiGet(
+      const blsResults = await apiGet(
         `foods/search?q=${encodeURIComponent(query)}&limit=${SEARCH_LIMIT}`
       );
-      const offPromise = offEnabled
-        ? apiGet(
-            `foods/search/off?q=${encodeURIComponent(query)}&limit=${SEARCH_LIMIT}`
-          ).catch(() => [])
-        : Promise.resolve([]);
-
-      const [blsResults, offResults] = await Promise.all([blsPromise, offPromise]);
-
       renderResultList(blsList, blsResults, "Keine Treffer.", false);
+
       if (!offEnabled) {
         renderResultList(offList, [], "Open Food Facts deaktiviert.", false);
       } else {
-        renderResultList(offList, offResults, "Keine Treffer.", true);
+        try {
+          const offResults = await apiGet(
+            `foods/search/off?q=${encodeURIComponent(query)}&limit=${SEARCH_LIMIT}`
+          );
+          renderResultList(offList, offResults, "Keine Treffer.", true);
+        } catch (offErr) {
+          renderResultList(
+            offList,
+            [],
+            offErr.message || "Open Food Facts nicht erreichbar.",
+            false
+          );
+        }
       }
     } catch (err) {
       showError(err.message);

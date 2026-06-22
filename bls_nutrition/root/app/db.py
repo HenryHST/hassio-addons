@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Generator, Iterator
 
@@ -107,9 +107,99 @@ def init_schema(conn: sqlite3.Connection) -> None:
             nova_group INTEGER,
             ecoscore TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS off_search_cache (
+            cache_key TEXT PRIMARY KEY,
+            results_json TEXT NOT NULL,
+            fetched_at TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS off_barcode_miss (
+            barcode TEXT PRIMARY KEY,
+            fetched_at TEXT NOT NULL
+        );
         """
     )
     _migrate_off_products(conn)
+    ensure_foods_fts(conn)
+
+
+def ensure_foods_fts(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE VIRTUAL TABLE IF NOT EXISTS foods_fts USING fts5(
+            bls_code UNINDEXED,
+            name_de,
+            name_en
+        )
+        """
+    )
+    fts_count = conn.execute("SELECT COUNT(*) AS c FROM foods_fts").fetchone()["c"]
+    food_count = conn.execute("SELECT COUNT(*) AS c FROM foods").fetchone()["c"]
+    if food_count and fts_count != food_count:
+        rebuild_foods_fts(conn)
+
+
+def rebuild_foods_fts(conn: sqlite3.Connection) -> None:
+    conn.execute("DELETE FROM foods_fts")
+    conn.execute(
+        """
+        INSERT INTO foods_fts(bls_code, name_de, name_en)
+        SELECT bls_code, name_de, COALESCE(name_en, '')
+        FROM foods
+        """
+    )
+
+
+def _build_fts_query(query: str) -> str | None:
+    tokens: list[str] = []
+    for part in query.strip().split():
+        part = part.strip()
+        if not part:
+            continue
+        escaped = part.replace('"', '""')
+        tokens.append(f'"{escaped}"*')
+    if not tokens:
+        return None
+    return " AND ".join(tokens)
+
+
+def _food_rows_to_results(
+    rows: Iterator[sqlite3.Row], language: str
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "source": "bls",
+            "id": row["bls_code"],
+            "name": row["name_de"] if language == "de" else (row["name_en"] or row["name_de"]),
+            "name_de": row["name_de"],
+            "name_en": row["name_en"],
+        }
+        for row in rows
+    ]
+
+
+def _search_foods_like(
+    conn: sqlite3.Connection, query: str, limit: int, language: str
+) -> list[dict[str, Any]]:
+    pattern = f"%{query.strip()}%"
+    rows = conn.execute(
+        """
+        SELECT bls_code, name_de, name_en
+        FROM foods
+        WHERE name_de LIKE ? OR name_en LIKE ? OR bls_code LIKE ?
+        ORDER BY
+            CASE
+                WHEN name_de LIKE ? THEN 0
+                WHEN name_en LIKE ? THEN 1
+                ELSE 2
+            END,
+            name_de
+        LIMIT ?
+        """,
+        (pattern, pattern, pattern, f"{query.strip()}%", f"{query.strip()}%", limit),
+    ).fetchall()
+    return _food_rows_to_results(rows, language)
 
 
 def _migrate_off_products(conn: sqlite3.Connection) -> None:
@@ -140,35 +230,43 @@ def get_meta(conn: sqlite3.Connection, key: str) -> str | None:
 def search_foods(
     conn: sqlite3.Connection, query: str, limit: int = 20, language: str = "de"
 ) -> list[dict[str, Any]]:
-    pattern = f"%{query.strip()}%"
-    if not pattern.strip("%"):
+    q = query.strip()
+    if not q:
         return []
-    rows = conn.execute(
+
+    prefix_rows = conn.execute(
         """
         SELECT bls_code, name_de, name_en
         FROM foods
-        WHERE name_de LIKE ? OR name_en LIKE ? OR bls_code LIKE ?
-        ORDER BY
-            CASE
-                WHEN name_de LIKE ? THEN 0
-                WHEN name_en LIKE ? THEN 1
-                ELSE 2
-            END,
-            name_de
+        WHERE bls_code LIKE ?
+        ORDER BY bls_code
         LIMIT ?
         """,
-        (pattern, pattern, pattern, f"{query.strip()}%", f"{query.strip()}%", limit),
+        (f"{q}%", limit),
     ).fetchall()
-    return [
-        {
-            "source": "bls",
-            "id": row["bls_code"],
-            "name": row["name_de"] if language == "de" else (row["name_en"] or row["name_de"]),
-            "name_de": row["name_de"],
-            "name_en": row["name_en"],
-        }
-        for row in rows
-    ]
+    if prefix_rows:
+        return _food_rows_to_results(prefix_rows, language)
+
+    fts_query = _build_fts_query(q)
+    if fts_query:
+        try:
+            rows = conn.execute(
+                """
+                SELECT f.bls_code, f.name_de, f.name_en
+                FROM foods_fts
+                JOIN foods f ON f.bls_code = foods_fts.bls_code
+                WHERE foods_fts MATCH ?
+                ORDER BY rank
+                LIMIT ?
+                """,
+                (fts_query, limit),
+            ).fetchall()
+            if rows:
+                return _food_rows_to_results(rows, language)
+        except sqlite3.OperationalError:
+            pass
+
+    return _search_foods_like(conn, q, limit, language)
 
 
 def get_food_name(conn: sqlite3.Connection, bls_code: str, language: str = "de") -> str | None:
@@ -276,6 +374,126 @@ def save_off_product(
             nova_group,
             ecoscore,
         ),
+    )
+    conn.execute("DELETE FROM off_barcode_miss WHERE barcode = ?", (barcode,))
+
+
+def _off_search_cache_key(query: str, language: str, limit: int) -> str:
+    return f"{query.strip().lower()}|{language}|{limit}"
+
+
+def get_off_search_cache(
+    conn: sqlite3.Connection,
+    query: str,
+    language: str,
+    limit: int,
+    ttl_days: int,
+) -> list[dict[str, Any]] | None:
+    key = _off_search_cache_key(query, language, limit)
+    row = conn.execute(
+        "SELECT results_json, fetched_at FROM off_search_cache WHERE cache_key = ?",
+        (key,),
+    ).fetchone()
+    if not row:
+        return None
+    try:
+        fetched = datetime.fromisoformat(row["fetched_at"])
+    except ValueError:
+        return None
+    if fetched <= datetime.now(timezone.utc) - timedelta(days=ttl_days):
+        return None
+    data = json.loads(row["results_json"])
+    return data if isinstance(data, list) else None
+
+
+def save_off_search_cache(
+    conn: sqlite3.Connection,
+    query: str,
+    language: str,
+    limit: int,
+    results: list[dict[str, Any]],
+) -> None:
+    key = _off_search_cache_key(query, language, limit)
+    conn.execute(
+        """
+        INSERT INTO off_search_cache(cache_key, results_json, fetched_at)
+        VALUES(?, ?, ?)
+        ON CONFLICT(cache_key) DO UPDATE SET
+            results_json = excluded.results_json,
+            fetched_at = excluded.fetched_at
+        """,
+        (key, json.dumps(results), datetime.now(timezone.utc).isoformat()),
+    )
+
+
+def search_off_products_local(
+    conn: sqlite3.Connection,
+    query: str,
+    limit: int,
+) -> list[dict[str, Any]]:
+    q = query.strip()
+    if not q:
+        return []
+    pattern = f"%{q}%"
+    rows = conn.execute(
+        """
+        SELECT barcode, name, brand, nutriscore, nova_group, ecoscore
+        FROM off_products
+        WHERE name LIKE ? OR brand LIKE ? OR barcode LIKE ?
+        ORDER BY
+            CASE
+                WHEN name LIKE ? THEN 0
+                WHEN brand LIKE ? THEN 1
+                ELSE 2
+            END,
+            name
+        LIMIT ?
+        """,
+        (pattern, pattern, pattern, f"{q}%", f"{q}%", limit),
+    ).fetchall()
+    results: list[dict[str, Any]] = []
+    for row in rows:
+        name = row["name"]
+        if not name:
+            continue
+        results.append(
+            {
+                "source": "off",
+                "id": row["barcode"],
+                "name": name,
+                "brand": row["brand"],
+                "nutriscore": row["nutriscore"],
+                "nova_group": row["nova_group"],
+                "ecoscore": row["ecoscore"],
+            }
+        )
+    return results
+
+
+def is_off_barcode_miss(
+    conn: sqlite3.Connection, barcode: str, ttl_days: int
+) -> bool:
+    row = conn.execute(
+        "SELECT fetched_at FROM off_barcode_miss WHERE barcode = ?",
+        (barcode,),
+    ).fetchone()
+    if not row:
+        return False
+    try:
+        fetched = datetime.fromisoformat(row["fetched_at"])
+    except ValueError:
+        return False
+    return fetched > datetime.now(timezone.utc) - timedelta(days=ttl_days)
+
+
+def save_off_barcode_miss(conn: sqlite3.Connection, barcode: str) -> None:
+    conn.execute(
+        """
+        INSERT INTO off_barcode_miss(barcode, fetched_at)
+        VALUES(?, ?)
+        ON CONFLICT(barcode) DO UPDATE SET fetched_at = excluded.fetched_at
+        """,
+        (barcode, datetime.now(timezone.utc).isoformat()),
     )
 
 

@@ -33,7 +33,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.4.1",
+    version="1.5.0",
     lifespan=lifespan,
 )
 
@@ -93,6 +93,7 @@ def search_off_products(
             limit,
             enable_network=settings.enable_open_food_facts,
             language=settings.language,
+            search_cache_ttl_days=settings.off_search_cache_ttl_days,
         )
 
 

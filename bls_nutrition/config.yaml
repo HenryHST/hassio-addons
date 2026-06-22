@@ -1,6 +1,6 @@
 ---
 name: BLS Nährwertdatenbank
-version: 1.4.1
+version: 1.5.0
 slug: bls_nutrition
 description: >-
   Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Open Food Facts
@@ -34,6 +34,7 @@ options:
   language: de
   enable_open_food_facts: true
   off_cache_ttl_days: 90
+  off_search_cache_ttl_days: 7
   search_layout: stacked
   todo_list_enabled: true
   todo_list_entity_id: todo.shopping_list
@@ -43,6 +44,7 @@ schema:
   language: list(de|en)?
   enable_open_food_facts: bool?
   off_cache_ttl_days: int(1,365)?
+  off_search_cache_ttl_days: int(1,90)?
   search_layout: list(stacked|side_by_side)?
   todo_list_enabled: bool?
   todo_list_entity_id: str?

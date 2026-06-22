@@ -16,4 +16,5 @@ The bundled data version from Max Rubner-Institut (currently **4.0**). Visible i
 
 ## Open Food Facts
 
-No pinned version — live API lookups with local caching.
+Live API lookups with persistent SQLite caching (barcode, text search, negative barcode cache).
+See [DOCS.md](DOCS.md#caching-open-food-facts) for cache options.
