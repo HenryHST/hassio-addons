@@ -5,6 +5,22 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-06-21
+
+### Added
+
+- Ingress UI: live search with 300 ms debounce (min. 2 characters) and request cancellation
+- Quick-portion expandable cards with 50/100/150 g chips and custom amount
+- Skeleton loaders for OFF search results; sessionStorage recents (last 5 calculations)
+- Camera barcode scan via `BarcodeDetector` + `getUserMedia` (with manual EAN fallback)
+- Dynamic recipe ingredients (add/remove rows, source per ingredient)
+- Manual dark mode toggle (auto / light / dark) with FOUC-free theme init
+
+### Changed
+
+- Ingress search: BLS results render first; OFF column loads asynchronously
+- Recipe form replaces fixed three-ingredient fields with dynamic list
+
 ## [1.5.0] - 2025-06-21
 
 ### Added

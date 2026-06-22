@@ -1,4 +1,5 @@
-:root {
+:root,
+html[data-theme="light"] {
   --color-bg: #f0f4f0;
   --color-surface: #ffffff;
   --color-text: #1a1a1a;
@@ -26,8 +27,7 @@
   --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+html[data-theme="dark"] {
     --color-bg: #121212;
     --color-surface: #1e1e1e;
     --color-text: #e8eaed;
@@ -35,7 +35,38 @@
     --color-border: #3c4043;
     --color-header-start: #1b5e20;
     --color-header-end: #2e7d32;
+    --color-header-text: #ffffff;
     --color-badge-bg: rgba(255, 255, 255, 0.15);
+    --color-badge-text: #ffffff;
+    --color-primary: #66bb6a;
+    --color-primary-text: #000000;
+    --color-error-bg: #3e2723;
+    --color-error-text: #ef9a9a;
+    --color-tile-kh: #3e2723;
+    --color-tile-kh-accent: #ffb74d;
+    --color-tile-be: #1b3320;
+    --color-tile-be-accent: #81c784;
+    --color-tile-ke: #1a237e;
+    --color-tile-ke-accent: #64b5f6;
+    --color-tile-fpe: #311b92;
+    --color-tile-fpe-accent: #b39ddb;
+    --color-nav-active: #81c784;
+    --color-nav-inactive: #9aa0a6;
+    --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] {
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-text: #e8eaed;
+    --color-text-muted: #9aa0a6;
+    --color-border: #3c4043;
+    --color-header-start: #1b5e20;
+    --color-header-end: #2e7d32;
+    --color-header-text: #ffffff;
+    --color-badge-bg: rgba(255, 255, 255, 0.15);
+    --color-badge-text: #ffffff;
     --color-primary: #66bb6a;
     --color-primary-text: #000000;
     --color-error-bg: #3e2723;
@@ -214,4 +245,48 @@ body {
 
 .footer a {
   color: var(--color-primary);
+}
+
+.theme-toggle {
+  background: var(--color-badge-bg);
+  color: var(--color-header-text);
+}
+
+.btn-secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.recent-chip,
+.portion-chip {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.recent-chip:active,
+.portion-chip:active {
+  filter: brightness(0.95);
+}
+
+.quick-portion {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: none;
+}
+
+.skeleton-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.skeleton-line {
+  background: var(--color-border);
+}
+
+.ingredient-remove {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
 }

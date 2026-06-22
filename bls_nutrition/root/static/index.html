@@ -3,8 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1b5e20">
+  <meta name="theme-color" content="#1b5e20" id="meta-theme-color">
   <title>BLS Nährwertdatenbank</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem("bls_theme") || "auto";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
   <link rel="icon" href="static/icon.png" type="image/png">
   <link rel="stylesheet" href="static/styles/base.css">
   <link rel="stylesheet" href="static/styles/theme-diabetes.css">
@@ -19,7 +25,12 @@
           <p class="header-subtitle" id="bls-version">BLS 4.0</p>
         </div>
       </div>
-      <span class="status-badge" id="food-count-badge">—</span>
+      <div class="header-actions">
+        <span class="status-badge" id="food-count-badge">—</span>
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Darstellung wechseln" title="Hell / Dunkel / System">
+          <span class="theme-toggle-icon" id="theme-toggle-icon" aria-hidden="true">◐</span>
+        </button>
+      </div>
     </header>
 
     <section class="hero-tiles" aria-label="Diabetes-Einheiten">
@@ -45,9 +56,13 @@
       <div class="panel active" id="panel-search" role="tabpanel">
         <h2 class="panel-title">Lebensmittel suchen</h2>
         <form id="search-form" class="form">
-          <input type="search" id="search-query" class="input" placeholder="z. B. Apfel" autocomplete="off" required>
+          <input type="search" id="search-query" class="input" placeholder="z. B. Apfel (mind. 2 Zeichen)" autocomplete="off" required>
           <button type="submit" class="btn btn-primary">Suchen</button>
         </form>
+        <div class="search-recents" id="search-recents" hidden>
+          <p class="search-recents-label">Zuletzt berechnet</p>
+          <div class="search-recents-chips" id="search-recents-chips"></div>
+        </div>
         <div class="search-results-grid search-layout-stacked" id="search-results-grid" hidden>
           <section class="search-column">
             <h3 class="search-column-title">BLS 4.0</h3>
@@ -62,9 +77,20 @@
 
       <div class="panel" id="panel-barcode" role="tabpanel" hidden>
         <h2 class="panel-title">Barcode scannen</h2>
+        <div class="barcode-scanner" id="barcode-scanner-wrap" hidden>
+          <video id="barcode-video" class="barcode-video" playsinline muted aria-label="Kameravorschau"></video>
+          <p class="barcode-scanner-hint">Barcode in den Rahmen halten</p>
+          <button type="button" class="btn btn-secondary" id="barcode-scan-stop">Kamera beenden</button>
+        </div>
+        <p class="barcode-scanner-unsupported" id="barcode-scanner-unsupported" hidden>
+          Kamera-Scan wird von diesem Browser nicht unterstützt. Bitte EAN manuell eingeben.
+        </p>
         <form id="barcode-form" class="form">
           <input type="text" id="barcode-input" class="input" inputmode="numeric" pattern="[0-9]*" placeholder="EAN / Barcode" autocomplete="off" required>
-          <button type="submit" class="btn btn-primary btn-scan">Barcode laden</button>
+          <div class="form-row-inline">
+            <button type="button" class="btn btn-secondary" id="barcode-scan-start">Kamera starten</button>
+            <button type="submit" class="btn btn-primary btn-scan">Barcode laden</button>
+          </div>
         </form>
         <div class="barcode-result" id="barcode-result" hidden></div>
         <form id="barcode-portion-form" class="form form-inline" hidden>
@@ -97,21 +123,8 @@
           <label class="label" for="recipe-servings">Portionen</label>
           <input type="number" id="recipe-servings" class="input input-narrow" value="1" min="1" step="1" required>
 
-          <fieldset class="ingredient-fieldset">
-            <legend>Zutat 1</legend>
-            <input type="text" class="input ingredient-id" data-index="0" placeholder="BLS-Code" required>
-            <input type="number" class="input ingredient-amount" data-index="0" placeholder="g" value="100" min="1" step="1" required>
-          </fieldset>
-          <fieldset class="ingredient-fieldset">
-            <legend>Zutat 2</legend>
-            <input type="text" class="input ingredient-id" data-index="1" placeholder="BLS-Code">
-            <input type="number" class="input ingredient-amount" data-index="1" placeholder="g" value="100" min="1" step="1">
-          </fieldset>
-          <fieldset class="ingredient-fieldset">
-            <legend>Zutat 3</legend>
-            <input type="text" class="input ingredient-id" data-index="2" placeholder="BLS-Code">
-            <input type="number" class="input ingredient-amount" data-index="2" placeholder="g" value="100" min="1" step="1">
-          </fieldset>
+          <div id="recipe-ingredients"></div>
+          <button type="button" class="btn btn-secondary" id="recipe-add-ingredient">+ Zutat hinzufügen</button>
 
           <button type="submit" class="btn btn-primary">Rezept berechnen</button>
         </form>
