@@ -359,47 +359,6 @@
     }
   }
 
-  function logQuickPortionLayout(wrap, quickPanel) {
-    const input = quickPanel.querySelector(".portion-custom-input");
-    const column = wrap.closest(".search-column");
-    const grid = wrap.closest(".search-results-grid");
-    const custom = quickPanel.querySelector(".portion-custom");
-    const rects = {
-      viewport: { w: window.innerWidth, h: window.innerHeight },
-      grid: grid ? { w: grid.getBoundingClientRect().width, cls: grid.className } : null,
-      column: column ? { w: column.getBoundingClientRect().width } : null,
-      wrap: { w: wrap.getBoundingClientRect().width },
-      quickPanel: { w: quickPanel.getBoundingClientRect().width },
-      custom: custom ? { w: custom.getBoundingClientRect().width } : null,
-      input: input
-        ? {
-            w: input.getBoundingClientRect().width,
-            computedWidth: getComputedStyle(input).width,
-            computedMinWidth: getComputedStyle(input).minWidth,
-            computedFlex: getComputedStyle(input).flex,
-            classes: input.className,
-          }
-        : null,
-      overflow: input && column
-        ? input.getBoundingClientRect().right > column.getBoundingClientRect().right + 1
-        : null,
-    };
-    // #region agent log
-    fetch("http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "92f7bb" },
-      body: JSON.stringify({
-        sessionId: "92f7bb",
-        location: "app.js:logQuickPortionLayout",
-        message: "quick-portion layout metrics",
-        data: rects,
-        timestamp: Date.now(),
-        hypothesisId: "A-B-C-D",
-      }),
-    }).catch(() => {});
-    // #endregion
-  }
-
   function createQuickPortionPanel(item) {
     const panel = document.createElement("div");
     panel.className = "quick-portion";
@@ -493,7 +452,6 @@
         if (!wasExpanded) {
           wrap.classList.add("is-expanded");
           quickPanel.hidden = false;
-          requestAnimationFrame(() => logQuickPortionLayout(wrap, quickPanel));
         }
       });
 
