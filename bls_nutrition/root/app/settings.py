@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,31 @@ class Settings:
     addon_version: str
 
 
+def _options_path(data_dir: Path) -> Path:
+    return data_dir / "options.json"
+
+
+def _read_option_bool(
+    data_dir: Path, option_name: str, env_name: str, default: bool
+) -> bool:
+    config_path = _options_path(data_dir)
+    if config_path.is_file():
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+            if option_name in data and data[option_name] is not None:
+                value = data[option_name]
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, str):
+                    lowered = value.lower()
+                    if lowered in ("true", "false"):
+                        return lowered == "true"
+        except (json.JSONDecodeError, OSError, TypeError):
+            pass
+    env_default = "true" if default else "false"
+    return os.environ.get(env_name, env_default).lower() == "true"
+
+
 def get_settings() -> Settings:
     data_dir = Path(os.environ.get("BLS_DATA_DIR", "/data"))
     layout = os.environ.get("BLS_SEARCH_LAYOUT", "stacked")
@@ -45,12 +71,12 @@ def get_settings() -> Settings:
             os.environ.get("BLS_OFF_SEARCH_CACHE_TTL_DAYS", "7")
         ),
         search_layout=layout,
-        search_recents_enabled=os.environ.get(
-            "BLS_SEARCH_RECENTS_ENABLED", "true"
-        ).lower()
-        == "true",
-        todo_list_enabled=os.environ.get("BLS_TODO_LIST_ENABLED", "true").lower()
-        == "true",
+        search_recents_enabled=_read_option_bool(
+            data_dir, "search_recents_enabled", "BLS_SEARCH_RECENTS_ENABLED", True
+        ),
+        todo_list_enabled=_read_option_bool(
+            data_dir, "todo_list_enabled", "BLS_TODO_LIST_ENABLED", False
+        ),
         todo_list_entity_id=os.environ.get(
             "BLS_TODO_LIST_ENTITY_ID", "todo.shopping_list"
         ),

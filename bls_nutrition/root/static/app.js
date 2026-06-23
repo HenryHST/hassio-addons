@@ -39,6 +39,23 @@
     return defaultValue;
   }
 
+  function debugLog(location, message, data, hypothesisId) {
+    // #region agent log
+    fetch("http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "92f7bb" },
+      body: JSON.stringify({
+        sessionId: "92f7bb",
+        location,
+        message,
+        data,
+        timestamp: Date.now(),
+        hypothesisId,
+      }),
+    }).catch(() => {});
+    // #endregion
+  }
+
   function formatNum(value) {
     if (value === null || value === undefined) return "—";
     const n = Number(value);
@@ -197,6 +214,7 @@
   }
 
   function createTodoButton(product) {
+    if (!todoListEnabled) return null;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "btn btn-todo";
@@ -467,10 +485,21 @@
       if (showScores && todoListEnabled) {
         const actions = document.createElement("div");
         actions.className = "result-item-actions";
-        actions.appendChild(createTodoButton(item));
-        wrap.appendChild(actions);
+        const todoBtn = createTodoButton(item);
+        if (todoBtn) {
+          actions.appendChild(todoBtn);
+          wrap.appendChild(actions);
+        }
       }
       container.appendChild(wrap);
+    }
+    if (showScores) {
+      applyTodoListVisibility();
+      debugLog("app.js:renderResultList", "OFF/BLS result list rendered", {
+        showScores,
+        todoListEnabled,
+        todoButtons: container.querySelectorAll(".btn-todo").length,
+      }, "C");
     }
   }
 
@@ -660,8 +689,9 @@
       if (todoListEnabled) {
         const actions = document.createElement("div");
         actions.className = "result-item-actions";
-        actions.appendChild(createTodoButton(product));
-        resultEl.appendChild(actions);
+        const todoBtn = createTodoButton(product);
+        if (todoBtn) actions.appendChild(todoBtn);
+        if (actions.childElementCount) resultEl.appendChild(actions);
       }
       $("barcode-portion-form").hidden = false;
     } catch (err) {
@@ -875,6 +905,11 @@
       applySearchLayout(health.search_layout || "stacked");
       applyTodoListVisibility();
       renderRecents();
+      debugLog("app.js:loadHealth", "health loaded", {
+        rawTodoListEnabled: health.todo_list_enabled,
+        todoListEnabled,
+        offTodoButtons: document.querySelectorAll("#search-results-off .btn-todo").length,
+      }, "A-B");
     } catch (_) {
       $("food-count-badge").textContent = "offline";
       todoListEnabled = false;

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Ingress UI: „Zur Einkaufsliste“-Button wird zuverlässig ausgeblendet, wenn `todo_list_enabled` deaktiviert ist
+- `todo_list_enabled` wird zur Laufzeit aus `/data/options.json` gelesen (nicht nur aus Start-Env)
 
 ## [1.6.1] - 2025-06-21
 
