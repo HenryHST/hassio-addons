@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import os
 from typing import Any
 
 import httpx
@@ -13,7 +14,31 @@ class OverpassError(Exception):
 
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+OVERPASS_FALLBACK_URL = "https://overpass.kumi.systems/api/interpreter"
 EARTH_RADIUS_KM = 6371.0
+
+
+def _request_headers() -> dict[str, str]:
+    version = os.environ.get("ADDON_VERSION", "dev")
+    return {
+        "User-Agent": f"bls-nutrition-addon/{version} (Home Assistant; +https://github.com/henryhst/hassio-addons)",
+        "Accept": "application/json",
+    }
+
+
+def _overpass_error_detail(response: httpx.Response) -> str:
+    content_type = (response.headers.get("content-type") or "").lower()
+    if "json" in content_type:
+        try:
+            body = response.json()
+            if isinstance(body, dict) and body.get("remark"):
+                return str(body["remark"])
+        except ValueError:
+            pass
+    if "html" in content_type:
+        return response.reason_phrase or "Anfrage abgelehnt"
+    text = (response.text or "").strip()
+    return text[:200] if text else (response.reason_phrase or "Unbekannter Fehler")
 
 
 def _distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -39,17 +64,25 @@ out center tags;
 """.strip()
 
 
+def _post_overpass(client: httpx.Client, url: str, query: str) -> httpx.Response:
+    return client.post(url, data={"data": query}, headers=_request_headers())
+
+
 def find_supermarkets(lat: float, lon: float, radius_km: int) -> list[dict[str, Any]]:
     radius_m = max(100, min(50000, int(radius_km * 1000)))
     query = _overpass_query(lat, lon, radius_m)
+    response: httpx.Response | None = None
     try:
         with httpx.Client(timeout=25.0) as client:
-            response = client.post(OVERPASS_URL, data={"data": query})
+            response = _post_overpass(client, OVERPASS_URL, query)
+            if response.status_code == 406:
+                response = _post_overpass(client, OVERPASS_FALLBACK_URL, query)
     except httpx.RequestError as exc:
         raise OverpassError(f"Overpass nicht erreichbar: {exc}") from exc
-    if response.status_code >= 400:
-        detail = response.text.strip() or response.reason_phrase
-        raise OverpassError(f"Overpass Fehler ({response.status_code}): {detail}")
+    if response is None or response.status_code >= 400:
+        status = response.status_code if response is not None else 0
+        detail = _overpass_error_detail(response) if response is not None else "Keine Antwort"
+        raise OverpassError(f"Overpass Fehler ({status}): {detail}")
     try:
         payload = response.json()
     except ValueError as exc:
