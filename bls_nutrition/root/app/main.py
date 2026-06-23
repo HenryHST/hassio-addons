@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import calculator, db, home_assistant, open_food_facts
+from app import calculator, db, home_assistant, open_food_facts, overpass
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
@@ -65,6 +65,8 @@ def health() -> dict[str, Any]:
             "search_recents_enabled": settings.search_recents_enabled,
             "todo_list_enabled": settings.todo_list_enabled,
             "todo_list_entity_id": settings.todo_list_entity_id,
+            "map_enabled": settings.map_enabled,
+            "map_radius_km": settings.map_radius_km,
         }
 
 
@@ -157,6 +159,29 @@ def get_food(bls_code: str) -> dict[str, Any]:
             "nutrients": key,
             "all_nutrients": nutrients,
         }
+
+
+@app.get("/map/supermarkets")
+def map_supermarkets(radius_km: int | None = Query(default=None, ge=1, le=50)) -> dict[str, Any]:
+    settings = _settings()
+    if not settings.map_enabled:
+        raise HTTPException(status_code=403, detail="Map-Funktion ist deaktiviert.")
+    effective_radius = radius_km if radius_km is not None else settings.map_radius_km
+    effective_radius = max(1, min(50, int(effective_radius)))
+    try:
+        latitude, longitude = home_assistant.get_home_coordinates()
+    except home_assistant.HomeAssistantError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    try:
+        supermarkets = overpass.find_supermarkets(latitude, longitude, effective_radius)
+    except overpass.OverpassError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {
+        "center": {"lat": latitude, "lon": longitude},
+        "radius_km": effective_radius,
+        "count": len(supermarkets),
+        "items": supermarkets,
+    }
 
 
 @app.post("/calculate/portion", response_model=CalculationResult)

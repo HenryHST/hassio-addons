@@ -38,6 +38,8 @@ options:
   search_recents_enabled: true
   todo_list_enabled: true
   todo_list_entity_id: todo.shopping_list
+  map_enabled: false
+  map_radius_km: 20
 schema:
   auto_update: bool
   update_interval_days: int(7,365)?
@@ -49,3 +51,5 @@ schema:
   search_recents_enabled: bool?
   todo_list_enabled: bool?
   todo_list_entity_id: str?
+  map_enabled: bool?
+  map_radius_km: int(1,50)?

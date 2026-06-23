@@ -14,6 +14,12 @@
   <link rel="icon" href="static/icon.png" type="image/png">
   <link rel="stylesheet" href="static/styles/base.css">
   <link rel="stylesheet" href="static/styles/theme-diabetes.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
 </head>
 <body>
   <div class="app">
@@ -130,6 +136,13 @@
         </form>
       </div>
 
+      <div class="panel" id="panel-map" role="tabpanel" hidden>
+        <h2 class="panel-title">Supermärkte in der Nähe</h2>
+        <p class="map-hint" id="map-radius-hint"></p>
+        <div class="map-status" id="map-status">Karte wird geladen…</div>
+        <div class="map-canvas" id="map-canvas" hidden></div>
+      </div>
+
       <section class="details" id="details-section" hidden>
         <button type="button" class="details-toggle" id="details-toggle" aria-expanded="false">
           Details <span class="details-chevron">▼</span>
@@ -164,6 +177,10 @@
         <span class="nav-icon" aria-hidden="true">📋</span>
         <span class="nav-label">Rezept</span>
       </button>
+      <button type="button" class="nav-btn" data-panel="map" id="nav-map-btn" hidden>
+        <span class="nav-icon" aria-hidden="true">🗺️</span>
+        <span class="nav-label">Map</span>
+      </button>
     </nav>
 
     <footer class="footer">
@@ -173,6 +190,12 @@
     </footer>
   </div>
 
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
   <script src="static/app.js?v=1.6.3" defer></script>
 </body>
 </html>

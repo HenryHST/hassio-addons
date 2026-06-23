@@ -49,8 +49,8 @@ unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel *
 |---------|--------------|
 | **Header** | Logo, Titel, BLS-Version, Lebensmittel-Badge, Theme-Toggle (Hell/Dunkel/System) |
 | **Hero-Tiles** | gKH, BE, KE, FPE — WETID-inspirierte Diabetes-Einheiten, immer sichtbar |
-| **Hauptbereich** | Suche, Scan, Portion oder Rezept (je nach Tab) |
-| **Bottom-Nav** | Suche · Scan · Portion · Rezept |
+| **Hauptbereich** | Suche, Scan, Portion, Rezept oder Map (je nach Tab) |
+| **Bottom-Nav** | Suche · Scan · Portion · Rezept · Map (optional) |
 
 ### Lebensmittelsuche
 
@@ -93,12 +93,19 @@ Theme-Toggle im Header: System · Hell · Dunkel (`localStorage`):
 
 ![Dark Mode](docs/images/ingress-dark.png)
 
+### Map (Supermärkte)
+
+Optionaler Map-Tab mit OpenStreetMap-Karte. Das Add-on nutzt den Home-Assistant-Standort
+(`latitude`/`longitude`) und lädt Supermärkte per Overpass API im konfigurierten Radius
+(`map_radius_km`, max. 50 km).
+
 ### Weitere Bereiche
 
 | Tab | Funktion |
 |-----|----------|
 | **Scan** | EAN/Barcode oder Kamera → OFF-Produkt laden, Menge setzen, berechnen |
 | **Rezept** | Dynamische Zutatenliste und Portionenanzahl |
+| **Map** | Supermärkte im Umkreis des HA-Standorts (optional via `map_enabled`) |
 
 ### Nutri-Score, Nova-Score und Eco-Score
 
@@ -177,6 +184,8 @@ search_layout: stacked
 search_recents_enabled: true
 todo_list_enabled: true
 todo_list_entity_id: todo.shopping_list
+map_enabled: false
+map_radius_km: 20
 ```
 
 | Option | Werte | Beschreibung |
@@ -187,6 +196,8 @@ todo_list_entity_id: todo.shopping_list
 | `search_recents_enabled` | `true`, `false` | Chips „Zuletzt berechnet“ unter dem Suchfeld in der Ingress-UI |
 | `todo_list_enabled` | `true`, `false` | Button „Zur Einkaufsliste“ in der Ingress-UI |
 | `todo_list_entity_id` | z. B. `todo.shopping_list` | Ziel-Entity der HA-To-do-Liste |
+| `map_enabled` | `true`, `false` | Optionalen Map-Tab in der Ingress-UI anzeigen |
+| `map_radius_km` | `1`–`50` | Radius in km fuer Supermarkt-Suche um den HA-Standort |
 
 ### Caching (Open Food Facts)
 

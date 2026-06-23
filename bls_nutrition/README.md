@@ -23,6 +23,7 @@ Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenban
 - Portions- und Rezeptberechnung (dynamische Zutatenliste)
 - Diabetes-Einheiten: **gKH**, **BE**, **KE**, **FPE** (WETID-inspiriert)
 - Barcode-Lookup und Kamera-Scan über **Open Food Facts** (inkl. Nutri-Score, Nova, Eco-Score)
+- Map-Tab mit Supermärkten im Umkreis (OpenStreetMap + Overpass API)
 - Dark Mode und „Zuletzt berechnet“-Chips
 - Eigene Lebensmittel und Rezepte
 
@@ -52,6 +53,8 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `search_recents_enabled` | `true` | Chips „Zuletzt berechnet“ in der Suche anzeigen |
 | `todo_list_enabled` | `true` | OFF-Produkte zur HA-To-do-Liste hinzufügen |
 | `todo_list_entity_id` | `todo.shopping_list` | Ziel-To-do-Entity |
+| `map_enabled` | `false` | Map-Tab in der Ingress-UI aktivieren |
+| `map_radius_km` | `20` | Suchradius für Supermärkte in km (`1`–`50`) |
 
 ## API Endpoints
 
@@ -61,6 +64,7 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `GET /foods/search?q=` | BLS-Lebensmittelsuche |
 | `GET /foods/search/off?q=` | Open Food Facts Textsuche |
 | `GET /foods/barcode/{ean}` | Barcode-Lookup |
+| `GET /map/supermarkets` | Supermärkte im Radius um den HA-Standort |
 | `POST /calculate/portion` | Portion berechnen |
 | `POST /calculate/recipe` | Rezept aggregieren |
 
@@ -68,6 +72,7 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 
 - **BLS 4.0:** Max Rubner-Institut (2025), CC BY 4.0, DOI: 10.25826/Data20251217-134202-0
 - **Open Food Facts:** ODbL
+- **OpenStreetMap/Overpass:** ODbL
 
 
 ## Support

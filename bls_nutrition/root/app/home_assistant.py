@@ -11,6 +11,16 @@ class HomeAssistantError(Exception):
     """Raised when a Home Assistant API call fails."""
 
 
+def _supervisor_auth() -> tuple[str, str]:
+    token = os.environ.get("SUPERVISOR_TOKEN")
+    if not token:
+        raise HomeAssistantError(
+            "Supervisor-Token nicht verfügbar — Add-on außerhalb von Home Assistant?"
+        )
+    base = os.environ.get("SUPERVISOR", "http://supervisor").rstrip("/")
+    return base, token
+
+
 def build_todo_item_text(name: str, description: str | None = None) -> str:
     """Build item text without using the HA description field.
 
@@ -30,13 +40,7 @@ def add_todo_item(
     item: str,
     description: str | None = None,
 ) -> None:
-    token = os.environ.get("SUPERVISOR_TOKEN")
-    if not token:
-        raise HomeAssistantError(
-            "Supervisor-Token nicht verfügbar — Add-on außerhalb von Home Assistant?"
-        )
-
-    base = os.environ.get("SUPERVISOR", "http://supervisor").rstrip("/")
+    base, token = _supervisor_auth()
     url = f"{base}/core/api/services/todo/add_item"
     payload: dict[str, str] = {
         "entity_id": entity_id,
@@ -63,6 +67,28 @@ def add_todo_item(
         raise HomeAssistantError(
             f"Home Assistant hat den Eintrag abgelehnt ({response.status_code}): {detail}"
         )
+
+
+def get_home_coordinates() -> tuple[float, float]:
+    base, token = _supervisor_auth()
+    url = f"{base}/core/api/config"
+    try:
+        with httpx.Client(timeout=15.0) as client:
+            response = client.get(url, headers={"Authorization": f"Bearer {token}"})
+    except httpx.RequestError as exc:
+        raise HomeAssistantError(f"Verbindung zu Home Assistant fehlgeschlagen: {exc}") from exc
+    if response.status_code >= 400:
+        detail = response.text.strip() or response.reason_phrase
+        raise HomeAssistantError(
+            f"Home Assistant Standort konnte nicht gelesen werden ({response.status_code}): {detail}"
+        )
+    try:
+        payload = response.json()
+        latitude = float(payload["latitude"])
+        longitude = float(payload["longitude"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HomeAssistantError("Home Assistant liefert keine gueltigen Standortdaten.") from exc
+    return latitude, longitude
 
 
 def build_todo_description(barcode: str | None, brand: str | None) -> str | None:

@@ -24,12 +24,17 @@
   let offEnabled = true;
   let todoListEnabled = false;
   let searchRecentsEnabled = true;
+  let mapEnabled = false;
+  let mapRadiusKm = 20;
   let searchAbortController = null;
   let searchDebounceTimer = null;
   let ingredientCounter = 0;
   let scanStream = null;
   let scanFrameId = null;
   let barcodeDetector = null;
+  let mapInstance = null;
+  let mapMarkersLayer = null;
+  let mapLoaded = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -71,6 +76,19 @@
       return;
     }
     showStatus(message, true);
+  }
+
+  function updateMapVisibility() {
+    const navMapBtn = $("nav-map-btn");
+    const mapPanel = $("panel-map");
+    if (navMapBtn) navMapBtn.hidden = !mapEnabled;
+    if (mapPanel && !mapEnabled) {
+      mapPanel.hidden = true;
+      mapPanel.classList.remove("active");
+      if (document.querySelector('.nav-btn[data-panel="map"]')?.classList.contains("active")) {
+        switchPanel("search");
+      }
+    }
   }
 
   async function apiGet(path, signal) {
@@ -824,6 +842,80 @@
     }
   }
 
+  // --- Map ---
+
+  function showMapStatus(message) {
+    const status = $("map-status");
+    if (!status) return;
+    status.textContent = message || "";
+    status.hidden = !message;
+  }
+
+  function clearMapMarkers() {
+    if (mapMarkersLayer) {
+      mapMarkersLayer.clearLayers();
+    }
+  }
+
+  function ensureMap() {
+    if (mapInstance) return mapInstance;
+    if (typeof L === "undefined") {
+      throw new Error("Leaflet konnte nicht geladen werden.");
+    }
+    const canvas = $("map-canvas");
+    if (!canvas) {
+      throw new Error("Kartencontainer fehlt.");
+    }
+    mapInstance = L.map(canvas, { zoomControl: true });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(mapInstance);
+    mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+    return mapInstance;
+  }
+
+  function renderMapItems(center, items) {
+    const map = ensureMap();
+    clearMapMarkers();
+    const homeMarker = L.marker([center.lat, center.lon]).addTo(mapMarkersLayer);
+    homeMarker.bindPopup("Home Assistant Standort");
+    for (const item of items) {
+      const marker = L.marker([item.lat, item.lon]).addTo(mapMarkersLayer);
+      const address = item.address ? `<br>${escapeHtml(item.address)}` : "";
+      marker.bindPopup(
+        `<strong>${escapeHtml(item.name || "Supermarkt")}</strong><br>` +
+          `${escapeHtml(item.type || "shop")} · ${formatNum(item.distance_km)} km${address}`
+      );
+    }
+    const allPoints = [[center.lat, center.lon], ...items.map((item) => [item.lat, item.lon])];
+    const bounds = L.latLngBounds(allPoints);
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
+    setTimeout(() => map.invalidateSize(), 0);
+  }
+
+  async function loadMapData() {
+    const mapCanvas = $("map-canvas");
+    const radiusHint = $("map-radius-hint");
+    if (radiusHint) radiusHint.textContent = `Radius: ${mapRadiusKm} km`;
+    if (!mapCanvas) return;
+    mapCanvas.hidden = true;
+    showMapStatus("Lade Supermärkte in deiner Umgebung…");
+    try {
+      const payload = await apiGet(`map/supermarkets?radius_km=${encodeURIComponent(mapRadiusKm)}`);
+      renderMapItems(payload.center, payload.items || []);
+      mapCanvas.hidden = false;
+      if ((payload.items || []).length) {
+        showMapStatus(`${payload.count} Märkte im Umkreis von ${payload.radius_km} km gefunden.`);
+      } else {
+        showMapStatus(`Keine Märkte im Umkreis von ${payload.radius_km} km gefunden.`);
+      }
+      mapLoaded = true;
+    } catch (err) {
+      showMapStatus(err.message || "Map konnte nicht geladen werden.");
+    }
+  }
+
   // --- Navigation ---
 
   function switchPanel(panelName) {
@@ -839,6 +931,9 @@
       if (isActive) btn.setAttribute("aria-current", "page");
       else btn.removeAttribute("aria-current");
     });
+    if (panelName === "map" && mapEnabled && !mapLoaded) {
+      loadMapData().catch((err) => showMapStatus(err.message));
+    }
     showError(null);
   }
 
@@ -880,13 +975,18 @@
       offEnabled = parseConfigFlag(health.open_food_facts_enabled, true);
       todoListEnabled = parseConfigFlag(health.todo_list_enabled, false);
       searchRecentsEnabled = parseConfigFlag(health.search_recents_enabled, true);
+      mapEnabled = parseConfigFlag(health.map_enabled, false);
+      mapRadiusKm = Math.max(1, Math.min(50, Number(health.map_radius_km) || 20));
       applySearchLayout(health.search_layout || "stacked");
       applyTodoListVisibility();
       renderRecents();
+      updateMapVisibility();
     } catch (_) {
       $("food-count-badge").textContent = "offline";
       todoListEnabled = false;
+      mapEnabled = false;
       applyTodoListVisibility();
+      updateMapVisibility();
     }
   }
 

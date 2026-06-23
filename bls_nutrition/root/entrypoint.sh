@@ -24,6 +24,8 @@ if [[ -f "${CONFIG_PATH}" ]]; then
     BLS_SEARCH_RECENTS_ENABLED=$(jq -r '.search_recents_enabled // true' "${CONFIG_PATH}")
     BLS_TODO_LIST_ENABLED=$(jq -r '.todo_list_enabled // true' "${CONFIG_PATH}")
     BLS_TODO_LIST_ENTITY_ID=$(jq -r '.todo_list_entity_id // "todo.shopping_list"' "${CONFIG_PATH}")
+    BLS_MAP_ENABLED=$(jq -r '.map_enabled // false' "${CONFIG_PATH}")
+    BLS_MAP_RADIUS_KM=$(jq -r '.map_radius_km // 20' "${CONFIG_PATH}")
 else
     BLS_AUTO_UPDATE=true
     BLS_UPDATE_INTERVAL_DAYS=30
@@ -35,6 +37,8 @@ else
     BLS_SEARCH_RECENTS_ENABLED=true
     BLS_TODO_LIST_ENABLED=true
     BLS_TODO_LIST_ENTITY_ID=todo.shopping_list
+    BLS_MAP_ENABLED=false
+    BLS_MAP_RADIUS_KM=20
 fi
 
 export BLS_AUTO_UPDATE
@@ -47,6 +51,8 @@ export BLS_SEARCH_LAYOUT
 export BLS_SEARCH_RECENTS_ENABLED
 export BLS_TODO_LIST_ENABLED
 export BLS_TODO_LIST_ENTITY_ID
+export BLS_MAP_ENABLED
+export BLS_MAP_RADIUS_KM
 
 echo "[bls_nutrition] Configuration:"
 echo "  - auto_update: ${BLS_AUTO_UPDATE}"
@@ -59,6 +65,8 @@ echo "  - search_layout: ${BLS_SEARCH_LAYOUT}"
 echo "  - search_recents_enabled: ${BLS_SEARCH_RECENTS_ENABLED}"
 echo "  - todo_list_enabled: ${BLS_TODO_LIST_ENABLED}"
 echo "  - todo_list_entity_id: ${BLS_TODO_LIST_ENTITY_ID}"
+echo "  - map_enabled: ${BLS_MAP_ENABLED}"
+echo "  - map_radius_km: ${BLS_MAP_RADIUS_KM}"
 
 echo "[bls_nutrition] Ensuring database is ready..."
 python -m app.bootstrap
