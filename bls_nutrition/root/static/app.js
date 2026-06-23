@@ -33,6 +33,12 @@
 
   const $ = (id) => document.getElementById(id);
 
+  function parseConfigFlag(value, defaultValue = false) {
+    if (value === true || value === "true") return true;
+    if (value === false || value === "false") return false;
+    return defaultValue;
+  }
+
   function formatNum(value) {
     if (value === null || value === undefined) return "—";
     const n = Number(value);
@@ -836,6 +842,25 @@
     );
   }
 
+  function applyTodoListVisibility() {
+    const todoEl = $("result-todo-action");
+    if (todoEl) {
+      if (!todoListEnabled) {
+        todoEl.innerHTML = "";
+        todoEl.hidden = true;
+      }
+    }
+    if (!todoListEnabled) {
+      document.querySelectorAll(".result-item-actions .btn-todo").forEach((btn) => {
+        btn.closest(".result-item-actions")?.remove();
+      });
+      const barcodeResult = $("barcode-result");
+      barcodeResult
+        ?.querySelector(".result-item-actions")
+        ?.remove();
+    }
+  }
+
   async function loadHealth() {
     try {
       const health = await apiGet("health");
@@ -844,13 +869,16 @@
           ? `${health.food_count.toLocaleString("de-DE")} LM`
           : "—";
       $("bls-version").textContent = `BLS ${health.bls_version || "4.0"}`;
-      offEnabled = health.open_food_facts_enabled !== false;
-      todoListEnabled = health.todo_list_enabled !== false;
-      searchRecentsEnabled = health.search_recents_enabled !== false;
+      offEnabled = parseConfigFlag(health.open_food_facts_enabled, true);
+      todoListEnabled = parseConfigFlag(health.todo_list_enabled, false);
+      searchRecentsEnabled = parseConfigFlag(health.search_recents_enabled, true);
       applySearchLayout(health.search_layout || "stacked");
+      applyTodoListVisibility();
       renderRecents();
     } catch (_) {
       $("food-count-badge").textContent = "offline";
+      todoListEnabled = false;
+      applyTodoListVisibility();
     }
   }
 
@@ -870,10 +898,11 @@
     });
   }
 
-  function init() {
+  async function init() {
     initTheme();
     initNavigation();
     initDetailsToggle();
+    await loadHealth();
     initLiveSearch();
     initRecipeIngredients();
     updateScannerAvailability();
@@ -885,8 +914,6 @@
     $("barcode-scan-stop")?.addEventListener("click", stopBarcodeScan);
     $("portion-form")?.addEventListener("submit", handlePortion);
     $("recipe-form")?.addEventListener("submit", handleRecipe);
-
-    loadHealth();
   }
 
   if (document.readyState === "loading") {
