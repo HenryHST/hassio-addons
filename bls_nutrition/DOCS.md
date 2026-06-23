@@ -99,6 +99,15 @@ Optionaler Map-Tab mit OpenStreetMap-Karte. Das Add-on nutzt den Home-Assistant-
 (`latitude`/`longitude`, `time_zone`) und lädt Supermärkte per Overpass API im konfigurierten Radius
 (`map_radius_km`, max. 50 km).
 
+**Marker-Farben** (aktueller Öffnungsstatus nach OSM-Daten und HA-Zeitzone):
+
+| Farbe | Bedeutung |
+|-------|-----------|
+| Blau | Home-Assistant-Standort |
+| Grün | Supermarkt aktuell geöffnet |
+| Rot | Supermarkt geschlossen (oder Feiertag am HA-Standort) |
+| Grau | Keine Öffnungszeiten in OpenStreetMap |
+
 Marker-Popups zeigen **Öffnungszeiten** aus OpenStreetMap (`opening_hours` / `opening_hours:de`):
 
 | Situation | Anzeige |

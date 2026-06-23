@@ -229,6 +229,23 @@ def build_opening_hours_display(raw: str | None, ctx: LocationContext) -> str:
     return _format_today(value, ctx.now)
 
 
+def is_open_now(raw: str | None, ctx: LocationContext) -> bool | None:
+    if ctx.is_holiday:
+        return False
+    if not raw or not raw.strip():
+        return None
+    value = raw.strip()
+    try:
+        parsed = OpeningHours(value)
+    except ParseException:
+        return None
+    if parsed.is_always_open:
+        return True
+    day_key = DAY_KEYS[ctx.now.weekday()]
+    time_str = ctx.now.strftime("%H:%M")
+    return parsed.is_open(day_key, time_str)
+
+
 def enrich_map_items(
     items: list[dict[str, Any]], ctx: LocationContext
 ) -> list[dict[str, Any]]:
@@ -239,5 +256,6 @@ def enrich_map_items(
         raw_str = str(raw).strip() if raw else None
         copy["opening_hours"] = raw_str
         copy["opening_hours_display"] = build_opening_hours_display(raw_str, ctx)
+        copy["is_open_now"] = is_open_now(raw_str, ctx)
         enriched.append(copy)
     return enriched

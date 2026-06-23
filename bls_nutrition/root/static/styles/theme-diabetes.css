@@ -24,6 +24,10 @@ html[data-theme="light"] {
   --color-tile-fpe-accent: #4527a0;
   --color-nav-active: #2e7d32;
   --color-nav-inactive: #757575;
+  --map-marker-home: #1565c0;
+  --map-marker-open: #2e7d32;
+  --map-marker-closed: #c62828;
+  --map-marker-unknown: #757575;
   --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -52,6 +56,10 @@ html[data-theme="dark"] {
     --color-tile-fpe-accent: #b39ddb;
     --color-nav-active: #81c784;
     --color-nav-inactive: #9aa0a6;
+    --map-marker-home: #42a5f5;
+    --map-marker-open: #66bb6a;
+    --map-marker-closed: #ef5350;
+    --map-marker-unknown: #9e9e9e;
     --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -81,6 +89,10 @@ html[data-theme="dark"] {
     --color-tile-fpe-accent: #b39ddb;
     --color-nav-active: #81c784;
     --color-nav-inactive: #9aa0a6;
+    --map-marker-home: #42a5f5;
+    --map-marker-open: #66bb6a;
+    --map-marker-closed: #ef5350;
+    --map-marker-unknown: #9e9e9e;
     --shadow-tile: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 }

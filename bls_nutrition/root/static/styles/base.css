@@ -447,6 +447,49 @@ body {
   white-space: pre-line;
 }
 
+.map-marker-pin {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.map-marker-home {
+  background: var(--map-marker-home, #1565c0);
+}
+
+.map-marker-open {
+  background: var(--map-marker-open, #2e7d32);
+}
+
+.map-marker-closed {
+  background: var(--map-marker-closed, #c62828);
+}
+
+.map-marker-unknown {
+  background: var(--map-marker-unknown, #757575);
+}
+
+.map-popup-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.map-popup-status-open {
+  color: var(--map-marker-open, #2e7d32);
+}
+
+.map-popup-status-closed {
+  color: var(--map-marker-closed, #c62828);
+}
+
+.map-popup-status-unknown {
+  color: var(--map-marker-unknown, #757575);
+}
+
 .nav-btn {
   display: flex;
   flex-direction: column;

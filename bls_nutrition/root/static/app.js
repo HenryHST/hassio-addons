@@ -99,9 +99,6 @@
     if (detailsSection) {
       detailsSection.hidden = panelName === "map" || !detailsHasResult;
     }
-    // #region agent log
-    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',runId:'post-fix',location:'app.js:updateHeroTilesVisibility',message:'hero tiles visibility',data:{panelName,heroTilesHidden:heroTiles?.hidden,detailsHidden:detailsSection?.hidden,detailsHasResult},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
   }
 
   async function apiGet(path, signal) {
@@ -366,9 +363,6 @@
     detailsHasResult = true;
     toggle.setAttribute("aria-expanded", "false");
     content.hidden = true;
-    // #region agent log
-    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:showDetails',message:'details shown after calculation',data:{resultName:parts.join(' · '),sectionHidden:section.hidden,detailsHasResult},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
   }
 
   async function runQuickPortion(item, amount, saveToRecents = true) {
@@ -892,14 +886,44 @@
     return mapInstance;
   }
 
+  function supermarketMarkerStatus(isOpenNow) {
+    if (isOpenNow === true) return "open";
+    if (isOpenNow === false) return "closed";
+    return "unknown";
+  }
+
+  function supermarketStatusLabel(isOpenNow) {
+    if (isOpenNow === true) return "Geöffnet";
+    if (isOpenNow === false) return "Geschlossen";
+    return "Öffnungszeiten unbekannt";
+  }
+
+  function createMapMarkerIcon(status) {
+    return L.divIcon({
+      className: "",
+      html: `<span class="map-marker-pin map-marker-${status}" aria-hidden="true"></span>`,
+      iconSize: [26, 36],
+      iconAnchor: [13, 36],
+      popupAnchor: [0, -32],
+    });
+  }
+
   function renderMapItems(center, items) {
     const map = ensureMap();
     clearMapMarkers();
-    const homeMarker = L.marker([center.lat, center.lon]).addTo(mapMarkersLayer);
+    const homeMarker = L.marker([center.lat, center.lon], {
+      icon: createMapMarkerIcon("home"),
+    }).addTo(mapMarkersLayer);
     homeMarker.bindPopup("Home Assistant Standort");
     for (const item of items) {
-      const marker = L.marker([item.lat, item.lon]).addTo(mapMarkersLayer);
+      const markerStatus = supermarketMarkerStatus(item.is_open_now);
+      const marker = L.marker([item.lat, item.lon], {
+        icon: createMapMarkerIcon(markerStatus),
+      }).addTo(mapMarkersLayer);
       const address = item.address ? `<br>${escapeHtml(item.address)}` : "";
+      const statusLine = `<br><span class="map-popup-status map-popup-status-${markerStatus}">${escapeHtml(
+        supermarketStatusLabel(item.is_open_now)
+      )}</span>`;
       const hours = item.opening_hours_display
         ? `<div class="map-popup-hours"><strong>Öffnungszeiten:</strong><br>${escapeHtml(
             item.opening_hours_display
@@ -907,7 +931,7 @@
         : "";
       marker.bindPopup(
         `<strong>${escapeHtml(item.name || "Supermarkt")}</strong><br>` +
-          `${escapeHtml(item.type || "shop")} · ${formatNum(item.distance_km)} km${address}${hours}`
+          `${escapeHtml(item.type || "shop")} · ${formatNum(item.distance_km)} km${statusLine}${address}${hours}`
       );
     }
     const allPoints = [[center.lat, center.lon], ...items.map((item) => [item.lat, item.lon])];
@@ -960,9 +984,6 @@
       loadMapData().catch((err) => showMapStatus(err.message));
     }
     updateHeroTilesVisibility(panelName);
-    // #region agent log
-    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',runId:'post-fix',location:'app.js:switchPanel',message:'panel switched',data:{panelName,detailsHidden:$("details-section")?.hidden,detailsHasResult,detailsInMapPanel:!!$("panel-map")?.contains($("details-section")),activePanelId:document.querySelector('.panel.active')?.id},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
-    // #endregion
     showError(null);
   }
 

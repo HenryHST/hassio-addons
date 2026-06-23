@@ -5,6 +5,17 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.2] - 2025-06-23
+
+### Added
+
+- Map markers colored by opening status: blue (Home Assistant), green (open), red (closed), gray (unknown OSM hours)
+- API field `is_open_now` on `/map/supermarkets` items
+
+### Fixed
+
+- Map tab hides calculation details from other panels
+
 ## [1.7.0] - 2025-06-23
 
 ### Added
