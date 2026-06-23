@@ -54,7 +54,7 @@ def _diabetes_model(data: dict[str, Any]) -> DiabetesUnits:
 def health() -> dict[str, Any]:
     settings = _settings()
     with db.get_connection(settings.db_path) as conn:
-        payload = {
+        return {
             "status": "ok",
             "addon_version": settings.addon_version,
             "bls_version": db.get_meta(conn, "bls_version") or settings.bls_version,
@@ -66,31 +66,6 @@ def health() -> dict[str, Any]:
             "todo_list_enabled": settings.todo_list_enabled,
             "todo_list_entity_id": settings.todo_list_entity_id,
         }
-    # #region agent log
-    try:
-        import json as _json
-        from time import time as _time
-
-        _log_path = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
-        if _log_path.parent.is_dir():
-            with _log_path.open("a", encoding="utf-8") as _f:
-                _f.write(
-                    _json.dumps(
-                        {
-                            "sessionId": "92f7bb",
-                            "location": "main.py:health",
-                            "message": "health todo_list_enabled",
-                            "data": {"todo_list_enabled": payload["todo_list_enabled"]},
-                            "timestamp": int(_time() * 1000),
-                            "hypothesisId": "A",
-                        }
-                    )
-                    + "\n"
-                )
-    except OSError:
-        pass
-    # #endregion
-    return payload
 
 
 @app.get("/", response_class=HTMLResponse)
