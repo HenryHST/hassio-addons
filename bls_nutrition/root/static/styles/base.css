@@ -440,6 +440,13 @@ body {
   overflow: hidden;
 }
 
+.map-popup-hours {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+
 .nav-btn {
   display: flex;
   flex-direction: column;

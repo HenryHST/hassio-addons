@@ -115,6 +115,8 @@ def find_supermarkets(lat: float, lon: float, radius_km: int) -> list[dict[str, 
         street = str(tags.get("addr:street") or "").strip()
         city = str(tags.get("addr:city") or "").strip()
         address_parts = [part for part in [street, house, city] if part]
+        opening_hours = tags.get("opening_hours:de") or tags.get("opening_hours")
+        opening_hours_raw = str(opening_hours).strip() if opening_hours else None
         distance = _distance_km(lat, lon, poi_lat, poi_lon)
         results.append(
             {
@@ -124,6 +126,7 @@ def find_supermarkets(lat: float, lon: float, radius_km: int) -> list[dict[str, 
                 "lon": poi_lon,
                 "type": str(tags.get("shop") or "supermarket"),
                 "address": ", ".join(address_parts) if address_parts else None,
+                "opening_hours": opening_hours_raw,
                 "distance_km": round(distance, 2),
             }
         )

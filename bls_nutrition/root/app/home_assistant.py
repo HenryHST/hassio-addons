@@ -69,7 +69,7 @@ def add_todo_item(
         )
 
 
-def get_home_coordinates() -> tuple[float, float]:
+def get_home_location() -> dict[str, float | str]:
     base, token = _supervisor_auth()
     url = f"{base}/core/api/config"
     try:
@@ -86,9 +86,19 @@ def get_home_coordinates() -> tuple[float, float]:
         payload = response.json()
         latitude = float(payload["latitude"])
         longitude = float(payload["longitude"])
+        time_zone = str(payload.get("time_zone") or "UTC")
     except (KeyError, TypeError, ValueError) as exc:
         raise HomeAssistantError("Home Assistant liefert keine gueltigen Standortdaten.") from exc
-    return latitude, longitude
+    return {
+        "latitude": latitude,
+        "longitude": longitude,
+        "time_zone": time_zone,
+    }
+
+
+def get_home_coordinates() -> tuple[float, float]:
+    location = get_home_location()
+    return float(location["latitude"]), float(location["longitude"])
 
 
 def build_todo_description(barcode: str | None, brand: str | None) -> str | None:

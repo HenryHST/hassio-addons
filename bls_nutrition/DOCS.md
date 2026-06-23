@@ -96,8 +96,21 @@ Theme-Toggle im Header: System · Hell · Dunkel (`localStorage`):
 ### Map (Supermärkte)
 
 Optionaler Map-Tab mit OpenStreetMap-Karte. Das Add-on nutzt den Home-Assistant-Standort
-(`latitude`/`longitude`) und lädt Supermärkte per Overpass API im konfigurierten Radius
+(`latitude`/`longitude`, `time_zone`) und lädt Supermärkte per Overpass API im konfigurierten Radius
 (`map_radius_km`, max. 50 km).
+
+Marker-Popups zeigen **Öffnungszeiten** aus OpenStreetMap (`opening_hours` / `opening_hours:de`):
+
+| Situation | Anzeige |
+|-----------|---------|
+| Werktag / Samstag | Nur **heute**, z. B. `Heute (Di): 08:00–20:00` |
+| Sonntag | **Ganze Woche** (Mo–So, je eine Zeile) |
+| Feiertag am HA-Standort | `Geschlossen (Feiertag)` (optional mit Feiertagsname) |
+| Kein OSM-Tag | `Keine Angabe in OpenStreetMap` |
+
+Feiertage werden anhand der Home-Assistant-Zeitzone und des Standorts ermittelt
+(Bundesland per einmaligem Nominatim-Reverse-Geocoding, Ergebnis in `/data/map_location_cache.json`).
+OSM-Öffnungszeiten können unvollständig oder veraltet sein.
 
 ### Weitere Bereiche
 

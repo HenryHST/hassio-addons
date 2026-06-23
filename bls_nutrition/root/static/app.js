@@ -888,9 +888,14 @@
     for (const item of items) {
       const marker = L.marker([item.lat, item.lon]).addTo(mapMarkersLayer);
       const address = item.address ? `<br>${escapeHtml(item.address)}` : "";
+      const hours = item.opening_hours_display
+        ? `<div class="map-popup-hours"><strong>Öffnungszeiten:</strong><br>${escapeHtml(
+            item.opening_hours_display
+          ).replace(/\n/g, "<br>")}</div>`
+        : "";
       marker.bindPopup(
         `<strong>${escapeHtml(item.name || "Supermarkt")}</strong><br>` +
-          `${escapeHtml(item.type || "shop")} · ${formatNum(item.distance_km)} km${address}`
+          `${escapeHtml(item.type || "shop")} · ${formatNum(item.distance_km)} km${address}${hours}`
       );
     }
     const allPoints = [[center.lat, center.lon], ...items.map((item) => [item.lat, item.lon])];

@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import calculator, db, home_assistant, open_food_facts, overpass
+from app import calculator, db, home_assistant, open_food_facts, opening_hours_display, overpass
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
@@ -33,7 +33,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.6.3",
+    version="1.7.0",
     lifespan=lifespan,
 )
 
@@ -169,13 +169,20 @@ def map_supermarkets(radius_km: int | None = Query(default=None, ge=1, le=50)) -
     effective_radius = radius_km if radius_km is not None else settings.map_radius_km
     effective_radius = max(1, min(50, int(effective_radius)))
     try:
-        latitude, longitude = home_assistant.get_home_coordinates()
+        location = home_assistant.get_home_location()
     except home_assistant.HomeAssistantError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    latitude = float(location["latitude"])
+    longitude = float(location["longitude"])
+    time_zone = str(location["time_zone"])
     try:
         supermarkets = overpass.find_supermarkets(latitude, longitude, effective_radius)
     except overpass.OverpassError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    ctx = opening_hours_display.get_location_context(
+        latitude, longitude, time_zone, settings.data_dir
+    )
+    supermarkets = opening_hours_display.enrich_map_items(supermarkets, ctx)
     return {
         "center": {"lat": latitude, "lon": longitude},
         "radius_km": effective_radius,
