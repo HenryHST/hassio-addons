@@ -35,6 +35,7 @@
   let mapInstance = null;
   let mapMarkersLayer = null;
   let mapLoaded = false;
+  let detailsHasResult = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -94,6 +95,9 @@
   function updateHeroTilesVisibility(panelName) {
     const heroTiles = $("hero-tiles");
     if (heroTiles) heroTiles.hidden = panelName === "map";
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:updateHeroTilesVisibility',message:'hero tiles visibility',data:{panelName,heroTilesHidden:heroTiles?.hidden,detailsHidden:$("details-section")?.hidden,detailsHasResult},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
   }
 
   async function apiGet(path, signal) {
@@ -355,8 +359,12 @@
     }
 
     section.hidden = false;
+    detailsHasResult = true;
     toggle.setAttribute("aria-expanded", "false");
     content.hidden = true;
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:showDetails',message:'details shown after calculation',data:{resultName:parts.join(' · '),sectionHidden:section.hidden,detailsHasResult},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
   }
 
   async function runQuickPortion(item, amount, saveToRecents = true) {
@@ -948,6 +956,9 @@
       loadMapData().catch((err) => showMapStatus(err.message));
     }
     updateHeroTilesVisibility(panelName);
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:switchPanel',message:'panel switched',data:{panelName,detailsHidden:$("details-section")?.hidden,detailsHasResult,detailsInMapPanel:!!$("panel-map")?.contains($("details-section")),activePanelId:document.querySelector('.panel.active')?.id},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
     showError(null);
   }
 
