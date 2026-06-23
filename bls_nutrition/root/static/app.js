@@ -97,6 +97,9 @@
   function updateHeroTilesVisibility(panelName) {
     const heroTiles = $("hero-tiles");
     if (heroTiles) heroTiles.hidden = panelName === "map";
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:updateHeroTilesVisibility',message:'hero tiles visibility',data:{panelName,hidden:heroTiles?.hidden,display:heroTiles?getComputedStyle(heroTiles).display:null},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
   }
 
   async function apiGet(path, signal) {
