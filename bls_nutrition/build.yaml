@@ -1,4 +1,4 @@
 ---
 build_from:
-  aarch64: python:3.12-slim-bookworm
-  amd64: python:3.12-slim-bookworm
+  aarch64: python:3.13-slim-trixie
+  amd64: python:3.13-slim-trixie
