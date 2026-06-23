@@ -5,6 +5,12 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.3] - 2025-06-23
+
+### Changed
+
+- Removed deprecated `armv7` architecture (Home Assistant sunset of 32-bit platforms)
+
 ## [1.0.2] - 2025-12-17
 
 ### Security

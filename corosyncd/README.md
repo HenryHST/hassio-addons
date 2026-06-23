@@ -3,7 +3,6 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
-![Supports armv7 Architecture](https://img.shields.io/badge/armv7-yes-green.svg)
 
 Corosync QNetd (Quorum Network Daemon) for Home Assistant - provides an external vote for Proxmox VE cluster quorum calculations.
 
@@ -32,7 +31,7 @@ Node A ──────X────── Node B
 ### Key Features
 
 - ✅ **Secure**: No SSH server, no hardcoded passwords
-- ✅ **Multi-architecture**: Supports aarch64, amd64, armv7
+- ✅ **Multi-architecture**: Supports aarch64, amd64
 - ✅ **Configurable**: Adjustable port and log level
 - ✅ **Health monitoring**: Built-in health checks
 - ✅ **Dual versioning**: Track addon and Corosync versions separately
@@ -175,7 +174,6 @@ This add-on supports the following architectures:
 
 - `aarch64` (ARM 64-bit) - Raspberry Pi 4, etc.
 - `amd64` (x86-64) - Most PCs, Intel NUC, etc.
-- `armv7` (ARM 32-bit) - Raspberry Pi 3, etc.
 
 ## Security
 

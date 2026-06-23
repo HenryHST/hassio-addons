@@ -68,7 +68,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ["aarch64", "amd64", "armv7"]
+        arch: ["aarch64", "amd64"]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -97,7 +97,6 @@ jobs:
           case "${{ matrix.arch }}" in
             aarch64) echo "platform=linux/arm64" >> $GITHUB_OUTPUT ;;
             amd64) echo "platform=linux/amd64" >> $GITHUB_OUTPUT ;;
-            armv7) echo "platform=linux/arm/v7" >> $GITHUB_OUTPUT ;;
             *) echo "Unsupported architecture: ${{ matrix.arch }}" && exit 1 ;;
           esac
 
@@ -181,7 +180,7 @@ jobs:
             local prefix="$1"
             local -n out_ref="$2"
             out_ref=()
-            for arch in aarch64 amd64 armv7; do
+            for arch in aarch64 amd64; do
               tag="${IMAGE_NAME}:${prefix}${arch}"
               if docker buildx imagetools inspect "${tag}" >/dev/null 2>&1; then
                 out_ref+=("${tag}")

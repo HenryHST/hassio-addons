@@ -2,4 +2,3 @@
 build_from:
   aarch64: python:3.12-slim-bookworm
   amd64: python:3.12-slim-bookworm
-  armv7: python:3.12-slim-bookworm

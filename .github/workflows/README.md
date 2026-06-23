@@ -42,7 +42,7 @@ Builds and signs the netboot.xyz addon Docker images for all supported architect
 - Release published
 - Manual dispatch
 
-**Architectures:** aarch64, amd64, armv7
+**Architectures:** aarch64, amd64
 
 **Outputs:**
 - `ghcr.io/{repo}/netboot_xyz:{version}-{arch}`
@@ -58,7 +58,7 @@ Builds and signs the Network UPS Tools (NUT) addon Docker images for all support
 - Release published
 - Manual dispatch
 
-**Architectures:** aarch64, amd64, armv7
+**Architectures:** aarch64, amd64
 
 **Outputs:**
 - `ghcr.io/{repo}/nut:{version}-{arch}`
@@ -115,7 +115,6 @@ Both addons support multiple architectures:
 |--------------|----------|-------------|
 | aarch64 | linux/arm64 | ARM 64-bit (Raspberry Pi 4, 5) |
 | amd64 | linux/amd64 | x86 64-bit (Intel/AMD) |
-| armv7 | linux/arm/v7 | ARM 32-bit (Raspberry Pi 3) |
 
 ## GitHub Actions Permissions
 

@@ -11,7 +11,7 @@ LABEL \
     io.hass.description="netboot.xyz network boot manager" \
     io.hass.version="${BUILD_VERSION}" \
     io.hass.type="addon" \
-    io.hass.arch="aarch64|amd64|armv7" \
+    io.hass.arch="aarch64|amd64" \
     io.hass.netbootxyz.version="${NETBOOTXYZ_VERSION}"
 
 # Store versions in environment for runtime access

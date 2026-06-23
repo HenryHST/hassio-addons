@@ -34,7 +34,6 @@ This repository contains the following add-ons:
 ![Version][bls-version-shield]
 ![Supports aarch64 Architecture][bls-aarch64-shield]
 ![Supports amd64 Architecture][bls-amd64-shield]
-![Supports armv7 Architecture][bls-armv7-shield]
 
 _Bundeslebensmittelschlüssel (BLS) 4.0 mit Diabetes-Einheiten und Barcode-Scanner_
 
@@ -54,7 +53,6 @@ Deutsche Nährwertdatenbank für Home Assistant mit gKH/BE/KE/FPE-Berechnung (WE
 ![Version][netboot-version-shield]
 ![Supports aarch64 Architecture][netboot-aarch64-shield]
 ![Supports amd64 Architecture][netboot-amd64-shield]
-![Supports armv7 Architecture][netboot-armv7-shield]
 
 _Network boot manager for operating systems and utilities_
 
@@ -75,7 +73,6 @@ A convenient place to boot into any type of operating system or utility disk wit
 ![Version][nut-version-shield]
 ![Supports aarch64 Architecture][nut-aarch64-shield]
 ![Supports amd64 Architecture][nut-amd64-shield]
-![Supports armv7 Architecture][nut-armv7-shield]
 
 _Manage battery backup (UPS) devices_
 
@@ -96,7 +93,6 @@ Network UPS Tools (NUT) provides support for monitoring and managing Uninterrupt
 ![Version][corosyncd-version-shield]
 ![Supports aarch64 Architecture][corosyncd-aarch64-shield]
 ![Supports amd64 Architecture][corosyncd-amd64-shield]
-![Supports armv7 Architecture][corosyncd-armv7-shield]
 
 _External quorum device for Proxmox VE clusters_
 
@@ -131,7 +127,7 @@ This repository uses GitHub Actions for continuous integration and deployment:
 - **🔏 Image Signing**: All images are signed with Cosign for security
 - **🔒 Security Scanning**: Daily vulnerability scans with Trivy
 - **✅ Quality Checks**: Automated linting (YAML, Shell, Dockerfile)
-- **📦 Multi-Arch Support**: Images for aarch64, amd64, and armv7
+- **📦 Multi-Arch Support**: Images for aarch64 and amd64
 
 ### Available Workflows
 
@@ -203,17 +199,13 @@ SOFTWARE.
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
 [netboot-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[netboot-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [netboot-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [bls-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [bls-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[bls-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [bls-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [corosyncd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [corosyncd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[corosyncd-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[nut-armv7-shield]: https://img.shields.io/badge/armv7-yes-green.svg
 [nut-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg

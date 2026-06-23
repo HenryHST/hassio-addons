@@ -1,6 +1,6 @@
 ---
 name: netboot.xyz
-version: 1.0.2
+version: 1.0.3
 slug: netboot_xyz
 description: >-
   netboot_xyz is a convenient place to boot into any type of operating system
@@ -10,7 +10,6 @@ url: https://github.com/henryhst/hassio-addons/tree/master/netboot_xyz
 arch:
   - aarch64
   - amd64
-  - armv7
 map:
   - config:rw
   - ssl
