@@ -1,9 +1,8 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.6.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.6.3-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
-![Supports armv7 Architecture](https://img.shields.io/badge/armv7-yes-green.svg)
 
 Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Diabetes-Einheiten und Barcode-Lookup für Home Assistant.
 
@@ -13,12 +12,18 @@ Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Diabetes-Einheiten
 
 ![Ingress Web-UI](docs/images/ingress-navigation.png)
 
+| Suche | Barcode-Scan |
+|-------|----------------|
+| ![Suche mit Quick-Portion](docs/images/ingress-search.png) | ![Barcode-Scan](docs/images/ingress-barcode.png) |
+
 Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenbank (7.140 Lebensmittel, CC BY 4.0) und stellt eine REST-API bereit für:
 
-- Lebensmittelsuche
-- Portions- und Rezeptberechnung
+- Lebensmittelsuche (Live-Suche, Dual-Column BLS + OFF)
+- Quick-Portion inline (50/100/150 g Chips)
+- Portions- und Rezeptberechnung (dynamische Zutatenliste)
 - Diabetes-Einheiten: **gKH**, **BE**, **KE**, **FPE** (WETID-inspiriert)
-- Barcode-Lookup über **Open Food Facts** (inkl. Nutri-Score, Nova-Score, Eco-Score)
+- Barcode-Lookup und Kamera-Scan über **Open Food Facts** (inkl. Nutri-Score, Nova, Eco-Score)
+- Dark Mode und „Zuletzt berechnet“-Chips
 - Eigene Lebensmittel und Rezepte
 
 Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalten.

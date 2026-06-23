@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>BLS Nährwertdatenbank – Überblick (Demo)</title>
+  <title>BLS Nährwertdatenbank – Scan (Demo)</title>
   <link rel="stylesheet" href="../../root/static/styles/base.css">
   <link rel="stylesheet" href="../../root/static/styles/theme-diabetes.css">
 </head>
@@ -34,24 +34,49 @@
 
     <main class="main">
       <div class="panel active" role="tabpanel">
-        <h2 class="panel-title">Lebensmittel suchen</h2>
+        <h2 class="panel-title">Barcode scannen</h2>
         <form class="form">
-          <input type="search" class="input" placeholder="z. B. Apfel (mind. 2 Zeichen)" value="">
-          <button type="button" class="btn btn-primary">Suchen</button>
+          <input type="text" class="input" value="4008400407321" readonly>
+          <div class="form-row-inline">
+            <button type="button" class="btn btn-secondary">Kamera starten</button>
+            <button type="button" class="btn btn-primary">Barcode laden</button>
+          </div>
+        </form>
+        <div class="barcode-result">
+          <strong>Apfelchips natur</strong><br>
+          <span class="result-item-meta">BioMarkt</span>
+          <span class="score-badges">
+            <span class="score-badge-item">
+              <span class="score-badge-label">Nutri-Score</span>
+              <img class="score-badge" src="../../root/static/assets/scores/nutriscore-c.svg" alt="Nutri-Score C">
+            </span>
+            <span class="score-badge-item">
+              <span class="score-badge-label">Nova</span>
+              <img class="score-badge" src="../../root/static/assets/scores/nova-3.svg" alt="Nova 3">
+            </span>
+            <span class="score-badge-item">
+              <span class="score-badge-label">Eco-Score</span>
+              <img class="score-badge" src="../../root/static/assets/scores/ecoscore-b.svg" alt="Eco-Score B">
+            </span>
+          </span>
+        </div>
+        <form class="form form-inline">
+          <label class="label">Menge (g)</label>
+          <input type="number" class="input input-narrow" value="100" readonly>
+          <button type="button" class="btn btn-primary">Berechnen</button>
         </form>
       </div>
     </main>
 
     <nav class="bottom-nav" aria-label="Navigation">
-      <button type="button" class="nav-btn active" aria-current="page"><span class="nav-icon" aria-hidden="true">🔍</span><span class="nav-label">Suche</span></button>
-      <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">📷</span><span class="nav-label">Scan</span></button>
+      <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">🔍</span><span class="nav-label">Suche</span></button>
+      <button type="button" class="nav-btn active" aria-current="page"><span class="nav-icon" aria-hidden="true">📷</span><span class="nav-label">Scan</span></button>
       <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">🍽</span><span class="nav-label">Portion</span></button>
       <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">📋</span><span class="nav-label">Rezept</span></button>
     </nav>
 
     <footer class="footer">
-      <p>Daten: <a href="https://blsdb.de" target="_blank" rel="noopener">Max Rubner-Institut BLS 4.0</a> (CC BY 4.0)</p>
-      <p>Barcode: <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (ODbL)</p>
+      <p>Daten: Max Rubner-Institut BLS 4.0 (CC BY 4.0)</p>
       <p><em>Keine medizinische Beratung.</em></p>
     </footer>
   </div>

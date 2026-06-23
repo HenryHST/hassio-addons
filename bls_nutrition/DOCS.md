@@ -47,20 +47,27 @@ unter **Add-ons → BLS Nährwertdatenbank → Öffnen** oder im Sidebar-Panel *
 
 | Bereich | Beschreibung |
 |---------|--------------|
-| **Header** | Logo, Titel, BLS-Version, Badge mit Anzahl Lebensmittel (z. B. „7.140 LM“) |
+| **Header** | Logo, Titel, BLS-Version, Lebensmittel-Badge, Theme-Toggle (Hell/Dunkel/System) |
 | **Hero-Tiles** | gKH, BE, KE, FPE — WETID-inspirierte Diabetes-Einheiten, immer sichtbar |
 | **Hauptbereich** | Suche, Scan, Portion oder Rezept (je nach Tab) |
 | **Bottom-Nav** | Suche · Scan · Portion · Rezept |
 
-### Lebensmittelsuche (Dual-Column)
+### Lebensmittelsuche
 
-Parallele Suche in zwei Spalten — links **BLS 4.0** (lokal), rechts **Open Food Facts** (Internet):
+Live-Suche ab 2 Zeichen (Debounce), parallel in **BLS 4.0** (lokal) und **Open Food Facts** (Internet):
 
 ![Dual-Column-Suche](docs/images/ingress-search.png)
 
-1. Suchbegriff eingeben (z. B. „Apfel“) und **Suchen** tippen
-2. Treffer in der passenden Spalte antippen → wechselt zur **Portion** mit vorausgefüllter Quelle und ID
-3. Layout der Spalten über Add-on-Option `search_layout` steuerbar (`stacked` oder `side_by_side`)
+1. Suchbegriff eingeben — Ergebnisse erscheinen automatisch (oder **Suchen** tippen)
+2. Treffer antippen → Quick-Portion mit Chips **50 / 100 / 150 g** und eigener Menge
+3. Layout über `search_layout` (`stacked` oder `side_by_side`)
+4. **Zuletzt berechnet**-Chips unter dem Suchfeld (optional per `search_recents_enabled`)
+
+### Barcode scannen
+
+EAN manuell eingeben oder per **Kamera starten** (Browser mit `BarcodeDetector`):
+
+![Barcode-Scan](docs/images/ingress-barcode.png)
 
 ### Portion und Ergebnis
 
@@ -74,12 +81,24 @@ Nach der Berechnung aktualisieren sich die Hero-Tiles. Nährwertdetails erschein
 | ID / Code | BLS-Code (z. B. `F110000`) oder OFF-Barcode |
 | Menge | Gramm eingeben → **Berechnen** |
 
+### Rezept
+
+Dynamische Zutatenliste — beliebig viele Zeilen mit Quelle (BLS/OFF/Eigen), Code und Gramm:
+
+![Rezept berechnen](docs/images/ingress-recipe.png)
+
+### Dark Mode
+
+Theme-Toggle im Header: System · Hell · Dunkel (`localStorage`):
+
+![Dark Mode](docs/images/ingress-dark.png)
+
 ### Weitere Bereiche
 
 | Tab | Funktion |
 |-----|----------|
-| **Scan** | EAN/Barcode eingeben → Open-Food-Facts-Produkt laden, Menge setzen, berechnen |
-| **Rezept** | Bis zu 3 Zutaten (BLS-Codes + Gramm) und Portionenanzahl |
+| **Scan** | EAN/Barcode oder Kamera → OFF-Produkt laden, Menge setzen, berechnen |
+| **Rezept** | Dynamische Zutatenliste und Portionenanzahl |
 
 ### Nutri-Score, Nova-Score und Eco-Score
 
@@ -121,7 +140,7 @@ Add-on-Optionen:
 > Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
 > und feste Sensoren (siehe unten).
 
-Screenshots neu erzeugen (Maintainer): `bls_nutrition/docs/snapshots/capture.sh`
+Screenshots neu erzeugen (Maintainer): [`docs/snapshots/capture.sh`](docs/snapshots/capture.sh) — siehe [`docs/snapshots/README.md`](docs/snapshots/README.md)
 
 ### Custom Integration
 

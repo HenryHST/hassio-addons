@@ -1,0 +1,11 @@
+{
+  "name": "bls-nutrition-snapshots",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.49.1"
+  }
+}

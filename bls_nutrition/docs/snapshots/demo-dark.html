@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>BLS Nährwertdatenbank – Überblick (Demo)</title>
+  <meta name="theme-color" content="#121212">
+  <title>BLS Nährwertdatenbank – Dark Mode (Demo)</title>
   <link rel="stylesheet" href="../../root/static/styles/base.css">
   <link rel="stylesheet" href="../../root/static/styles/theme-diabetes.css">
 </head>
@@ -20,7 +21,7 @@
       <div class="header-actions">
         <span class="status-badge">7.140 LM</span>
         <button type="button" class="theme-toggle" aria-label="Darstellung wechseln">
-          <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+          <span class="theme-toggle-icon" aria-hidden="true">☾</span>
         </button>
       </div>
     </header>
@@ -36,9 +37,15 @@
       <div class="panel active" role="tabpanel">
         <h2 class="panel-title">Lebensmittel suchen</h2>
         <form class="form">
-          <input type="search" class="input" placeholder="z. B. Apfel (mind. 2 Zeichen)" value="">
+          <input type="search" class="input" placeholder="z. B. Apfel (mind. 2 Zeichen)">
           <button type="button" class="btn btn-primary">Suchen</button>
         </form>
+        <div class="search-recents">
+          <p class="search-recents-label">Zuletzt berechnet</p>
+          <div class="search-recents-chips">
+            <button type="button" class="recent-chip">Apfel, roh · 150 g</button>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -51,7 +58,6 @@
 
     <footer class="footer">
       <p>Daten: <a href="https://blsdb.de" target="_blank" rel="noopener">Max Rubner-Institut BLS 4.0</a> (CC BY 4.0)</p>
-      <p>Barcode: <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (ODbL)</p>
       <p><em>Keine medizinische Beratung.</em></p>
     </footer>
   </div>

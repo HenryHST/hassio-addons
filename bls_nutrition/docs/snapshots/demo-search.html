@@ -17,26 +17,19 @@
           <p class="header-subtitle">BLS 4.0</p>
         </div>
       </div>
-      <span class="status-badge">7.140 LM</span>
+      <div class="header-actions">
+        <span class="status-badge">7.140 LM</span>
+        <button type="button" class="theme-toggle" aria-label="Darstellung wechseln">
+          <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+        </button>
+      </div>
     </header>
 
     <section class="hero-tiles" aria-label="Diabetes-Einheiten">
-      <div class="hero-tile hero-tile-kh">
-        <span class="hero-tile-label">gKH</span>
-        <span class="hero-tile-value">—</span>
-      </div>
-      <div class="hero-tile hero-tile-be">
-        <span class="hero-tile-label">BE</span>
-        <span class="hero-tile-value">—</span>
-      </div>
-      <div class="hero-tile hero-tile-ke">
-        <span class="hero-tile-label">KE</span>
-        <span class="hero-tile-value">—</span>
-      </div>
-      <div class="hero-tile hero-tile-fpe">
-        <span class="hero-tile-label">FPE</span>
-        <span class="hero-tile-value">—</span>
-      </div>
+      <div class="hero-tile hero-tile-kh"><span class="hero-tile-label">gKH</span><span class="hero-tile-value">—</span></div>
+      <div class="hero-tile hero-tile-be"><span class="hero-tile-label">BE</span><span class="hero-tile-value">—</span></div>
+      <div class="hero-tile hero-tile-ke"><span class="hero-tile-label">KE</span><span class="hero-tile-value">—</span></div>
+      <div class="hero-tile hero-tile-fpe"><span class="hero-tile-label">FPE</span><span class="hero-tile-value">—</span></div>
     </section>
 
     <main class="main">
@@ -46,26 +39,38 @@
           <input type="search" class="input" value="Apfel" readonly>
           <button type="button" class="btn btn-primary">Suchen</button>
         </form>
-        <div class="search-results-grid search-layout-stacked">
+        <div class="search-recents">
+          <p class="search-recents-label">Zuletzt berechnet</p>
+          <div class="search-recents-chips">
+            <button type="button" class="recent-chip">Apfel, roh · 150 g</button>
+            <button type="button" class="recent-chip">Haferflocken · 50 g</button>
+          </div>
+        </div>
+        <div class="search-results-grid search-layout-side-by-side">
           <section class="search-column">
             <h3 class="search-column-title">BLS 4.0</h3>
             <ul class="result-list">
-              <li>
+              <li class="result-item-wrap is-expanded">
                 <button type="button" class="result-item">
                   <span class="result-item-name">Apfel, roh</span>
                   <span class="result-item-meta">F110000</span>
                 </button>
+                <div class="quick-portion">
+                  <div class="portion-chips">
+                    <button type="button" class="portion-chip">50 g</button>
+                    <button type="button" class="portion-chip">100 g</button>
+                    <button type="button" class="portion-chip">150 g</button>
+                  </div>
+                  <div class="portion-custom">
+                    <input type="number" class="input input-narrow portion-custom-input" value="100" readonly>
+                    <button type="button" class="btn btn-primary btn-sm">Berechnen</button>
+                  </div>
+                </div>
               </li>
-              <li>
+              <li class="result-item-wrap">
                 <button type="button" class="result-item">
                   <span class="result-item-name">Apfel, gedünstet</span>
                   <span class="result-item-meta">F110100</span>
-                </button>
-              </li>
-              <li>
-                <button type="button" class="result-item">
-                  <span class="result-item-name">Apfelsaft</span>
-                  <span class="result-item-meta">N120000</span>
                 </button>
               </li>
             </ul>
@@ -73,17 +78,26 @@
           <section class="search-column">
             <h3 class="search-column-title">Open Food Facts</h3>
             <ul class="result-list">
-              <li>
+              <li class="result-item-wrap">
                 <button type="button" class="result-item">
                   <span class="result-item-name">Apfelchips</span>
                   <span class="result-item-meta">4008400407321 · BioMarkt</span>
+                  <span class="score-badges">
+                    <span class="score-badge-item">
+                      <span class="score-badge-label">Nutri-Score</span>
+                      <img class="score-badge" src="../../root/static/assets/scores/nutriscore-c.svg" alt="Nutri-Score C">
+                    </span>
+                    <span class="score-badge-item">
+                      <span class="score-badge-label">Nova</span>
+                      <img class="score-badge" src="../../root/static/assets/scores/nova-3.svg" alt="Nova 3">
+                    </span>
+                  </span>
                 </button>
-              </li>
-              <li>
-                <button type="button" class="result-item">
-                  <span class="result-item-name">Apfelmark</span>
-                  <span class="result-item-meta">4005556001234 · Mühle</span>
-                </button>
+                <div class="result-item-actions">
+                  <button type="button" class="btn btn-todo">
+                    <span class="btn-todo-label">Zur Einkaufsliste</span>
+                  </button>
+                </div>
               </li>
             </ul>
           </section>
@@ -92,22 +106,10 @@
     </main>
 
     <nav class="bottom-nav" aria-label="Navigation">
-      <button type="button" class="nav-btn active" aria-current="page">
-        <span class="nav-icon" aria-hidden="true">🔍</span>
-        <span class="nav-label">Suche</span>
-      </button>
-      <button type="button" class="nav-btn">
-        <span class="nav-icon" aria-hidden="true">📷</span>
-        <span class="nav-label">Scan</span>
-      </button>
-      <button type="button" class="nav-btn">
-        <span class="nav-icon" aria-hidden="true">🍽</span>
-        <span class="nav-label">Portion</span>
-      </button>
-      <button type="button" class="nav-btn">
-        <span class="nav-icon" aria-hidden="true">📋</span>
-        <span class="nav-label">Rezept</span>
-      </button>
+      <button type="button" class="nav-btn active" aria-current="page"><span class="nav-icon" aria-hidden="true">🔍</span><span class="nav-label">Suche</span></button>
+      <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">📷</span><span class="nav-label">Scan</span></button>
+      <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">🍽</span><span class="nav-label">Portion</span></button>
+      <button type="button" class="nav-btn"><span class="nav-icon" aria-hidden="true">📋</span><span class="nav-label">Rezept</span></button>
     </nav>
 
     <footer class="footer">
