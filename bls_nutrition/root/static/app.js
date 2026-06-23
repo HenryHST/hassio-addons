@@ -89,6 +89,14 @@
         switchPanel("search");
       }
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:updateMapVisibility',message:'map visibility applied',data:{mapEnabled,navHidden:navMapBtn?.hidden,navDisplay:navMapBtn?getComputedStyle(navMapBtn).display:null},timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
+    // #endregion
+  }
+
+  function updateHeroTilesVisibility(panelName) {
+    const heroTiles = $("hero-tiles");
+    if (heroTiles) heroTiles.hidden = panelName === "map";
   }
 
   async function apiGet(path, signal) {
@@ -919,6 +927,9 @@
   // --- Navigation ---
 
   function switchPanel(panelName) {
+    if (panelName === "map" && !mapEnabled) {
+      panelName = "search";
+    }
     if (panelName !== "barcode") stopBarcodeScan();
     document.querySelectorAll(".panel").forEach((panel) => {
       const isActive = panel.id === `panel-${panelName}`;
@@ -934,6 +945,7 @@
     if (panelName === "map" && mapEnabled && !mapLoaded) {
       loadMapData().catch((err) => showMapStatus(err.message));
     }
+    updateHeroTilesVisibility(panelName);
     showError(null);
   }
 
@@ -977,6 +989,9 @@
       searchRecentsEnabled = parseConfigFlag(health.search_recents_enabled, true);
       mapEnabled = parseConfigFlag(health.map_enabled, false);
       mapRadiusKm = Math.max(1, Math.min(50, Number(health.map_radius_km) || 20));
+      // #region agent log
+      fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:loadHealth',message:'health map config',data:{rawMapEnabled:health.map_enabled,mapEnabled,mapRadiusKm},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
+      // #endregion
       applySearchLayout(health.search_layout || "stacked");
       applyTodoListVisibility();
       renderRecents();
