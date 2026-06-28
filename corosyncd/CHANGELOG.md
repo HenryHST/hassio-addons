@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed non-functional options `qnetd_port` and `tls_enabled` (port 5403 is fixed)
 - Documentation synced to 1.0.3
 
+### Fixed
+
+- Docker build: removed `corosync-qnetd -v` from image build (exits 1, broke GHCR publish and caused Supervisor 404)
+
 ## [1.0.2] - 2025-06-23
 
 ### Changed

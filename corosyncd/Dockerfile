@@ -27,8 +27,6 @@ RUN \
     && echo "Installed Corosync QNetd version:" \
     && COROSYNC_VERSION=$(dpkg -l | grep corosync-qnetd | awk '{print $3}') \
     && echo "  Version: ${COROSYNC_VERSION}" \
-    && export COROSYNC_VERSION \
-    && corosync-qnetd -v \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
