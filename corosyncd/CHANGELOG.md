@@ -5,6 +5,19 @@ All notable changes to the Corosync QNetd Home Assistant Add-on will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-06-28
+
+### Added
+
+- Custom AppArmor profile (`apparmor: true`)
+- CI smoke test: image build, port 5403, startup banner (`.github/workflows/test-corosyncd.yaml`)
+- VEX document for known scan findings (`.vex/corosyncd-known-issues.openvex.json`)
+
+### Changed
+
+- `COROSYNC_VERSION` persisted at build time (`/etc/corosync-qnetd-version`); entrypoint no longer calls `corosync-qnetd -v`
+- Build workflow: no GHCR push on PRs; Cosign signs image digest
+
 ## [1.0.5] - 2025-06-23
 
 ### Added

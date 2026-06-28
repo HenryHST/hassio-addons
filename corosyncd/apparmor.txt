@@ -1,0 +1,30 @@
+#include <tunables/global>
+
+profile corosyncd flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  capability,
+  file,
+  signal,
+  network,
+
+  capability setgid,
+  capability setuid,
+  capability dac_read_search,
+
+  /entrypoint.sh ix,
+  /bin/bash ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /usr/sbin/corosync-qnetd ix,
+  /etc/corosync/** r,
+  /etc/corosync-qnetd-version r,
+  /data/** rw,
+  /tmp/** rwk,
+  /var/run/** rw,
+
+  network inet stream,
+  network inet6 stream,
+
+  ptrace (trace,read) peer=docker-default,
+}

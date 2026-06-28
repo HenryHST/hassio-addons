@@ -120,9 +120,9 @@ The list of actions is expected to grow in the future.
 
 #### Sub-option: `upsmon`
 
-Add the necessary actions for a `upsmon` process to work. This is either set to
-`master` or `slave`. If creating an account for a `netclient` setup to connect
-this should be set to `slave`.
+Add the necessary actions for a `upsmon` process to work. Use `primary` or
+`secondary` (NUT 2.8+). The legacy values `master` and `slave` are still
+accepted and mapped automatically. For a `netclient` setup, use `secondary`.
 
 ### Option: `devices`
 
@@ -196,6 +196,13 @@ Recognized values are `netserver` and `netclient`.
   allow other clients to connect (either as slaves or for management).
 - `netclient`: Only runs `upsmon` to connect to a remote system running as
   `netserver`.
+
+#### Network listener (`upsd`)
+
+In `netserver` mode, `upsd` listens on `0.0.0.0:3493` so Home Assistant and other
+LAN clients can reach the NUT server. Restrict access at the firewall or Home
+Assistant host level if needed. The add-on does not expose port 3493 to the
+public internet by default.
 
 ### Option: `shutdown_host`
 

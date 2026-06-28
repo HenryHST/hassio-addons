@@ -6,6 +6,9 @@
 # ==============================================================================
 set -e
 
+# shellcheck source=/usr/bin/nut-config-helpers.sh
+source /usr/bin/nut-config-helpers.sh
+
 readonly USERS_CONF=/etc/nut/upsd.users
 readonly UPSD_CONF=/etc/nut/upsd.conf
 declare nutmode
@@ -59,9 +62,9 @@ if bashio::config.equals 'mode' 'netserver' ;then
     fi
     {
         echo
-        echo "[upsmonmaster]"
+        echo "[upsmonprimary]"
         echo "  password = ${upsmonpwd}"
-        echo "  upsmon master"
+        echo "  upsmon primary"
     } >> "${USERS_CONF}"
 
     for user in $(bashio::config "users|keys"); do
@@ -92,6 +95,7 @@ if bashio::config.equals 'mode' 'netserver' ;then
 
         if bashio::config.has_value "users[${user}].upsmon"; then
             upsmon=$(bashio::config "users[${user}].upsmon")
+            upsmon=$(normalize_upsmon_role "${upsmon}")
             echo "  upsmon ${upsmon}" >> "${USERS_CONF}"
         fi
     done
@@ -129,7 +133,7 @@ if bashio::config.equals 'mode' 'netserver' ;then
         IFS="$OIFS"
 
         bashio::log.debug "Writing MONITOR line for ${upsname}@localhost"
-        echo "MONITOR ${upsname}@localhost ${upspowervalue} upsmonmaster ${upsmonpwd} master" \
+        echo "MONITOR ${upsname}@localhost ${upspowervalue} upsmonprimary ${upsmonpwd} primary" \
             >> /etc/nut/upsmon.conf
     done
 

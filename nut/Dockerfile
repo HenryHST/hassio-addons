@@ -87,6 +87,7 @@ RUN chmod +x /etc/cont-init.d/* \
     && chmod +x /etc/services.d/upsd/run \
     && chmod +x /etc/services.d/upsd/finish \
     && chmod +x /usr/bin/notify \
+    && chmod +x /usr/bin/nut-config-helpers.sh \
     && chmod +x /usr/bin/shutdownhost
 
 # Build arguments

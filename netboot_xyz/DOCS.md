@@ -1,11 +1,18 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.0.6  
+**Add-on Version**: 1.0.8  
 **netboot.xyz Core Version**: 0.7.6
 
 > **Note**: The add-on version is independent of the netboot.xyz core version. The add-on version tracks 
 > changes to the Home Assistant integration, while the core version indicates the underlying netboot.xyz 
 > version being used.
+
+## Quick start (Ingress)
+
+1. Install and start the add-on.
+2. Open **Settings → Add-ons → netboot.xyz → Open Web UI** (Ingress on port 3000).
+3. Configure DHCP `next-server` to your Home Assistant host IP and pick a boot file from the table below.
+4. Optionally set `menu_version` in the add-on configuration to pin boot menu downloads.
 
 ## Installation
 

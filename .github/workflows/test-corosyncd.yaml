@@ -1,0 +1,58 @@
+---
+name: Test Corosync QNetd
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'corosyncd/**'
+      - '.github/workflows/test-corosyncd.yaml'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'corosyncd/**'
+      - '.github/workflows/test-corosyncd.yaml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Container smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t corosyncd:test ./corosyncd
+
+      - name: Run smoke test
+        run: |
+          set -euo pipefail
+          data_dir="$(mktemp -d)"
+          echo '{"log_level":"info"}' > "${data_dir}/options.json"
+
+          cid=$(docker run -d --name corosync-smoke \
+            -v "${data_dir}:/data" \
+            -p 15403:5403 \
+            corosyncd:test)
+
+          cleanup() {
+            docker rm -f "${cid}" >/dev/null 2>&1 || true
+            rm -rf "${data_dir}"
+          }
+          trap cleanup EXIT
+
+          for _ in $(seq 1 30); do
+            if nc -z localhost 15403; then
+              break
+            fi
+            sleep 1
+          done
+
+          nc -zv localhost 15403
+          docker logs "${cid}" | grep -q "Corosync QNetd Add-on"
+          docker logs "${cid}" | grep -q "NSS database: /data/corosync-qnetd/nssdb"

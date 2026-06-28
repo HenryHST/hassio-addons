@@ -1,6 +1,6 @@
 ---
 name: Network UPS Tools
-version: 1.0.7
+version: 1.0.8
 slug: nut
 description: Manage battery backup (UPS) devices
 url: https://github.com/henryhst/hassio-addons/tree/main/nut
@@ -47,7 +47,7 @@ schema:
         - str
       actions:
         - str
-      upsmon: list(master|slave)?
+      upsmon: list(master|slave|primary|secondary)?
   devices:
     - name: str
       driver: str

@@ -59,6 +59,12 @@ When updating VEX documents:
 - [Trivy VEX Documentation](https://trivy.dev/docs/supply-chain/vex/)
 - [VEX Use Cases](https://www.cisa.gov/resources-tools/resources/vex-use-cases)
 
+### `corosyncd-known-issues.openvex.json`
+
+Contains VEX statements for the Corosync QNetd addon regarding:
+
+- **CVE-2023-45853** (zlib1g): Not affected — vulnerable code not in execution path
+
 ## Maintenance
 
 VEX documents are reviewed:

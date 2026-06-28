@@ -5,6 +5,18 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.8] - 2026-06-28
+
+### Added
+
+- CI workflow: ShellCheck + unit tests (`test-nut.yaml`, `nut/tests/`)
+- `nut-config-helpers.sh` for shared config logic
+
+### Changed
+
+- NUT 2.8+ terminology: generated configs use `primary`/`secondary` (`master`/`slave` still accepted in schema)
+- DOCS: `upsmon` roles and `LISTEN 0.0.0.0:3493` network exposure documented
+
 ## [1.0.7] - 2025-06-23
 
 ### Added

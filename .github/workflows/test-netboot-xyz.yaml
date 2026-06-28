@@ -17,8 +17,42 @@ on:
       - 'netboot_xyz/**'
       - '.github/workflows/test-netboot-xyz.yaml'
   workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
+  shellcheck:
+    name: ShellCheck (add-on scripts)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: ./netboot_xyz/root
+          severity: warning
+
+  nginx-config:
+    name: nginx configuration syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Validate nginx configs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx gettext-base
+          export NETBOOTXYZ_VERSION=0.7.6
+          mkdir -p /tmp/netboot-config/nginx/site-confs /tmp/netboot-config/log/nginx
+          cp netboot_xyz/root/defaults/nginx.conf /tmp/netboot-config/nginx/nginx.conf
+          envsubst < netboot_xyz/root/defaults/default > /tmp/netboot-config/nginx/site-confs/default
+          sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/nginx.conf
+          sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/site-confs/default
+          nginx -t -c /tmp/netboot-config/nginx/nginx.conf
+
   npm-audit:
     name: npm audit (webapp dependencies)
     runs-on: ubuntu-latest

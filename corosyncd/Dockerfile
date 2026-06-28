@@ -6,7 +6,8 @@ ARG BUILD_DATE
 ARG BUILD_REF
 
 # Store versions for runtime access
-ENV ADDON_VERSION="${BUILD_VERSION}"
+ENV ADDON_VERSION="${BUILD_VERSION}" \
+    COROSYNC_VERSION_FILE=/etc/corosync-qnetd-version
 
 # Set shell with pipefail option for safer script execution
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
@@ -24,8 +25,8 @@ RUN \
         netcat-openbsd \
         procps \
         corosync-qnetd \
-    && echo "Installed Corosync QNetd version:" \
-    && COROSYNC_VERSION=$(dpkg -l | grep corosync-qnetd | awk '{print $3}') \
+    && COROSYNC_VERSION="$(dpkg-query -W -f='${Version}' corosync-qnetd)" \
+    && echo "${COROSYNC_VERSION}" > /etc/corosync-qnetd-version \
     && echo "  Version: ${COROSYNC_VERSION}" \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

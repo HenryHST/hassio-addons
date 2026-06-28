@@ -5,6 +5,18 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.8] - 2026-06-28
+
+### Added
+
+- Add-on icon (`icon.png`)
+- CI: ShellCheck on `root/*.sh`, `nginx -t` on rendered configs
+- Weekly scheduled npm audit re-run; Dependabot for GitHub Actions
+
+### Changed
+
+- DOCS: Ingress quick-start section
+
 ## [1.0.7] - 2025-06-23
 
 ### Added

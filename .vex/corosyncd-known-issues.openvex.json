@@ -1,0 +1,27 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://github.com/henryhst/hassio-addons/vex/corosyncd-known-issues",
+  "author": "henryhst",
+  "role": "Project Maintainer",
+  "timestamp": "2026-06-28T00:00:00Z",
+  "version": "1",
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2023-45853"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/henryhst/hassio-addons/corosyncd@1.0.6",
+          "identifiers": {
+            "purl": "pkg:deb/debian/zlib1g@1:1.2.13.dfsg-1"
+          }
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Corosync QNetd does not perform ZIP archive operations. The zlib code path for zipOpenNewFileInZip4_6 is not reachable from corosync-qnetd.",
+      "action_statement": "No action required. Debian security updates are applied during image build."
+    }
+  ]
+}

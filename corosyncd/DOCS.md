@@ -468,7 +468,7 @@ For critical setups, consider:
 
 This add-on uses **dual versioning**:
 
-### Addon Version (1.0.5)
+### Addon Version (1.0.6)
 
 Tracks Home Assistant add-on features:
 - Configuration options

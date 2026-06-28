@@ -33,10 +33,19 @@ setup_persistent_nssdb() {
     ln -sfn "${DATA_NSSDB}" "${ETC_NSSDB}"
 }
 
+if [[ -f "${COROSYNC_VERSION_FILE:-/etc/corosync-qnetd-version}" ]]; then
+    COROSYNC_VERSION=$(< "${COROSYNC_VERSION_FILE}")
+elif COROSYNC_VERSION=$(dpkg-query -W -f='${Version}' corosync-qnetd 2>/dev/null); then
+    :
+else
+    COROSYNC_VERSION="unknown"
+fi
+export COROSYNC_VERSION
+
 echo "-----------------------------------------------------------"
 echo " Corosync QNetd Add-on"
 echo " Add-on Version: ${ADDON_VERSION}"
-echo " Corosync Version: $(corosync-qnetd -v 2>&1 | head -n1 || echo 'unknown')"
+echo " Corosync Version: ${COROSYNC_VERSION}"
 echo "-----------------------------------------------------------"
 
 if [[ -f "${CONFIG_PATH}" ]]; then
