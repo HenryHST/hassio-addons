@@ -61,6 +61,11 @@ jobs:
 
           cleanup() {
             docker rm -f "${cid}" >/dev/null 2>&1 || true
+            # Container writes /data/chronyd as chrony; reclaim ownership before rm
+            docker run --rm --user root \
+              -v "${data_dir}:/data" \
+              alpine:3.24 \
+              chown -R "$(id -u):$(id -g)" /data >/dev/null 2>&1 || true
             rm -rf "${data_dir}"
           }
           trap cleanup EXIT
