@@ -1,0 +1,39 @@
+---
+name: Chrony NTP
+version: 1.0.0
+slug: chronyd
+description: >-
+  Chrony NTP server for Home Assistant — synchronize time from upstream NTP
+  pools and serve time to devices on your LAN.
+url: https://github.com/henryhst/hassio-addons/tree/main/chronyd
+startup: system
+arch:
+  - aarch64
+  - amd64
+init: false
+host_network: false
+map:
+  - data:rw
+backup: cold
+apparmor: true
+panel_icon: mdi:clock-outline
+ports:
+  123/udp: 123
+ports_description:
+  123/udp: NTP (Network Time Protocol)
+options:
+  ntp_servers: "0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
+  enable_nts: false
+  enable_sysclk: false
+  noclientlog: false
+  log_level: 0
+  timezone: UTC
+  enable_ptp: false
+schema:
+  ntp_servers: str
+  enable_nts: bool
+  enable_sysclk: bool
+  noclientlog: bool
+  log_level: int?
+  timezone: str?
+  enable_ptp: bool?

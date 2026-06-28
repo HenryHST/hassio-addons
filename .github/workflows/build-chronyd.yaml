@@ -1,0 +1,201 @@
+---
+name: Build Chrony NTP Addon
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'chronyd/**'
+      - '.github/workflows/build-chronyd.yaml'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'chronyd/**'
+      - '.github/workflows/build-chronyd.yaml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  ADDON_NAME: chronyd
+
+jobs:
+  information:
+    name: Gather addon information
+    outputs:
+      version: ${{ steps.get_info.outputs.version }}
+      name: ${{ steps.get_info.outputs.name }}
+      description: ${{ steps.get_info.outputs.description }}
+      architectures: ${{ steps.get_info.outputs.architectures }}
+      build_date: ${{ steps.get_info.outputs.build_date }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Get addon information
+        id: get_info
+        run: |
+          version=$(yq eval '.version' chronyd/config.yaml)
+          name=$(yq eval '.name' chronyd/config.yaml)
+          description=$(yq eval '.description' chronyd/config.yaml)
+          architectures=$(yq eval -o=json '.arch' chronyd/config.yaml | jq -c)
+          build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "name=${name}" >> $GITHUB_OUTPUT
+          echo "description=${description}" >> $GITHUB_OUTPUT
+          echo "architectures=${architectures}" >> $GITHUB_OUTPUT
+          echo "build_date=${build_date}" >> $GITHUB_OUTPUT
+
+  build:
+    name: Build ${{ matrix.arch }}
+    needs: information
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ["aarch64", "amd64"]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get platform for architecture
+        id: platform
+        run: |
+          case "${{ matrix.arch }}" in
+            aarch64) echo "platform=linux/arm64" >> $GITHUB_OUTPUT ;;
+            amd64) echo "platform=linux/amd64" >> $GITHUB_OUTPUT ;;
+            *) echo "Unsupported architecture: ${{ matrix.arch }}" && exit 1 ;;
+          esac
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+
+          TAGS="${IMAGE_NAME}:${{ needs.information.outputs.version }}-${{ matrix.arch }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            TAGS="${TAGS},${IMAGE_NAME}:latest-${{ matrix.arch }}"
+          fi
+
+          echo "image_name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./chronyd
+          file: ./chronyd/Dockerfile
+          platforms: ${{ steps.platform.outputs.platform }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ env.ADDON_NAME }}-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=${{ needs.information.outputs.version }}
+            BUILD_DATE=${{ needs.information.outputs.build_date }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_NAME=${{ needs.information.outputs.name }}
+            BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
+            BUILD_REPOSITORY=${{ github.repository }}
+
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v4.1.2
+
+      - name: Sign the published Docker image
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          IMAGE_DIGEST="${{ steps.build.outputs.digest }}"
+          cosign sign --yes "${{ steps.meta.outputs.image_name }}@${IMAGE_DIGEST}"
+
+  create-manifest:
+    name: Create multi-arch manifest
+    if: github.event_name != 'pull_request'
+    needs: [build, information]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push manifest
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.ADDON_NAME }}"
+          VERSION="${{ needs.information.outputs.version }}"
+
+          collect_tags() {
+            local prefix="$1"
+            local -n out_ref="$2"
+            out_ref=()
+            for arch in aarch64 amd64; do
+              tag="${IMAGE_NAME}:${prefix}${arch}"
+              if docker buildx imagetools inspect "${tag}" >/dev/null 2>&1; then
+                out_ref+=("${tag}")
+                echo "Including ${tag}"
+              else
+                echo "Skipping missing ${tag}"
+              fi
+            done
+          }
+
+          collect_tags "${VERSION}-" version_tags
+          if [[ ${#version_tags[@]} -lt 2 ]]; then
+            echo "Need at least 2 architecture images for ${IMAGE_NAME}:${VERSION}"
+            exit 1
+          fi
+
+          docker buildx imagetools create -t "${IMAGE_NAME}:${VERSION}" "${version_tags[@]}"
+
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.ref }}" == "refs/heads/master" ]]; then
+            collect_tags "latest-" latest_tags
+            if [[ ${#latest_tags[@]} -ge 2 ]]; then
+              docker buildx imagetools create -t "${IMAGE_NAME}:latest" "${latest_tags[@]}"
+            fi
+          fi

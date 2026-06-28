@@ -10,6 +10,7 @@ on:
       - 'netboot_xyz/**'
       - 'nut/**'
       - 'corosyncd/**'
+      - 'chronyd/**'
       - 'bls_nutrition/**'
       - '.github/workflows/security-scan.yaml'
   pull_request:
@@ -17,6 +18,7 @@ on:
       - 'netboot_xyz/**'
       - 'nut/**'
       - 'corosyncd/**'
+      - 'chronyd/**'
       - 'bls_nutrition/**'
   schedule:
     # Run daily at 02:00 UTC
@@ -250,6 +252,79 @@ jobs:
             echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
           fi
 
+  scan-chronyd:
+    name: Scan Chrony NTP Image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Chrony NTP image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./chronyd
+          file: ./chronyd/Dockerfile
+          tags: local/chronyd:scan
+          load: true
+          cache-from: type=gha,scope=chronyd-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=scan
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_NAME=Chrony NTP
+            BUILD_DESCRIPTION=Security scan
+            BUILD_REPOSITORY=${{ github.repository }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          image-ref: local/chronyd:scan
+          format: sarif
+          output: trivy-chronyd-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-chronyd-results.sarif
+          category: chronyd
+
+      - name: Run Trivy vulnerability scanner (table output)
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          image-ref: local/chronyd:scan
+          format: table
+          severity: CRITICAL,HIGH
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## Security Scan: Chrony NTP" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** chronyd" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base:** Alpine 3.24" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+
   scan-bls-nutrition:
     name: Scan BLS Nährwertdatenbank Image
     runs-on: ubuntu-latest
@@ -384,6 +459,24 @@ jobs:
           sarif_file: trivy-config-corosyncd.sarif
           category: config-corosyncd
 
+      - name: Run Trivy config scanner on Chrony NTP
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          scan-type: config
+          scan-ref: chronyd/Dockerfile
+          format: sarif
+          output: trivy-config-chronyd.sarif
+          exit-code: 0
+
+      - name: Upload config scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-config-chronyd.sarif
+          category: config-chronyd
+
       - name: Run Trivy config scanner on BLS Nährwertdatenbank
         uses: aquasecurity/trivy-action@master
         env:
@@ -421,6 +514,11 @@ jobs:
             aquasec/trivy:latest config /workspace/corosyncd/Dockerfile \
             --severity CRITICAL,HIGH,MEDIUM || true
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### Chrony NTP Dockerfile" >> $GITHUB_STEP_SUMMARY
+          docker run --rm -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest config /workspace/chronyd/Dockerfile \
+            --severity CRITICAL,HIGH,MEDIUM || true
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "#### BLS Nährwertdatenbank Dockerfile" >> $GITHUB_STEP_SUMMARY
           docker run --rm -v ${{ github.workspace }}:/workspace \
             aquasec/trivy:latest config /workspace/bls_nutrition/Dockerfile \
@@ -429,7 +527,7 @@ jobs:
   security-report:
     name: Generate Security Report
     runs-on: ubuntu-latest
-    needs: [scan-netboot-xyz, scan-nut, scan-corosyncd, scan-bls-nutrition, scan-dockerfiles]
+    needs: [scan-netboot-xyz, scan-nut, scan-corosyncd, scan-chronyd, scan-bls-nutrition, scan-dockerfiles]
     if: always()
     steps:
       - name: Generate overall summary
@@ -443,6 +541,7 @@ jobs:
           echo "| netboot.xyz Image | ${{ needs.scan-netboot-xyz.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| NUT Image | ${{ needs.scan-nut.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Corosync QNetd Image | ${{ needs.scan-corosyncd.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chrony NTP Image | ${{ needs.scan-chronyd.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| BLS Nährwertdatenbank Image | ${{ needs.scan-bls-nutrition.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Dockerfile Config | ${{ needs.scan-dockerfiles.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

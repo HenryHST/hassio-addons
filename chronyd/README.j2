@@ -1,0 +1,41 @@
+# Home Assistant Add-on: Chrony NTP
+
+![Version](https://img.shields.io/badge/version-{{ version }}-blue.svg)
+{% for arch in supported_architectures %}
+![Supports {{ arch }} Architecture](https://img.shields.io/badge/{{ arch }}-yes-green.svg)
+{% endfor %}
+
+Chrony NTP server for Home Assistant — synchronize from upstream NTP and serve time on your LAN.
+
+## About
+
+This add-on runs **Chrony** as an NTP server (UDP 123). It is the Home Assistant packaging of the former [ha-chronyd](https://github.com/HenryHST/ha-chronyd) project.
+
+## Installation
+
+1. Navigate to **Supervisor** → **Add-on Store**
+2. Add repository: `{{ repository }}`
+3. Install **Chrony NTP**
+4. Start the add-on
+
+## Configuration
+
+```yaml
+ntp_servers: "0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
+enable_nts: false
+log_level: 0
+timezone: UTC
+```
+
+See [DOCS.md](DOCS.md) for details.
+
+## Version Information
+
+- **Add-on Version**: {{ version }}
+- **Chrony Version**: see add-on startup logs
+
+## Support
+
+- [DOCS.md](DOCS.md)
+- [CHANGELOG.md](CHANGELOG.md)
+- [Issues]({{ repository }}/issues)

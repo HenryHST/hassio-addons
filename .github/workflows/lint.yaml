@@ -65,6 +65,12 @@ jobs:
           dockerfile: corosyncd/Dockerfile
           failure-threshold: warning
 
+      - name: Run Hadolint on chronyd
+        uses: hadolint/hadolint-action@v3.3.0
+        with:
+          dockerfile: chronyd/Dockerfile
+          failure-threshold: warning
+
       - name: Run Hadolint on bls_nutrition
         uses: hadolint/hadolint-action@v3.3.0
         with:
@@ -121,6 +127,18 @@ jobs:
           yq eval '.arch' corosyncd/config.yaml
 
           echo "✓ corosyncd config is valid"
+
+      - name: Validate chronyd config
+        run: |
+          echo "Validating chronyd/config.yaml..."
+          yq eval '.' chronyd/config.yaml > /dev/null
+
+          yq eval '.name' chronyd/config.yaml
+          yq eval '.version' chronyd/config.yaml
+          yq eval '.slug' chronyd/config.yaml
+          yq eval '.arch' chronyd/config.yaml
+
+          echo "✓ chronyd config is valid"
 
       - name: Validate bls_nutrition config
         run: |

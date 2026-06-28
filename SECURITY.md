@@ -155,6 +155,10 @@ trivy image nut:test
 docker build -t corosyncd:test ./corosyncd
 trivy image corosyncd:test
 
+# Scan Chrony NTP image
+docker build -t chronyd:test ./chronyd
+trivy image chronyd:test
+
 # Scan BLS Nährwertdatenbank image
 docker build -t bls_nutrition:test ./bls_nutrition
 trivy image bls_nutrition:test

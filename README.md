@@ -108,6 +108,25 @@ Corosync QNetd (Quorum Network Daemon) provides an external vote for cluster quo
 
 [:books: Read the full add-on documentation][addon-doc-corosyncd]
 
+### ✓ [Chrony NTP][addon-chronyd]
+
+![Version][chronyd-version-shield]
+![Supports aarch64 Architecture][chronyd-aarch64-shield]
+![Supports amd64 Architecture][chronyd-amd64-shield]
+
+_NTP time server for your LAN powered by Chrony_
+
+Run a Chrony NTP server on Home Assistant. Synchronize from upstream NTP pools, serve time on UDP 123, and optionally use NTS or PTP hardware clocks.
+
+**Features:**
+- Configurable upstream NTP servers (comma-separated)
+- Network Time Security (NTS) support
+- Persistent drift file across restarts
+- ESP32 reference-clock firmware included (hardware projects)
+- Health check via `chronyc tracking`
+
+[:books: Read the full add-on documentation][addon-doc-chronyd]
+
 ## Support
 
 Got questions?
@@ -138,6 +157,7 @@ This repository uses GitHub Actions for continuous integration and deployment:
 | Build netboot.xyz | Builds netboot.xyz addon | Push, PR, Release |
 | Build NUT | Builds NUT addon | Push, PR, Release |
 | Build Corosync QNetd | Builds corosyncd addon | Push, PR, Release |
+| Build Chrony NTP | Builds chronyd addon | Push, PR, Release |
 | Lint | Code quality checks | Push, PR |
 | Release | Version management | Release, Manual |
 
@@ -188,6 +208,8 @@ SOFTWARE.
 [addon-bls]: https://github.com/henryhst/hassio-addons/tree/master/bls_nutrition
 [addon-doc-bls]: https://github.com/henryhst/hassio-addons/blob/master/bls_nutrition/DOCS.md
 [addon-corosyncd]: https://github.com/henryhst/hassio-addons/tree/main/corosyncd
+[addon-chronyd]: https://github.com/henryhst/hassio-addons/tree/main/chronyd
+[addon-doc-chronyd]: https://github.com/henryhst/hassio-addons/blob/main/chronyd/DOCS.md
 [addon-doc-corosyncd]: https://github.com/henryhst/hassio-addons/blob/main/corosyncd/DOCS.md
 [addon-doc-netboot]: https://github.com/henryhst/hassio-addons/blob/main/netboot_xyz/DOCS.md
 [addon-doc-nut]: https://github.com/henryhst/hassio-addons/blob/main/nut/DOCS.md
@@ -209,3 +231,6 @@ SOFTWARE.
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [nut-version-shield]: https://img.shields.io/badge/version-v1.0.8-blue.svg
+[chronyd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
+[chronyd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
+[chronyd-version-shield]: https://img.shields.io/badge/version-v1.0.0-blue.svg

@@ -65,6 +65,21 @@ Builds and signs the Network UPS Tools (NUT) addon Docker images for all support
 - `ghcr.io/{repo}/nut:latest-{arch}` (on main branch)
 - Multi-arch manifest: `ghcr.io/{repo}/nut:{version}`
 
+#### `build-chronyd.yaml`
+Builds and signs the Chrony NTP addon Docker images for all supported architectures.
+
+**Triggers:**
+- Push to main/master branch (when chronyd files change)
+- Pull requests (when chronyd files change)
+- Manual dispatch
+
+**Architectures:** aarch64, amd64
+
+**Outputs:**
+- `ghcr.io/{repo}/chronyd:{version}-{arch}`
+- `ghcr.io/{repo}/chronyd:latest-{arch}` (on main branch)
+- Multi-arch manifest: `ghcr.io/{repo}/chronyd:{version}`
+
 ### ✅ Lint Workflow
 
 #### `lint.yaml`
@@ -109,7 +124,7 @@ cosign verify \
 
 ## Multi-Architecture Support
 
-Both addons support multiple architectures:
+All add-ons support multiple architectures:
 
 | Architecture | Platform | Description |
 |--------------|----------|-------------|
