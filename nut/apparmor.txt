@@ -1,0 +1,120 @@
+#include <tunables/global>
+
+profile nut flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  capability,
+  file,
+  signal,
+  network,
+
+  capability setgid,
+  capability setuid,
+  capability dac_read_search,
+  capability sys_chroot,
+
+  # S6-Overlay
+  /init ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  # Bashio
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
+
+  # Add-on configuration and state
+  /data/** rw,
+
+  # NUT configuration
+  /etc/nut/** rw,
+
+  # Runtime sockets and PID files
+  /run/nut/** rw,
+  /var/run/nut/** rw,
+
+  # USB UPS devices
+  /dev/bus/usb/** rw,
+  /dev/ttyUSB* rw,
+  /dev/ttyACM* rw,
+
+  # Supervisor API (notify script)
+  network inet stream,
+  network inet6 stream,
+
+  ptrace (trace,read) peer=docker-default,
+
+  /usr/sbin/upsd cx -> nut_upsd,
+  /usr/sbin/upsmon cx -> nut_upsmon,
+  /usr/sbin/upsdrvctl cx -> nut_upsdrvctl,
+
+  profile nut_upsd flags=(attach_disconnected,mediate_deleted) {
+    #include <abstractions/base>
+
+    capability,
+    file,
+    signal,
+    network,
+
+    signal (receive) peer=nut,
+
+    /usr/sbin/upsd ix,
+    /etc/nut/** r,
+    /run/nut/** rw,
+    /var/run/nut/** rw,
+    /data/** r,
+
+    network inet stream,
+    network inet6 stream,
+  }
+
+  profile nut_upsmon flags=(attach_disconnected,mediate_deleted) {
+    #include <abstractions/base>
+
+    capability,
+    file,
+    signal,
+    network,
+
+    signal (receive) peer=nut,
+
+    /usr/sbin/upsmon ix,
+    /usr/bin/notify ix,
+    /usr/bin/shutdownhost ix,
+    /usr/bin/wall ix,
+    /bin/bash ix,
+    /etc/nut/** r,
+    /run/nut/** rw,
+    /var/run/nut/** rw,
+    /data/** r,
+
+    network inet stream,
+    network inet6 stream,
+  }
+
+  profile nut_upsdrvctl flags=(attach_disconnected,mediate_deleted) {
+    #include <abstractions/base>
+
+    capability,
+    file,
+    signal,
+
+    signal (receive) peer=nut,
+
+    /usr/sbin/upsdrvctl ix,
+    /usr/lib/** ix,
+    /etc/nut/** r,
+    /run/nut/** rw,
+    /var/run/nut/** rw,
+    /dev/bus/usb/** rw,
+    /dev/ttyUSB* rw,
+    /dev/ttyACM* rw,
+  }
+}

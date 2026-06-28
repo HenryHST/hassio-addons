@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Corosync QNetd
 
-![Version](https://img.shields.io/badge/version-1.0.4-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 
@@ -155,7 +155,7 @@ Then check add-on logs for detailed connection information.
 
 This add-on uses **dual versioning**:
 
-- **Addon Version** (1.0.4): Add-on features, configuration options, bug fixes
+- **Addon Version** (1.0.5): Add-on features, configuration options, bug fixes
 - **Corosync Core Version** (3.1.7): Upstream Corosync QNetd version
 
 Both versions are displayed in:

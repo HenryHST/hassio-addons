@@ -21,6 +21,10 @@ bashio::log.info " Add-on Version: ${ADDON_VERSION:-unknown}"
 bashio::log.info " NUT Core Version: ${NUT_VERSION:-unknown}"
 bashio::log.info "-----------------------------------------------------------"
 
+if bashio::config.has_value 'log_level'; then
+    bashio::log.level "$(bashio::config 'log_level')"
+fi
+
 # Create /run/nut directory if it doesn't exist (symlinked to /var/run/nut)
 mkdir -p /var/run/nut
 mkdir -p /run/nut

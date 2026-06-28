@@ -23,10 +23,16 @@ if [[ -z "${NOTIFYTYPE}" ]]; then
     exit 1
 fi
 
+payload=$(jq -n \
+    --arg ups_name "${UPSNAME}" \
+    --arg notify_type "${NOTIFYTYPE}" \
+    --arg notify_msg "${NOTIFYMSG}" \
+    '{ups_name: $ups_name, notify_type: $notify_type, notify_msg: $notify_msg}')
+
 # Send notification to Home Assistant
 if ! curl -sS -f -X "POST" \
     -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
-    --data-binary "{\"ups_name\":\"${UPSNAME}\",\"notify_type\":\"${NOTIFYTYPE}\",\"notify_msg\":\"${NOTIFYMSG}\"}" \
+    --data-binary "${payload}" \
     "http://supervisor/core/api/events/nut.ups_event"; then
     echo "ERROR: Failed to send UPS event to Home Assistant" >&2
     exit 1

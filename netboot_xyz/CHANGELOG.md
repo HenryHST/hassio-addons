@@ -5,6 +5,19 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.7] - 2025-06-23
+
+### Added
+
+- Docker `HEALTHCHECK` on web UI port 3000
+- CI workflow: `npm audit` fails on HIGH+ vulnerabilities
+
+### Changed
+
+- AppArmor profile rewritten for supervisord stack (removed s6/bashio, `sys_admin`, broad `/dev/*`)
+- Removed unused `docker_api`; `hassio_role` lowered to `default`
+- Full OCI image labels in Dockerfile; `npm audit fix` no longer ignores failures
+
 ## [1.0.6] - 2025-06-28
 
 ### Fixed

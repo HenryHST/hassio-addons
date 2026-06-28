@@ -4,15 +4,31 @@ FROM alpine:3.24
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG BUILD_REF
+ARG BUILD_ARCH
+ARG BUILD_NAME
+ARG BUILD_DESCRIPTION
+ARG BUILD_REPOSITORY
 ARG NETBOOTXYZ_VERSION="0.7.6"
 
 LABEL \
-    io.hass.name="netboot.xyz" \
-    io.hass.description="netboot.xyz network boot manager" \
-    io.hass.version="${BUILD_VERSION}" \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
-    io.hass.arch="aarch64|amd64" \
-    io.hass.netbootxyz.version="${NETBOOTXYZ_VERSION}"
+    io.hass.version="${BUILD_VERSION}" \
+    io.hass.netbootxyz.version="${NETBOOTXYZ_VERSION}" \
+    maintainer="henryhst" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="henryhst Home Assistant Add-ons" \
+    org.opencontainers.image.authors="henryhst" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.url="https://github.com/henryhst/hassio-addons" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/netboot_xyz/DOCS.md" \
+    org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.revision="${BUILD_REF}" \
+    org.opencontainers.image.version="${BUILD_VERSION}"
 
 # Store versions in environment for runtime access
 ENV ADDON_VERSION="${BUILD_VERSION}" \
@@ -61,7 +77,7 @@ RUN \
     && npm install --omit=dev \
     && echo "Applying security patches..." \
     && npm update systeminformation@5.27.14 --save \
-    && npm audit fix --omit=dev || true \
+    && npm audit fix --omit=dev \
     && npm cache clean --force \
     && rm -rf /tmp/* /root/.npm
 
@@ -81,6 +97,9 @@ RUN chmod +x /start.sh /init.sh
 
 # Expose ports
 EXPOSE 69/udp 80 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://127.0.0.1:3000/ || exit 1
 
 # Default command
 CMD ["/bin/bash", "/start.sh"]

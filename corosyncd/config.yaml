@@ -1,6 +1,6 @@
 ---
 name: Corosync QNetd
-version: 1.0.4
+version: 1.0.5
 slug: corosyncd
 description: >-
   Corosync QNetd (Quorum Network Daemon) provides an external vote for cluster
@@ -12,6 +12,9 @@ arch:
   - aarch64
   - amd64
 init: false
+map:
+  - data:rw
+backup: cold
 hassio_api: true
 hassio_role: manager
 homeassistant_api: false

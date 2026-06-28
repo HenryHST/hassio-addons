@@ -1,6 +1,6 @@
 ---
 name: netboot.xyz
-version: 1.0.6
+version: 1.0.7
 slug: netboot_xyz
 description: >-
   netboot_xyz is a convenient place to boot into any type of operating system
@@ -16,12 +16,11 @@ map:
 boot: manual
 apparmor: true
 backup: cold
-docker_api: true
 host_network: false
 host_pid: false
 panel_admin: true
 hassio_api: true
-hassio_role: manager
+hassio_role: default
 init: false
 ingress: true
 ingress_port: 3000

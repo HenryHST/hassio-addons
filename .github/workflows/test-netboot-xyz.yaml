@@ -1,0 +1,46 @@
+---
+name: Test netboot.xyz
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'netboot_xyz/**'
+      - '.github/workflows/test-netboot-xyz.yaml'
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - 'netboot_xyz/**'
+      - '.github/workflows/test-netboot-xyz.yaml'
+  workflow_dispatch:
+
+jobs:
+  npm-audit:
+    name: npm audit (webapp dependencies)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install webapp and run npm audit
+        run: |
+          NETBOOTXYZ_VERSION=$(grep 'NETBOOTXYZ_VERSION=' netboot_xyz/Dockerfile | head -1 | cut -d'"' -f2)
+          echo "netboot.xyz webapp version: ${NETBOOTXYZ_VERSION}"
+          curl -fsSL -o /tmp/webapp.tar.gz \
+            "https://github.com/netbootxyz/webapp/archive/${NETBOOTXYZ_VERSION}.tar.gz"
+          mkdir -p /tmp/webapp
+          tar xzf /tmp/webapp.tar.gz -C /tmp/webapp --strip-components=1
+          cd /tmp/webapp
+          npm install --omit=dev
+          npm update systeminformation@5.27.14 --save
+          npm audit fix --omit=dev
+          npm audit --audit-level=high

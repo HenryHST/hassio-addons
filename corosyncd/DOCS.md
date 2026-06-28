@@ -289,9 +289,8 @@ Corosync QNetd uses TLS certificates for secure communication. Certificates are 
 
 **On QNetd (Home Assistant):**
 ```
-/var/run/corosync-qnetd/
-├── nssdb/           # NSS database with certificates
-└── corosync-qnetd.cert
+/data/corosync-qnetd/nssdb/   # Persistent NSS database (TLS certificates)
+/etc/corosync/qnetd/nssdb/    # Symlink to /data/corosync-qnetd/nssdb
 ```
 
 **On Proxmox Nodes:**
@@ -316,8 +315,8 @@ pvecm qdevice setup <QNETD_IP>
 Advanced users can manage certificates manually:
 
 ```bash
-# View certificates on QNetd
-certutil -L -d /var/run/corosync-qnetd/nssdb
+# View certificates on QNetd (Home Assistant add-on shell)
+certutil -L -d /data/corosync-qnetd/nssdb
 
 # View certificates on Proxmox
 certutil -L -d /etc/corosync/qdevice/net/nssdb
@@ -343,8 +342,7 @@ nc -zv <HOME_ASSISTANT_IP> 5403
 1. Verify add-on is running and started
 2. Check Home Assistant firewall allows port 5403
 3. Verify network connectivity (ping test)
-4. Check add-on configuration for correct port
-5. Review add-on logs for errors
+4. Review add-on logs for errors
 
 ### Issue: Cluster loses quorum despite QNetd
 
@@ -444,10 +442,10 @@ Monitor QNetd health through Home Assistant:
 
 #### Backup
 
-QNetd configuration is stored in the add-on's persistent data directory. To backup:
+QNetd TLS certificates and NSS database are stored in the add-on's persistent data directory (`/data/corosync-qnetd/`). To backup:
 
-1. Create Home Assistant backup
-2. Or manually backup: `/usr/share/hassio/addons/data/<addon>/`
+1. Create a Home Assistant backup (add-on uses `backup: cold`)
+2. Or manually backup: `/usr/share/hassio/addons/data/<addon_slug>/corosync-qnetd/`
 
 #### Recovery
 
@@ -470,7 +468,7 @@ For critical setups, consider:
 
 This add-on uses **dual versioning**:
 
-### Addon Version (1.0.4)
+### Addon Version (1.0.5)
 
 Tracks Home Assistant add-on features:
 - Configuration options

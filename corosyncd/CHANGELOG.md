@@ -5,6 +5,18 @@ All notable changes to the Corosync QNetd Home Assistant Add-on will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-06-23
+
+### Added
+
+- Persistent TLS/NSS storage under `/data/corosync-qnetd/` (`map: data:rw`, `backup: cold`)
+- `build.yaml` for explicit base image pinning
+
+### Changed
+
+- Entrypoint migrates NSS database from image to persistent storage on first start
+- Documentation: certificate paths, backup, fixed port 5403
+
 ## [1.0.4] - 2025-06-28
 
 ### Fixed
