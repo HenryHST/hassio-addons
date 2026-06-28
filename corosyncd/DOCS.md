@@ -125,7 +125,7 @@ In Home Assistant:
    ```
    -----------------------------------------------------------
     Corosync QNetd Add-on
-    Add-on Version: 1.0.3
+    Add-on Version: 1.0.4
     Corosync Version: 3.1.7
    -----------------------------------------------------------
    [corosync-qnetd] Starting Corosync QNetd daemon...
@@ -470,7 +470,7 @@ For critical setups, consider:
 
 This add-on uses **dual versioning**:
 
-### Addon Version (1.0.3)
+### Addon Version (1.0.4)
 
 Tracks Home Assistant add-on features:
 - Configuration options

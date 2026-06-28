@@ -7,10 +7,10 @@ The Corosync QNetd Home Assistant Add-on uses a **dual versioning** approach to 
 ### 1. Addon Version
 
 **Format:** Semantic Versioning (MAJOR.MINOR.PATCH)  
-**Example:** `1.0.3`  
+**Example:** `1.0.4`  
 **Visible in:**
 - Add-on info panel in Home Assistant
-- Startup logs: "Add-on Version: 1.0.3"
+- Startup logs: "Add-on Version: 1.0.4"
 - `config.yaml` version field
 - Docker image tags
 - GitHub releases

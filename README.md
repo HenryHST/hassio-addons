@@ -205,7 +205,7 @@ SOFTWARE.
 [bls-version-shield]: https://img.shields.io/badge/version-v1.7.4-blue.svg
 [corosyncd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [corosyncd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.3-blue.svg
+[corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.4-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [nut-version-shield]: https://img.shields.io/badge/version-v1.0.5-blue.svg
