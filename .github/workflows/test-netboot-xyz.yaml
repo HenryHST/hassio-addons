@@ -41,6 +41,6 @@ jobs:
           tar xzf /tmp/webapp.tar.gz -C /tmp/webapp --strip-components=1
           cd /tmp/webapp
           npm install --omit=dev
-          npm update systeminformation@5.27.14 --save
+          npm install systeminformation@5.27.14 express@4.22.2 js-yaml@4.3.0 --save --omit=dev
           npm audit fix --omit=dev
-          npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high

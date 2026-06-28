@@ -76,7 +76,7 @@ RUN \
     && tar xzf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
     && npm install --omit=dev \
     && echo "Applying security patches..." \
-    && npm update systeminformation@5.27.14 --save \
+    && npm install systeminformation@5.27.14 express@4.22.2 js-yaml@4.3.0 --save --omit=dev \
     && npm audit fix --omit=dev \
     && npm cache clean --force \
     && rm -rf /tmp/* /root/.npm

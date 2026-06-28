@@ -17,6 +17,11 @@ The add-on version tracks changes to the Home Assistant integration, configurati
 - AppArmor profile rewritten for supervisord stack (removed s6/bashio, `sys_admin`, broad `/dev/*`)
 - Removed unused `docker_api`; `hassio_role` lowered to `default`
 - Full OCI image labels in Dockerfile; `npm audit fix` no longer ignores failures
+- Security patches use `npm install` (not `npm update`) for pinned dependency versions (`systeminformation`, `express`, `js-yaml`)
+
+### Fixed
+
+- CI npm-audit job: `EUPDATEARGS` from invalid `npm update package@version` syntax
 
 ## [1.0.6] - 2025-06-28
 
