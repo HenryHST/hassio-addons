@@ -7,6 +7,25 @@ set -e
 
 readonly CONFIG_PATH=/data/options.json
 readonly DATA_LIB=/data/chronyd/lib
+readonly DEBUG_LOG=/data/chronyd/debug-92f7bb.ndjson
+
+# #region agent log
+debug_log() {
+    local hypothesis_id="$1" location="$2" message="$3" data="$4"
+    local payload
+    payload=$(jq -nc \
+        --arg sid "92f7bb" \
+        --arg hid "${hypothesis_id}" \
+        --arg loc "${location}" \
+        --arg msg "${message}" \
+        --argjson dat "${data}" \
+        --argjson ts "$(date +%s)000" \
+        '{sessionId:$sid,hypothesisId:$hid,location:$loc,message:$msg,data:$dat,timestamp:$ts,runId:"pre-fix"}')
+    echo "[DEBUG-92f7bb] ${payload}" >&2
+    mkdir -p /data/chronyd
+    echo "${payload}" >> "${DEBUG_LOG}" 2>/dev/null || true
+}
+# #endregion
 readonly ETC_CHRONY=/etc/chrony
 readonly RUN_CHRONY=/run/chrony
 readonly VAR_LIB_CHRONY=/var/lib/chrony
@@ -54,6 +73,15 @@ load_options() {
     LOG_LEVEL=$(jq -r '.log_level // 0' "${CONFIG_PATH}")
     TZ=$(jq -r '.timezone // "UTC"' "${CONFIG_PATH}")
     ENABLE_PTP=$(jq -r '.enable_ptp // false' "${CONFIG_PATH}")
+
+    # #region agent log
+    debug_log "H1" "entrypoint.sh:load_options" "options.json parsed" "$(jq -nc \
+        --arg ntp "${NTP_SERVERS}" \
+        --arg ntp_type "$(jq -r '.ntp_servers | type' "${CONFIG_PATH}")" \
+        --arg nts "${ENABLE_NTS}" \
+        --arg raw "$(jq -c '.ntp_servers' "${CONFIG_PATH}")" \
+        '{ntp_servers:$ntp,ntp_servers_type:$ntp_type,enable_nts:$nts,ntp_servers_raw:$raw}')"
+    # #endregion
 
     export NTP_SERVERS ENABLE_NTS ENABLE_SYSCLK NOCLIENTLOG LOG_LEVEL TZ
 

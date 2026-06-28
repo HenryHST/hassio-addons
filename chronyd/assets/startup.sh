@@ -5,6 +5,20 @@ set -eu
 
 DEFAULT_NTP="0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
 CHRONY_CONF_FILE="/etc/chrony/chrony.conf"
+DEBUG_LOG="/data/chronyd/debug-92f7bb.ndjson"
+
+# #region agent log
+debug_log() {
+ _hid="$1"
+ _msg="$2"
+ _data="$3"
+ _ts="$(date +%s)000"
+ _line="{\"sessionId\":\"92f7bb\",\"hypothesisId\":\"${_hid}\",\"location\":\"startup.sh\",\"message\":\"${_msg}\",\"data\":${_data},\"timestamp\":${_ts},\"runId\":\"pre-fix\"}"
+ echo "[DEBUG-92f7bb] ${_line}" >&2
+ mkdir -p /data/chronyd 2>/dev/null || true
+ echo "${_line}" >> "${DEBUG_LOG}" 2>/dev/null || true
+}
+# #endregion
 
 CURRENT_USER="$(id -u)"
 CURRENT_GROUP="$(id -g)"
@@ -74,9 +88,17 @@ else
  fi
 fi
 
+# #region agent log
+debug_log "H2" "startup before server loop" "{\"ENABLE_NTS\":\"${ENABLE_NTS:-false}\",\"NTP_SERVERS_len\":$(printf %s "${NTP_SERVERS}" | wc -c | tr -d ' '),\"chronyd_features\":\"$(chronyd -v 2>&1 | head -n1)\"}"
+# #endregion
+
 IFS=","
 for N in $NTP_SERVERS; do
  N_CLEANED=$(printf "%s" "$N" | tr -d '"')
+
+ # #region agent log
+ debug_log "H3" "server loop iteration" "{\"raw_token\":$(printf '%s' "$N" | jq -Rs .),\"cleaned\":$(printf '%s' "$N_CLEANED" | jq -Rs .)}"
+ # #endregion
 
  if echo "${N_CLEANED}" | grep -q '^127\.'; then
  echo "server ${N_CLEANED}" >> ${CHRONY_CONF_FILE}
@@ -107,6 +129,11 @@ fi
  echo
  echo "allow all"
 } >> ${CHRONY_CONF_FILE}
+
+# #region agent log
+debug_log "H4" "generated chrony.conf head" "$(sed -n '1,12p' ${CHRONY_CONF_FILE} | jq -Rs '{conf_head:.}')"
+debug_log "H4" "chrony.conf line 7" "$(sed -n '7p' ${CHRONY_CONF_FILE} | jq -Rs '{line7:.}')"
+# #endregion
 
 SYSCLK="-x"
 if [ "${ENABLE_SYSCLK:-false}" = true ]; then
