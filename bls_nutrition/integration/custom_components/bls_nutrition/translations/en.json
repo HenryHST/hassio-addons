@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "BLS Nutrition Database",
-        "description": "Connect to the BLS nutrition add-on.",
+        "description": "Connect to the BLS nutrition add-on. Default when installed on the same host: {default_host}:{default_port}.",
         "data": {
           "host": "Host",
           "port": "Port"
@@ -15,6 +15,37 @@
     },
     "abort": {
       "already_configured": "This connection is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "BLS Nutrition Database",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "default_barcode_amount_g": "Default barcode amount (g)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "food_count": { "name": "Food count" },
+      "bls_version": { "name": "Database version" },
+      "last_food": { "name": "Last food" },
+      "search_hits": { "name": "Search hits" },
+      "g_kh": { "name": "gKH" },
+      "be": { "name": "BE" },
+      "ke": { "name": "KE" },
+      "fpe": { "name": "FPE" },
+      "energy_kcal": { "name": "Energy" },
+      "protein": { "name": "Protein" },
+      "fat": { "name": "Fat" },
+      "carbs": { "name": "Carbohydrates" },
+      "nutriscore": { "name": "Nutri-Score" },
+      "nova": { "name": "Nova score" },
+      "ecoscore": { "name": "Eco-Score" }
     }
   }
 }

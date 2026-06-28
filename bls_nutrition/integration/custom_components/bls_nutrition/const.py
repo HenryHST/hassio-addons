@@ -3,6 +3,8 @@
 DOMAIN = "bls_nutrition"
 DEFAULT_HOST = "bls_nutrition"
 DEFAULT_PORT = 8090
+CONF_DEFAULT_BARCODE_AMOUNT_G = "default_barcode_amount_g"
+CONF_CONFIG_ENTRY_ID = "config_entry_id"
 
 SERVICE_SEARCH_FOOD = "search_food"
 SERVICE_LOOKUP_BARCODE = "lookup_barcode"

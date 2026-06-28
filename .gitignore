@@ -1,1 +1,9 @@
 .vscode
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+.venv-*/
+.cursor/
+*.log

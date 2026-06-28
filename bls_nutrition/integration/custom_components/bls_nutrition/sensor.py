@@ -47,14 +47,14 @@ async def async_setup_entry(
             BlsVersionSensor(runtime, entry),
             BlsLastFoodSensor(runtime, entry),
             BlsSearchHitsSensor(runtime, entry),
-            BlsDiabetesSensor(runtime, entry, ENTITY_G_KH, "g_kh", "gKH", UnitOfMass.GRAMS),
-            BlsDiabetesSensor(runtime, entry, ENTITY_BE, "be", "BE", None),
-            BlsDiabetesSensor(runtime, entry, ENTITY_KE, "ke", "KE", None),
-            BlsDiabetesSensor(runtime, entry, ENTITY_FPE, "fpe", "FPE", None),
-            BlsNutrientSensor(runtime, entry, ENTITY_ENERGY, "ENERCC", UnitOfEnergy.KILO_CALORIE),
-            BlsNutrientSensor(runtime, entry, ENTITY_PROTEIN, "PROT625", UnitOfMass.GRAMS),
-            BlsNutrientSensor(runtime, entry, ENTITY_FAT, "FAT", UnitOfMass.GRAMS),
-            BlsNutrientSensor(runtime, entry, ENTITY_CARBS, "CHO", UnitOfMass.GRAMS),
+            BlsDiabetesSensor(runtime, entry, ENTITY_G_KH, "g_kh", UnitOfMass.GRAMS),
+            BlsDiabetesSensor(runtime, entry, ENTITY_BE, "be", None),
+            BlsDiabetesSensor(runtime, entry, ENTITY_KE, "ke", None),
+            BlsDiabetesSensor(runtime, entry, ENTITY_FPE, "fpe", None),
+            BlsNutrientSensor(runtime, entry, ENTITY_ENERGY, "energy_kcal", UnitOfEnergy.KILO_CALORIE),
+            BlsNutrientSensor(runtime, entry, ENTITY_PROTEIN, "protein", UnitOfMass.GRAMS),
+            BlsNutrientSensor(runtime, entry, ENTITY_FAT, "fat", UnitOfMass.GRAMS),
+            BlsNutrientSensor(runtime, entry, ENTITY_CARBS, "carbs", UnitOfMass.GRAMS),
             BlsNutriscoreSensor(runtime, entry),
             BlsNovaSensor(runtime, entry),
             BlsEcoscoreSensor(runtime, entry),
@@ -72,13 +72,17 @@ def _device_info(entry: ConfigEntry) -> DeviceInfo:
 
 
 class BlsSensorBase(CoordinatorEntity, SensorEntity):
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
 
     def __init__(self, runtime: BlsRuntimeData, entry: ConfigEntry) -> None:
         super().__init__(runtime.coordinator)
         self._runtime = runtime
         self._entry = entry
         self._attr_device_info = _device_info(entry)
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.last_update_success
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -113,7 +117,7 @@ class BlsSensorBase(CoordinatorEntity, SensorEntity):
 
 
 class BlsFoodCountSensor(BlsSensorBase):
-    _attr_name = "BLS Lebensmittel Anzahl"
+    _attr_translation_key = "food_count"
     _attr_icon = "mdi:food-apple"
     _attr_native_unit_of_measurement = "Lebensmittel"
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -132,7 +136,7 @@ class BlsFoodCountSensor(BlsSensorBase):
 
 
 class BlsVersionSensor(BlsSensorBase):
-    _attr_name = "BLS Datenbank Version"
+    _attr_translation_key = "bls_version"
     _attr_icon = "mdi:database"
 
     @property
@@ -149,7 +153,7 @@ class BlsVersionSensor(BlsSensorBase):
 
 
 class BlsLastFoodSensor(BlsSensorBase):
-    _attr_name = "BLS Letztes Lebensmittel"
+    _attr_translation_key = "last_food"
     _attr_icon = "mdi:food"
 
     @property
@@ -193,7 +197,7 @@ class BlsLastFoodSensor(BlsSensorBase):
 
 
 class BlsSearchHitsSensor(BlsSensorBase):
-    _attr_name = "BLS Suchtreffer"
+    _attr_translation_key = "search_hits"
     _attr_icon = "mdi:magnify"
     _attr_state_class = SensorStateClass.MEASUREMENT
 
@@ -225,14 +229,13 @@ class BlsDiabetesSensor(BlsSensorBase):
         runtime: BlsRuntimeData,
         entry: ConfigEntry,
         object_id: str,
-        diabetes_key: str,
-        label: str,
+        translation_key: str,
         unit: str | None,
     ) -> None:
         super().__init__(runtime, entry)
         self._object_id = object_id
-        self._diabetes_key = diabetes_key
-        self._attr_name = f"BLS {label}"
+        self._diabetes_key = translation_key
+        self._attr_translation_key = translation_key
         self._attr_icon = "mdi:diabetes"
         if unit:
             self._attr_native_unit_of_measurement = unit
@@ -253,28 +256,33 @@ class BlsDiabetesSensor(BlsSensorBase):
 
 
 class BlsNutrientSensor(BlsSensorBase):
+    _ICONS = {
+        "energy_kcal": "mdi:fire",
+        "protein": "mdi:food-steak",
+        "fat": "mdi:oil",
+        "carbs": "mdi:bread-slice",
+    }
+
     def __init__(
         self,
         runtime: BlsRuntimeData,
         entry: ConfigEntry,
         object_id: str,
-        nutrient_key: str,
+        translation_key: str,
         unit: str,
     ) -> None:
         super().__init__(runtime, entry)
         self._object_id = object_id
-        self._nutrient_key = nutrient_key
+        self._nutrient_key = {
+            "energy_kcal": "ENERCC",
+            "protein": "PROT625",
+            "fat": "FAT",
+            "carbs": "CHO",
+        }[translation_key]
+        self._attr_translation_key = translation_key
         self._attr_native_unit_of_measurement = unit
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        labels = {
-            "ENERCC": ("Energie", "mdi:fire"),
-            "PROT625": ("Protein", "mdi:food-steak"),
-            "FAT": ("Fett", "mdi:oil"),
-            "CHO": ("Kohlenhydrate", "mdi:bread-slice"),
-        }
-        label, icon = labels.get(nutrient_key, (nutrient_key, "mdi:chart-line"))
-        self._attr_name = f"BLS {label}"
-        self._attr_icon = icon
+        self._attr_icon = self._ICONS.get(translation_key, "mdi:chart-line")
 
     @property
     def unique_id(self) -> str:
@@ -301,7 +309,7 @@ class BlsOffScoreSensorBase(BlsSensorBase):
 
 
 class BlsNutriscoreSensor(BlsOffScoreSensorBase):
-    _attr_name = "BLS Nutri-Score"
+    _attr_translation_key = "nutriscore"
     _attr_icon = "mdi:food-apple-outline"
 
     @property
@@ -322,7 +330,7 @@ class BlsNutriscoreSensor(BlsOffScoreSensorBase):
 
 
 class BlsNovaSensor(BlsOffScoreSensorBase):
-    _attr_name = "BLS Nova-Score"
+    _attr_translation_key = "nova"
     _attr_icon = "mdi:food-variant"
 
     @property
@@ -343,7 +351,7 @@ class BlsNovaSensor(BlsOffScoreSensorBase):
 
 
 class BlsEcoscoreSensor(BlsOffScoreSensorBase):
-    _attr_name = "BLS Eco-Score"
+    _attr_translation_key = "ecoscore"
     _attr_icon = "mdi:leaf"
 
     @property

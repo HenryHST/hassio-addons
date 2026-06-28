@@ -5,6 +5,30 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2025-06-28
+
+### Added
+
+- Home Assistant integration: Options Flow (host, port, default barcode amount)
+- Services return responses (`supports_response`) for search, barcode, portion, recipe
+- Service field `config_entry_id` for multi-instance setups
+- Service `lookup_barcode` accepts `amount_g`
+- Sensor entity translations (DE/EN) and availability when add-on is unreachable
+- Local Leaflet bundle (map works without CDN)
+- DOCS: Schnellstart-Checklist for full HA setup
+- HACS publish guide (`integration/HACS_PUBLISH.md`)
+
+### Changed
+
+- Integration version synced with add-on (1.7.3)
+- Unified todo list default: `todo.shopping_list` everywhere
+- Services unregister on last integration unload
+
+### Fixed
+
+- `todo_list_enabled` runtime default aligned with add-on config (`true`)
+- `repository.json` maintainer typo
+
 ## [1.7.2] - 2025-06-23
 
 ### Added

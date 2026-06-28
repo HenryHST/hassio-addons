@@ -21,12 +21,25 @@ fields:
 ---
 service: bls_nutrition.lookup_barcode
 name: Barcode suchen
-description: Sucht ein Packungsprodukt über Open Food Facts.
+description: Sucht ein Packungsprodukt über Open Food Facts und berechnet die Portion.
 fields:
   barcode:
     name: Barcode (EAN)
     required: true
     example: "4008400407321"
+    selector:
+      text:
+  amount_g:
+    name: Menge (g)
+    description: Portion in Gramm (Standard aus Integrations-Optionen).
+    selector:
+      number:
+        min: 0.1
+        step: 0.1
+        unit_of_measurement: g
+  config_entry_id:
+    name: Config Entry ID
+    description: Nur bei mehreren BLS-Integrationen erforderlich.
     selector:
       text:
 
@@ -140,7 +153,7 @@ fields:
       text:
   entity_id:
     name: To-do-Entity
-    description: Ziel-Liste, z. B. todo.einkaufsliste
-    default: todo.einkaufsliste
+    description: Ziel-Liste, z. B. todo.shopping_list
+    default: todo.shopping_list
     selector:
       text:

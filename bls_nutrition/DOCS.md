@@ -20,7 +20,19 @@ Das Add-on stellt die deutsche BLS 4.0 Nährwertdatenbank lokal in Home Assistan
 
 Beim ersten Start lädt das Add-on die BLS-Daten von [blsdb.de](https://blsdb.de/download). Das kann 5–15 Minuten dauern.
 
-### Add-on aktualisieren
+## Schnellstart (Home Assistant)
+
+Checkliste für die vollständige Einrichtung:
+
+1. **Add-on installieren** — Repository `https://github.com/henryhst/hassio-addons` → **BLS Nährwertdatenbank** installieren und starten
+2. **Ingress prüfen** — Add-on öffnen oder `http://<host>:8090/health` (Status `ok`)
+3. **Integration hinzufügen** — Einstellungen → Geräte & Dienste → Integration hinzufügen → **BLS Nährwertdatenbank** → Host `bls_nutrition`, Port `8090`
+4. **Helper-Paket** (optional, für Lovelace-Dashboard) — `integration/packages/bls_nutrition.yaml` nach `config/packages/` kopieren und Home Assistant neu starten
+5. **Dashboard** — Nach Integration erscheint **BLS Nährwert** unter Dashboards (oder manuell importieren)
+
+Erwartete Sensoren: `sensor.bls_nutrition_food_count`, `sensor.bls_nutrition_g_kh`, …
+
+## Add-on aktualisieren
 
 Updates werden als vorgefertigtes Container-Image von GitHub Container Registry bezogen (`ghcr.io/henryhst/hassio-addons/bls_nutrition`).
 
@@ -164,7 +176,7 @@ Add-on-Optionen:
 | Option | Default | Beschreibung |
 |--------|---------|--------------|
 | `todo_list_enabled` | `true` | Button anzeigen |
-| `todo_list_entity_id` | `todo.einkaufsliste` | Ziel-To-do-Entity |
+| `todo_list_entity_id` | `todo.shopping_list` | Ziel-To-do-Entity |
 
 > Das **Lovelace-Dashboard** der Integration bleibt eine separate Oberfläche für Automatisierungen
 > und feste Sensoren (siehe unten).
@@ -184,6 +196,7 @@ Kopiere den Ordner `integration/custom_components/bls_nutrition` nach
 #### Option B: HACS
 
 Verwende ein **separates** Integrations-Repository. Siehe
+[`integration/HACS_PUBLISH.md`](integration/HACS_PUBLISH.md) und
 [`integration/README.md`](integration/README.md) für die Veröffentlichung als
 eigenes GitHub-Repo (z. B. `homeassistant-bls-nutrition`).
 
@@ -192,6 +205,9 @@ eigenes GitHub-Repo (z. B. `homeassistant-bls-nutrition`).
 1. **Einstellungen** → **Geräte & Dienste** → **Integration hinzufügen**
 2. **BLS Nährwertdatenbank** wählen
 3. Host: `bls_nutrition` (Supervisor-intern), Port: `8090`
+4. Optional: **Konfigurieren** → Host/Port oder Standard-Barcode-Menge (g) anpassen
+
+Services `search_food`, `lookup_barcode`, `calculate_portion` und `calculate_recipe` liefern eine **Antwort** (kein Event-Polling nötig). Bei mehreren Integrationen `config_entry_id` angeben.
 
 ## Configuration
 
@@ -292,7 +308,7 @@ data:
   name: Kölln Haferflocken
   barcode: "4008400407321"
   brand: Kölln
-  entity_id: todo.einkaufsliste
+  entity_id: todo.shopping_list
 ```
 
 ## Dashboard

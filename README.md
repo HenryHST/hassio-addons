@@ -202,7 +202,7 @@ SOFTWARE.
 [netboot-version-shield]: https://img.shields.io/badge/version-v1.0.4-blue.svg
 [bls-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [bls-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[bls-version-shield]: https://img.shields.io/badge/version-v1.7.2-blue.svg
+[bls-version-shield]: https://img.shields.io/badge/version-v1.7.3-blue.svg
 [corosyncd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [corosyncd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.2-blue.svg

@@ -97,7 +97,7 @@ def get_settings() -> Settings:
             data_dir, "search_recents_enabled", "BLS_SEARCH_RECENTS_ENABLED", True
         ),
         todo_list_enabled=_read_option_bool(
-            data_dir, "todo_list_enabled", "BLS_TODO_LIST_ENABLED", False
+            data_dir, "todo_list_enabled", "BLS_TODO_LIST_ENABLED", True
         ),
         todo_list_entity_id=os.environ.get(
             "BLS_TODO_LIST_ENTITY_ID", "todo.shopping_list"

@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "BLS Nährwertdatenbank",
-        "description": "Verbindung zum BLS-Nährwert-Add-on herstellen.",
+        "description": "Verbindung zum BLS-Nährwert-Add-on herstellen. Standard bei installiertem Add-on auf demselben Host: {default_host}:{default_port}.",
         "data": {
           "host": "Host",
           "port": "Port"
@@ -15,6 +15,37 @@
     },
     "abort": {
       "already_configured": "Diese Verbindung ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "BLS Nährwertdatenbank",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "default_barcode_amount_g": "Standard-Menge Barcode (g)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "food_count": { "name": "Lebensmittel Anzahl" },
+      "bls_version": { "name": "Datenbank Version" },
+      "last_food": { "name": "Letztes Lebensmittel" },
+      "search_hits": { "name": "Suchtreffer" },
+      "g_kh": { "name": "gKH" },
+      "be": { "name": "BE" },
+      "ke": { "name": "KE" },
+      "fpe": { "name": "FPE" },
+      "energy_kcal": { "name": "Energie" },
+      "protein": { "name": "Protein" },
+      "fat": { "name": "Fett" },
+      "carbs": { "name": "Kohlenhydrate" },
+      "nutriscore": { "name": "Nutri-Score" },
+      "nova": { "name": "Nova-Score" },
+      "ecoscore": { "name": "Eco-Score" }
     }
   }
 }
