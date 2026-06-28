@@ -9,7 +9,7 @@ declare interval
 if bashio::config.false 'enable_home_assistant_sensors' \
     || ! bashio::config.equals 'mode' 'netserver'; then
     bashio::log.info "Home Assistant sensor sync disabled"
-    exec s6-notifyoncheck -- sleep infinity
+    exec sleep infinity
 fi
 
 interval=$(bashio::config 'homeassistant_poll_interval')

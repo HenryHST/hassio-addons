@@ -5,6 +5,12 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.1.1] - 2026-06-28
+
+### Fixed
+
+- `ha-sensors` service crash loop when `enable_home_assistant_sensors: false` (`s6-notifyoncheck` without `notification-fd`)
+
 ## [1.1.0] - 2026-06-28
 
 ### Added

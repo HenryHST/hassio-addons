@@ -8,7 +8,7 @@ declare port
 
 if bashio::config.false 'enable_prometheus'; then
     bashio::log.info "Prometheus metrics disabled"
-    exec s6-notifyoncheck -- sleep infinity
+    exec sleep infinity
 fi
 
 port=$(bashio::config 'prometheus_port')

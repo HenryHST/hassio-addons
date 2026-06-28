@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-**Add-on Version**: 1.1.0  
+**Add-on Version**: 1.1.1  
 **NUT Core Version**: 2.8.1-5 (Debian trixie package; see `/etc/nut-version` in the container)
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 

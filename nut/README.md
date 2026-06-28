@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-[![Release](https://img.shields.io/badge/version-v1.1.0-blue.svg)](https://github.com/henryhst/hassio-addons/tree/main/nut) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
+[![Release](https://img.shields.io/badge/version-v1.1.1-blue.svg)](https://github.com/henryhst/hassio-addons/tree/main/nut) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
 
 [![Discord](https://img.shields.io/discord/478094546522079232.svg)](https://discord.me/hassioaddons) [![Community Forum](https://img.shields.io/badge/community-forum-brightgreen.svg)](https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516)
 
@@ -8,7 +8,7 @@ A Network UPS Tools daemon to allow you to easily manage battery backup (UPS)
 devices connected to your Home Assistant machine.
 
 **Version Information:**
-- Add-on Version: 1.1.0 (Home Assistant integration)
+- Add-on Version: 1.1.1 (Home Assistant integration)
 - NUT Core: 2.8.1-5 (Debian trixie; runtime: `/etc/nut-version`)
 - Home Assistant: UPS status + numeric sensors (see [DOCS.md](DOCS.md#home-assistant-sensors))
 
