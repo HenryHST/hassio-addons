@@ -80,6 +80,7 @@ fi
 if [ -z "${NTP_SERVERS:-}" ]; then
  NTP_SERVERS="${DEFAULT_NTP}"
 fi
+NTP_SERVERS=$(printf '%s' "${NTP_SERVERS}" | tr ',;' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | awk 'NF' | paste -sd, -)
 
 if [ -z "${LOG_LEVEL:-}" ]; then
  LOG_LEVEL=0
@@ -132,7 +133,7 @@ fi
  echo "driftfile /var/lib/chrony/chrony.drift"
  echo "makestep 0.1 3"
  if [ -n "${NTP_DIRECTIVES:-}" ]; then
- echo -e "${NTP_DIRECTIVES}"
+ printf '%b\n' "${NTP_DIRECTIVES}"
  fi
  if [ "${NOCLIENTLOG:-false}" = true ]; then
  echo "noclientlog"

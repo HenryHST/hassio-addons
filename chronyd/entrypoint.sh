@@ -51,8 +51,12 @@ setup_persistent_storage() {
     fi
     ln -sfn "${DATA_LIB}" "${VAR_LIB_CHRONY}"
 
-    chown -R chrony:chrony "${DATA_LIB}" "${ETC_CHRONY}" "${RUN_CHRONY}" 2>/dev/null || true
+    chown -R chrony:chrony /data/chronyd "${ETC_CHRONY}" "${RUN_CHRONY}" 2>/dev/null || true
     chmod 1750 "${ETC_CHRONY}" "${RUN_CHRONY}" 2>/dev/null || true
+}
+
+canonicalize_ntp_server_list() {
+    printf '%s' "$1" | tr ',;' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | awk 'NF' | paste -sd, -
 }
 
 normalize_ntp_servers() {
@@ -91,7 +95,7 @@ load_options() {
         return
     fi
 
-    NTP_SERVERS=$(normalize_ntp_servers "${CONFIG_PATH}")
+    NTP_SERVERS=$(canonicalize_ntp_server_list "$(normalize_ntp_servers "${CONFIG_PATH}")")
     ENABLE_NTS=$(jq -r '.enable_nts // false' "${CONFIG_PATH}")
     ENABLE_SYSCLK=$(jq -r '.enable_sysclk // false' "${CONFIG_PATH}")
     NOCLIENTLOG=$(jq -r '.noclientlog // false' "${CONFIG_PATH}")

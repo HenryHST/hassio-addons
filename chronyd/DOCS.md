@@ -25,13 +25,14 @@ Ensure no other service on the host already binds UDP 123, or map a different ho
 
 ### `ntp_servers`
 
-Comma-separated list of upstream NTP servers (no spaces). Default: global NTP pool.
+Comma- or semicolon-separated list of upstream NTP servers. Default: global NTP pool.
 
 Examples:
 
 ```yaml
 ntp_servers: "time.cloudflare.com"
 ntp_servers: "de.pool.ntp.org,ch.pool.ntp.org"
+ntp_servers: "briareus.schulte.org;de.pool.ntp.org"
 ntp_servers: "127.127.1.1"   # local clock, stratum 10
 ```
 

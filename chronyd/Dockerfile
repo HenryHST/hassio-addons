@@ -12,7 +12,7 @@ ENV ADDON_VERSION="${BUILD_VERSION}" \
     CHRONY_VERSION_FILE=/etc/chrony-version \
     NTP_DIRECTIVES="ratelimit\nrtcsync"
 
-SHELL ["/bin/sh", "-eo", "pipefail", "-c"]
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 # hadolint ignore=DL3018
 RUN \

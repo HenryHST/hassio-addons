@@ -42,18 +42,10 @@ jobs:
         run: |
           set -euo pipefail
           data_dir="$(mktemp -d)"
-          cat > "${data_dir}/options.json" <<'EOF'
-{
-  "ntp_servers": "0.pool.ntp.org,1.pool.ntp.org",
-  "enable_nts": false,
-  "enable_sysclk": false,
-  "noclientlog": false,
-  "log_level": 0,
-  "timezone": "UTC",
-  "enable_ptp": false
-}
-EOF
-
+          echo '{"ntp_servers":"0.pool.ntp.org,1.pool.ntp.org","enable_nts":false,'\
+            '"enable_sysclk":false,"noclientlog":false,"log_level":0,'\
+            '"timezone":"UTC","enable_ptp":false}' \
+            > "${data_dir}/options.json"
           fail() {
             echo "::group::Container logs"
             docker logs "${cid}" 2>&1 || true
