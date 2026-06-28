@@ -37,3 +37,6 @@ if ! curl -sS -f -X "POST" \
     echo "ERROR: Failed to send UPS event to Home Assistant" >&2
     exit 1
 fi
+
+/usr/bin/ha-sensors-sync.sh --event "${UPSNAME}" "${NOTIFYTYPE}" --quick \
+    || echo "WARNING: Home Assistant sensor sync after notify failed" >&2

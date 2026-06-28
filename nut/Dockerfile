@@ -89,7 +89,10 @@ RUN chmod +x /etc/cont-init.d/* \
     && chmod +x /etc/services.d/upsd/finish \
     && chmod +x /usr/bin/notify \
     && chmod +x /usr/bin/nut-config-helpers.sh \
-    && chmod +x /usr/bin/shutdownhost
+    && chmod +x /usr/bin/ha-sensors-sync.sh \
+    && chmod +x /usr/bin/shutdownhost \
+    && chmod +x /etc/services.d/ha-sensors/run \
+    && chmod +x /etc/services.d/ha-sensors/finish
 
 # Build arguments
 ARG BUILD_ARCH

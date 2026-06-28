@@ -1,6 +1,6 @@
 ---
 name: Network UPS Tools
-version: 1.0.9
+version: 1.1.0
 slug: nut
 description: Manage battery backup (UPS) devices
 url: https://github.com/henryhst/hassio-addons/tree/main/nut
@@ -38,6 +38,8 @@ options:
   shutdown_host: false
   certverify: "0"
   forcessl: "0"
+  enable_home_assistant_sensors: true
+  homeassistant_poll_interval: 30
 schema:
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   users:
@@ -67,3 +69,5 @@ schema:
   certverify: list(0|1)?
   forcessl: list(0|1)?
   i_like_to_be_pwned: bool?
+  enable_home_assistant_sensors: bool?
+  homeassistant_poll_interval: int(10,300)?

@@ -31,6 +31,7 @@ profile nut flags=(attach_disconnected,mediate_deleted) {
   /tmp/** rwk,
 
   /etc/nut-version r,
+  /data/nut/monitor.env r,
   /data/** rw,
 
   # NUT configuration
@@ -86,7 +87,9 @@ profile nut flags=(attach_disconnected,mediate_deleted) {
     signal (receive) peer=nut,
 
     /usr/sbin/upsmon ix,
-    /usr/bin/notify ix,
+    /usr/bin/upsc ix,
+  /usr/bin/notify ix,
+  /usr/bin/ha-sensors-sync.sh ix,
     /usr/bin/shutdownhost ix,
     /usr/bin/wall ix,
     /bin/bash ix,

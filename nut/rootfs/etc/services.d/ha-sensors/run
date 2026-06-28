@@ -1,0 +1,21 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Network UPS Tools
+# Poll upsc and push sensor states to Home Assistant
+# ==============================================================================
+declare interval
+
+if bashio::config.false 'enable_home_assistant_sensors' \
+    || ! bashio::config.equals 'mode' 'netserver'; then
+    bashio::log.info "Home Assistant sensor sync disabled"
+    exec s6-notifyoncheck -- sleep infinity
+fi
+
+interval=$(bashio::config 'homeassistant_poll_interval')
+bashio::log.info "Home Assistant sensor sync enabled (interval ${interval}s)"
+
+while true; do
+    /usr/bin/ha-sensors-sync.sh || bashio::log.warning "Home Assistant sensor sync failed"
+    sleep "${interval}"
+done

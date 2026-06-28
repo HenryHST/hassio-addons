@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-**Add-on Version**: 1.0.9  
+**Add-on Version**: 1.1.0  
 **NUT Core Version**: 2.8.1-5 (Debian trixie package; see `/etc/nut-version` in the container)
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
@@ -291,6 +291,97 @@ HaveIBeenPwned password requirement by setting it to `true`.
 
 **Note**: _We STRONGLY suggest picking a stronger/safer password instead of
 using this option! USE AT YOUR OWN RISK!_
+
+### Option: `enable_home_assistant_sensors`
+
+When `true` (default), the add-on polls `upsc` and pushes sensor states to Home
+Assistant via the States API. Works without installing a separate integration.
+
+```yaml
+enable_home_assistant_sensors: true
+homeassistant_poll_interval: 30
+```
+
+Set to `false` if you use the [NUT Hass.io custom integration](integration/README.md).
+
+### Option: `homeassistant_poll_interval`
+
+Seconds between `upsc` polls for add-on sensor push (10–300). Default: `30`.
+
+## Home Assistant Sensors
+
+Three ways to get UPS data in Home Assistant:
+
+| Method | Install | Best for |
+|--------|---------|----------|
+| **A — Add-on push** | None (default) | Quick start, dashboards |
+| **B — Custom integration** | [integration/README.md](integration/README.md) | Proper devices/entities |
+| **C — Official NUT integration** | HA Integrations | All NUT variables |
+
+Use **either** add-on push **or** custom integration — not both (duplicate entities).
+
+### Status values
+
+| Sensor state | Meaning | NUT `ups.status` token |
+|--------------|---------|------------------------|
+| `ONLINE` | Utility power present | `OL` |
+| `ONBATT` | Running on battery | `OB` |
+| `LOWBATT` | Battery low | `LB` |
+| `FSD` | Forced shutdown in progress | `FSD` |
+
+### Option A — Add-on sensor push (default)
+
+Entities (example UPS name `myups`):
+
+| Entity | Description |
+|--------|-------------|
+| `sensor.nut_addon_myups_status` | ONLINE / ONBATT / LOWBATT / FSD |
+| `sensor.nut_addon_myups_battery_charge` | Battery charge (%) |
+| `sensor.nut_addon_myups_input_voltage` | Input voltage (V) |
+| `sensor.nut_addon_myups_load` | Load (%) |
+| `sensor.nut_addon_myups_battery_runtime` | Runtime (s) |
+
+Numeric sensors appear only when the UPS driver exposes the variable.
+
+Example Lovelace:
+
+```yaml
+type: entities
+title: UPS
+entities:
+  - entity: sensor.nut_addon_myups_status
+  - entity: sensor.nut_addon_myups_battery_charge
+  - entity: sensor.nut_addon_myups_load
+```
+
+### Option B — Custom integration `nut_hassio`
+
+1. Copy `integration/custom_components/nut_hassio` to `config/custom_components/`
+2. Restart Home Assistant
+3. Add integration: host = HA IP, port = add-on **3493** port, UPS name + user from add-on config
+4. Set `enable_home_assistant_sensors: false` in the add-on
+
+### Option C — Official [NUT integration](https://www.home-assistant.io/integrations/nut/)
+
+Connect to the add-on `upsd` port with a configured user for all standard NUT sensors.
+
+### Example automation (critical alert)
+
+```yaml
+automation:
+  - alias: "UPS low battery or shutdown"
+    trigger:
+      - platform: state
+        entity_id: sensor.nut_addon_myups_status
+        to:
+          - LOWBATT
+          - FSD
+    action:
+      - service: notify.persistent_notification
+        data:
+          title: "UPS critical"
+          message: "UPS status is {{ states('sensor.nut_addon_myups_status') }}"
+```
 
 ## Event Notifications
 

@@ -5,6 +5,17 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.1.0] - 2026-06-28
+
+### Added
+
+- Home Assistant sensor push: `enable_home_assistant_sensors`, `homeassistant_poll_interval`
+- Status sensors: ONLINE, ONBATT, LOWBATT, FSD via `upsc` + States API (`sensor.nut_addon_<ups>_*`)
+- Numeric sensors: battery charge, input voltage, load, battery runtime (when supported)
+- Immediate status update on `nut.ups_event` via enhanced `notify` script
+- Custom HA integration `nut_hassio` under [`nut/integration/`](integration/)
+- `map_ups_status()` helper and unit tests
+
 ## [1.0.9] - 2026-06-28
 
 ### Changed

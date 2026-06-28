@@ -58,7 +58,9 @@ if bashio::config.equals 'mode' 'netserver' ;then
     # Debug: Log device count
     device_count=$(bashio::config 'devices|length')
     bashio::log.debug "Device count from config: ${device_count}"
-    
+
+    declare -a ups_device_names=()
+
     # Create Monitor User
     upsmonpwd=$(shuf -ze -n20  {A..Z} {a..z} {0..9}|tr -d '\0')
     if [[ -z "${upsmonpwd}" ]]; then
@@ -139,7 +141,17 @@ if bashio::config.equals 'mode' 'netserver' ;then
         bashio::log.debug "Writing MONITOR line for ${upsname}@localhost"
         echo "MONITOR ${upsname}@localhost ${upspowervalue} upsmonprimary ${upsmonpwd} primary" \
             >> /etc/nut/upsmon.conf
+        ups_device_names+=("${upsname}")
     done
+
+    mkdir -p /data/nut
+    {
+        echo "UPSUSER=upsmonprimary"
+        echo "UPSPASS=${upsmonpwd}"
+        echo "UPS_DEVICES=${ups_device_names[*]}"
+    } > /data/nut/monitor.env
+    chmod 600 /data/nut/monitor.env
+    bashio::log.debug "Wrote /data/nut/monitor.env for Home Assistant sensor sync"
 
     monitor_count=$(grep -c "^MONITOR" /etc/nut/upsmon.conf 2>/dev/null || echo 0)
     bashio::log.debug "Total MONITOR lines in upsmon.conf: ${monitor_count}"

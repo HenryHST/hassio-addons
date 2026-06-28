@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "NUT Hass.io",
+        "description": "Verbindung zum upsd des NUT-Add-ons.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "ups_name": "UPS-Name",
+          "username": "Benutzername",
+          "password": "Passwort"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum NUT-Server fehlgeschlagen. Host, Port, Zugangsdaten und UPS-Name prüfen."
+    },
+    "abort": {
+      "already_configured": "Diese UPS ist bereits eingerichtet."
+    }
+  }
+}
