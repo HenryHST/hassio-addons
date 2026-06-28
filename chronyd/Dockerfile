@@ -24,7 +24,7 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG BASHIO_VERSION="0.16.2"
+ARG BASHIO_VERSION="0.18.1"
 RUN \
     curl -L -o /tmp/bashio.tar.gz \
         "https://github.com/hassio-addons/bashio/archive/v${BASHIO_VERSION}.tar.gz" \
