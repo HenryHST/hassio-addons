@@ -1,0 +1,7 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Chrony NTP
+# chrony_exporter stopped — restart without halting chronyd
+# ==============================================================================
+bashio::log.warning "chrony_exporter stopped, restarting..."

@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Chrony NTP
 
-**Add-on Version**: 2.1.0
+**Add-on Version**: 2.2.0
 
 ## About
 
@@ -25,6 +25,7 @@ ntp_server:
 pool_maxsources: 4
 enable_nts: false
 enable_ptp: false
+enable_prometheus: false
 log_level: info
 ```
 

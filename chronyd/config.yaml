@@ -1,6 +1,6 @@
 ---
 name: Chrony NTP
-version: 2.1.0
+version: 2.2.0
 slug: chronyd
 description: >-
   Chrony NTP server for Home Assistant — synchronize time from upstream NTP
@@ -22,8 +22,10 @@ apparmor: true
 panel_icon: mdi:clock-outline
 ports:
   123/udp: 123
+  9123/tcp: null
 ports_description:
   123/udp: NTP (Network Time Protocol)
+  9123/tcp: Prometheus metrics (chrony_exporter)
 options:
   set_system_clock: true
   ntp_pool: pool.ntp.org
@@ -31,6 +33,8 @@ options:
   pool_maxsources: 4
   enable_nts: false
   enable_ptp: false
+  enable_prometheus: false
+  prometheus_port: 9123
   log_level: info
 schema:
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
@@ -42,3 +46,5 @@ schema:
   mode: list(pool|server)?
   enable_nts: bool?
   enable_ptp: bool?
+  enable_prometheus: bool?
+  prometheus_port: int(1024,65535)?

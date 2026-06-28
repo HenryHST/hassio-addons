@@ -92,6 +92,46 @@ devices:
   - /dev/ptp0
 ```
 
+### Option: `enable_prometheus`
+
+When `true`, starts [chrony_exporter](https://github.com/SuperQ/chrony_exporter) alongside chronyd and exposes Prometheus metrics on `prometheus_port` (default `9123`). Default: `false`.
+
+```yaml
+enable_prometheus: true
+prometheus_port: 9123
+```
+
+The endpoint (`/metrics`) has no authentication by default — only enable on trusted networks or place Prometheus in the same LAN.
+
+### Option: `prometheus_port`
+
+TCP port for the metrics HTTP server (1024–65535). Default: `9123`. The add-on maps this port to the host; note the assigned port under **Info** after start.
+
+## Prometheus and Grafana
+
+1. Set `enable_prometheus: true` and restart the add-on.
+2. Note the host port for `9123/tcp` under add-on **Info**.
+3. Add a scrape job to Prometheus (HA Prometheus add-on or external):
+
+```yaml
+scrape_configs:
+  - job_name: chronyd
+    static_configs:
+      - targets: ['<HA-HOST>:<PORT>']
+```
+
+Useful metrics for dashboards and alerts:
+
+| Metric | Meaning |
+|--------|---------|
+| `chrony_tracking_last_offset_seconds` | Last clock offset |
+| `chrony_tracking_rms_offset_seconds` | RMS offset (stability) |
+| `chrony_tracking_stratum` | Stratum (16 = not synchronized) |
+| `chrony_sources_state` | Upstream source reachability |
+| `chrony_serverstats_*` | NTP requests from LAN clients |
+
+Community Grafana dashboards for `chrony_exporter` work out of the box. See the [chrony_exporter README](https://github.com/SuperQ/chrony_exporter) for recording rules (e.g. clock error bounds).
+
 ## Migration
 
 ### From 2.0.x

@@ -29,7 +29,7 @@ jobs:
       - name: Build image
         run: |
           docker build -t chronyd:test \
-            --build-arg BUILD_VERSION=2.1.0 \
+            --build-arg BUILD_VERSION=2.2.0 \
             --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
             --build-arg BUILD_REF=test \
             --build-arg BUILD_ARCH=amd64 \
@@ -47,7 +47,8 @@ jobs:
           cid=""
 
           echo '{"ntp_pool":"pool.ntp.org","ntp_server":["0.pool.ntp.org"],"pool_maxsources":4,'\
-            '"set_system_clock":false,"enable_nts":false,"enable_ptp":false,"log_level":"info"}' \
+            '"set_system_clock":false,"enable_nts":false,"enable_ptp":false,'\
+            '"enable_prometheus":true,"prometheus_port":9123,"log_level":"info"}' \
             > "${data_dir}/options.json"
 
           cat > "${data_dir}/mock-supervisor.py" << 'PY'
@@ -121,6 +122,7 @@ jobs:
             --cap-add SYS_TIME \
             -v "${data_dir}:/data" \
             -p 10123:123/udp \
+            -p 19123:9123/tcp \
             chronyd:test) || fail
 
           for _ in $(seq 1 45); do
@@ -145,3 +147,11 @@ jobs:
           nc -zu localhost 10123 || fail
 
           docker exec "${cid}" chronyc -n tracking || fail
+
+          for _ in $(seq 1 30); do
+            if curl -sf "http://localhost:19123/metrics" | grep -q "chrony_tracking"; then
+              break
+            fi
+            sleep 1
+          done
+          curl -sf "http://localhost:19123/metrics" | grep -q "chrony_tracking" || fail

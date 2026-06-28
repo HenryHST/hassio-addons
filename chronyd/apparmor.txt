@@ -52,6 +52,7 @@ profile chronyd flags=(attach_disconnected,mediate_deleted) {
   /dev/ptp0 rw,
 
   network inet dgram,
+  network inet stream,
   network inet6 dgram,
 
   ptrace (trace,read) peer=docker-default,

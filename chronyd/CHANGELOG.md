@@ -5,6 +5,13 @@ All notable changes to the Chrony NTP Home Assistant Add-on will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-06-28
+
+### Added
+
+- Optional Prometheus metrics via [chrony_exporter](https://github.com/SuperQ/chrony_exporter) (`enable_prometheus`, `prometheus_port`, TCP 9123)
+- Metrics: tracking, sources, sourcestats, serverstats (`chrony_*` metric names for Grafana)
+
 ## [2.1.0] - 2026-06-28
 
 ### Changed

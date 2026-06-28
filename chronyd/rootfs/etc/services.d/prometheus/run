@@ -1,0 +1,24 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Chrony NTP
+# Optional Prometheus metrics via chrony_exporter
+# ==============================================================================
+declare port
+
+if bashio::config.false 'enable_prometheus'; then
+    bashio::log.info "Prometheus metrics disabled"
+    exec s6-notifyoncheck -- sleep infinity
+fi
+
+port=$(bashio::config 'prometheus_port')
+bashio::log.info "Starting chrony_exporter on port ${port}..."
+
+exec chrony_exporter \
+    --chrony.address=unix:///run/chrony/chronyd.sock \
+    --collector.chmod-socket \
+    --web.listen-address=":${port}" \
+    --collector.tracking \
+    --collector.sources \
+    --collector.sourcestats \
+    --collector.serverstats

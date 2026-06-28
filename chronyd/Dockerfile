@@ -62,11 +62,29 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+ARG CHRONY_EXPORTER_VERSION="0.13.3"
+RUN \
+    ARCH="$(uname -m)" \
+    && case "${ARCH}" in \
+        x86_64) EXPORTER_ARCH="amd64" ;; \
+        aarch64) EXPORTER_ARCH="arm64" ;; \
+        *) echo "Unsupported architecture: ${ARCH}" && exit 1 ;; \
+    esac \
+    && curl -L -o /tmp/chrony_exporter.tar.gz \
+        "https://github.com/SuperQ/chrony_exporter/releases/download/v${CHRONY_EXPORTER_VERSION}/chrony_exporter-${CHRONY_EXPORTER_VERSION}.linux-${EXPORTER_ARCH}.tar.gz" \
+    && mkdir -p /tmp/chrony_exporter \
+    && tar -xzf /tmp/chrony_exporter.tar.gz -C /tmp/chrony_exporter --strip-components=1 \
+    && mv /tmp/chrony_exporter/chrony_exporter /usr/bin/chrony_exporter \
+    && chmod +x /usr/bin/chrony_exporter \
+    && rm -rf /tmp/*
+
 COPY rootfs /
 
 RUN chmod +x /etc/cont-init.d/* \
     && chmod +x /etc/services.d/chronyd/run \
-    && chmod +x /etc/services.d/chronyd/finish
+    && chmod +x /etc/services.d/chronyd/finish \
+    && chmod +x /etc/services.d/prometheus/run \
+    && chmod +x /etc/services.d/prometheus/finish
 
 ARG BUILD_ARCH
 ARG BUILD_NAME
@@ -92,7 +110,7 @@ LABEL \
     org.opencontainers.image.revision="${BUILD_REF}" \
     org.opencontainers.image.version="${BUILD_VERSION}"
 
-EXPOSE 123/udp
+EXPOSE 123/udp 9123/tcp
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD chronyc -n tracking || exit 1
