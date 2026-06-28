@@ -5,7 +5,7 @@
 This add-on uses **dual versioning** to distinguish between the add-on wrapper and the underlying NUT core:
 
 ```
-Add-on Version: 1.0.5 (semantic versioning)
+Add-on Version: 1.0.6 (semantic versioning)
 Core Version: 2.8.1-5 (Network UPS Tools Debian package version)
 ```
 
@@ -45,7 +45,7 @@ Both versions are displayed at add-on startup:
 ```
 -----------------------------------------------------------
  Network UPS Tools Add-on
- Add-on Version: 1.0.5
+ Add-on Version: 1.0.6
  NUT Core Version: 2.8.1-5
 -----------------------------------------------------------
 ```

@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-**Add-on Version**: 1.0.5  
+**Add-on Version**: 1.0.6  
 **NUT Core Version**: 2.8.1-5
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 

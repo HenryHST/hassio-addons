@@ -5,6 +5,13 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.6] - 2025-06-28
+
+### Fixed
+
+- Removed `image:` field (Supervisor builds locally; fixes GHCR `404 manifest unknown`)
+- CI: multi-arch manifest via `buildx imagetools` instead of `docker manifest create`
+
 ## [1.0.5] - 2025-06-23
 
 ### Added

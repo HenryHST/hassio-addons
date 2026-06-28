@@ -199,7 +199,7 @@ SOFTWARE.
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
 [netboot-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [netboot-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[netboot-version-shield]: https://img.shields.io/badge/version-v1.0.5-blue.svg
+[netboot-version-shield]: https://img.shields.io/badge/version-v1.0.6-blue.svg
 [bls-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [bls-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [bls-version-shield]: https://img.shields.io/badge/version-v1.7.4-blue.svg
@@ -208,4 +208,4 @@ SOFTWARE.
 [corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.4-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[nut-version-shield]: https://img.shields.io/badge/version-v1.0.5-blue.svg
+[nut-version-shield]: https://img.shields.io/badge/version-v1.0.6-blue.svg
