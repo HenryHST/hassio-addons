@@ -250,6 +250,79 @@ jobs:
             echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
           fi
 
+  scan-bls-nutrition:
+    name: Scan BLS Nährwertdatenbank Image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build BLS image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./bls_nutrition
+          file: ./bls_nutrition/Dockerfile
+          tags: local/bls_nutrition:scan
+          load: true
+          cache-from: type=gha,scope=bls_nutrition-${{ matrix.arch }}
+          build-args: |
+            BUILD_VERSION=scan
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+            BUILD_REF=${{ github.sha }}
+            BUILD_ARCH=${{ matrix.arch }}
+            BUILD_NAME=BLS Nährwertdatenbank
+            BUILD_DESCRIPTION=Security scan
+            BUILD_REPOSITORY=${{ github.repository }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          image-ref: local/bls_nutrition:scan
+          format: sarif
+          output: trivy-bls-nutrition-results.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-bls-nutrition-results.sarif
+          category: bls-nutrition
+
+      - name: Run Trivy vulnerability scanner (table output)
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          image-ref: local/bls_nutrition:scan
+          format: table
+          severity: CRITICAL,HIGH
+          vuln-type: os,library
+          exit-code: 0
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## Security Scan: BLS Nährwertdatenbank" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** bls_nutrition" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base:** python:3.13-slim-trixie" >> $GITHUB_STEP_SUMMARY
+          echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
+
   scan-dockerfiles:
     name: Scan Dockerfiles for Misconfigurations
     runs-on: ubuntu-latest
@@ -311,6 +384,24 @@ jobs:
           sarif_file: trivy-config-corosyncd.sarif
           category: config-corosyncd
 
+      - name: Run Trivy config scanner on BLS Nährwertdatenbank
+        uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_DISABLE_VEX_NOTICE: "true"
+        with:
+          scan-type: config
+          scan-ref: bls_nutrition/Dockerfile
+          format: sarif
+          output: trivy-config-bls-nutrition.sarif
+          exit-code: 0
+
+      - name: Upload config scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-config-bls-nutrition.sarif
+          category: config-bls-nutrition
+
       - name: Run Trivy config scanner (table output)
         run: |
           echo "### Dockerfile Misconfigurations" >> $GITHUB_STEP_SUMMARY
@@ -329,11 +420,16 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/workspace \
             aquasec/trivy:latest config /workspace/corosyncd/Dockerfile \
             --severity CRITICAL,HIGH,MEDIUM || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### BLS Nährwertdatenbank Dockerfile" >> $GITHUB_STEP_SUMMARY
+          docker run --rm -v ${{ github.workspace }}:/workspace \
+            aquasec/trivy:latest config /workspace/bls_nutrition/Dockerfile \
+            --severity CRITICAL,HIGH,MEDIUM || true
 
   security-report:
     name: Generate Security Report
     runs-on: ubuntu-latest
-    needs: [scan-netboot-xyz, scan-nut, scan-corosyncd, scan-dockerfiles]
+    needs: [scan-netboot-xyz, scan-nut, scan-corosyncd, scan-bls-nutrition, scan-dockerfiles]
     if: always()
     steps:
       - name: Generate overall summary
@@ -347,6 +443,7 @@ jobs:
           echo "| netboot.xyz Image | ${{ needs.scan-netboot-xyz.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| NUT Image | ${{ needs.scan-nut.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Corosync QNetd Image | ${{ needs.scan-corosyncd.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| BLS Nährwertdatenbank Image | ${{ needs.scan-bls-nutrition.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Dockerfile Config | ${{ needs.scan-dockerfiles.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Next Steps" >> $GITHUB_STEP_SUMMARY

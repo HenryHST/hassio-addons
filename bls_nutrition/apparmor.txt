@@ -1,0 +1,36 @@
+#include <tunables/global>
+
+profile bls_nutrition flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  capability,
+  file,
+  signal,
+  network,
+
+  # Entrypoint and shell
+  /entrypoint.sh ix,
+  /bin/bash ix,
+  /bin/** ix,
+  /usr/bin/** ix,
+
+  # Python runtime
+  /usr/bin/python3* ix,
+  /usr/local/bin/python* ix,
+  /usr/lib/python3*/** r,
+  /usr/local/lib/python3*/** r,
+  /app/** r,
+
+  # Persistent data (BLS DB, OFF cache, map cache)
+  /data/** rw,
+
+  # Temporary files
+  /tmp/** rwk,
+
+  # Outbound HTTPS (BLS download, OFF, Overpass, Nominatim) and API :8090
+  network inet stream,
+  network inet6 stream,
+
+  # suppress ptrace denials when using 'docker ps' or using 'ps' inside a container
+  ptrace (trace,read) peer=docker-default,
+}

@@ -17,6 +17,7 @@ We will respond within 48 hours and work with you to understand and address the 
 | netboot.xyz | 1.0.x | ✅ Yes |
 | Network UPS Tools | 1.0.x | ✅ Yes |
 | Corosync QNetd | 1.0.x | ✅ Yes |
+| BLS Nährwertdatenbank | 1.7.x | ✅ Yes |
 
 ## Security Measures
 
@@ -154,6 +155,10 @@ trivy image nut:test
 docker build -t corosyncd:test ./corosyncd
 trivy image corosyncd:test
 
+# Scan BLS Nährwertdatenbank image
+docker build -t bls_nutrition:test ./bls_nutrition
+trivy image bls_nutrition:test
+
 # Scan with specific severity
 trivy image --severity CRITICAL,HIGH netboot_xyz:test
 
@@ -201,6 +206,6 @@ npm audit fix
 
 ---
 
-**Last Updated**: 2025-01-06
+**Last Updated**: 2025-06-23
 
 For questions about this security policy, please open a discussion or contact the maintainer.

@@ -1,6 +1,6 @@
 ---
 name: BLS Nährwertdatenbank
-version: 1.7.3
+version: 1.7.4
 slug: bls_nutrition
 description: >-
   Bundeslebensmittelschlüssel (BLS) 4.0 Nährwertdatenbank mit Open Food Facts
@@ -23,6 +23,7 @@ panel_title: BLS Nährwert
 panel_admin: false
 map:
   - data:rw
+apparmor: true
 ports:
   8090/tcp: 8090
 ports_description:

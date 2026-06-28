@@ -1,6 +1,6 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.7.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.7.4-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 
@@ -67,6 +67,20 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `GET /map/supermarkets` | Supermärkte im Radius um den HA-Standort |
 | `POST /calculate/portion` | Portion berechnen |
 | `POST /calculate/recipe` | Rezept aggregieren |
+
+## Entwicklung
+
+Unit-Tests und Lint lokal:
+
+```bash
+cd bls_nutrition
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
+pytest tests -v
+ruff check tests
+```
+
+CI führt zusätzlich **hassfest** (HA-Integration) und **Trivy** (Docker-Image) aus.
 
 ## Attribution
 
