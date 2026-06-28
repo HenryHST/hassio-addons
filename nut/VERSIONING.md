@@ -5,8 +5,8 @@
 This add-on uses **dual versioning** to distinguish between the add-on wrapper and the underlying NUT core:
 
 ```
-Add-on Version: 1.0.6 (semantic versioning)
-Core Version: 2.8.1-5 (Network UPS Tools Debian package version)
+Add-on Version: 1.0.9 (semantic versioning)
+Core Version: 2.8.1-5 (Network UPS Tools Debian trixie package; recorded in /etc/nut-version at build)
 ```
 
 ## Add-on Version (Semantic Versioning)

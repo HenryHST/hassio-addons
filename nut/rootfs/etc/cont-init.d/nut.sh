@@ -18,6 +18,10 @@ declare upsmonpwd
 declare username
 
 # Display version information
+if [[ -f "${NUT_VERSION_FILE:-/etc/nut-version}" ]]; then
+    NUT_VERSION=$(< "${NUT_VERSION_FILE}")
+fi
+
 bashio::log.info "-----------------------------------------------------------"
 bashio::log.info " Network UPS Tools Add-on"
 bashio::log.info " Add-on Version: ${ADDON_VERSION:-unknown}"

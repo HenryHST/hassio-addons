@@ -5,6 +5,13 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.9] - 2026-06-28
+
+### Changed
+
+- Base image upgraded from `debian:bookworm-slim` to `debian:trixie-slim` (NUT **2.8.1-5** via apt instead of 2.8.0-7 on bookworm)
+- NUT core version at runtime is read from `/etc/nut-version` (set at image build from `dpkg-query`)
+
 ## [1.0.8] - 2026-06-28
 
 ### Added

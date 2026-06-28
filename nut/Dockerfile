@@ -1,14 +1,13 @@
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 # Version labels
 ARG BUILD_VERSION
 ARG BUILD_DATE
 ARG BUILD_REF
-ARG NUT_VERSION="2.8.1-5"
 
-# Store versions for runtime access
+# Store versions for runtime access (NUT version written at build from dpkg)
 ENV ADDON_VERSION="${BUILD_VERSION}" \
-    NUT_VERSION="${NUT_VERSION}"
+    NUT_VERSION_FILE=/etc/nut-version
 
 # Set shell with pipefail option
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
@@ -44,7 +43,7 @@ RUN \
     && rm -rf /tmp/*
 
 # Install s6-overlay for service management
-ARG S6_OVERLAY_VERSION="3.2.0.2"
+ARG S6_OVERLAY_VERSION="3.2.3.0"
 RUN \
     ARCH="$(uname -m)" \
     && case "${ARCH}" in \
@@ -72,7 +71,9 @@ RUN \
         nut-xml \
         nut-modbus \
         usbutils \
-    && echo "NUT version:" \
+    && dpkg-query -W -f='${Version}' nut-server > /etc/nut-version \
+    && echo "NUT package version:" \
+    && cat /etc/nut-version \
     && upsd -V || true \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -106,7 +107,7 @@ LABEL \
     io.hass.arch="${BUILD_ARCH}" \
     io.hass.type="addon" \
     io.hass.version=${BUILD_VERSION} \
-    io.hass.nut.version="${NUT_VERSION}" \
+    io.hass.nut.version="2.8.1-5" \
     maintainer="henryhst" \
     org.opencontainers.image.title="${BUILD_NAME}" \
     org.opencontainers.image.description="${BUILD_DESCRIPTION}" \

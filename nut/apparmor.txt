@@ -30,7 +30,7 @@ profile nut flags=(attach_disconnected,mediate_deleted) {
   /usr/lib/bashio/** ix,
   /tmp/** rwk,
 
-  # Add-on configuration and state
+  /etc/nut-version r,
   /data/** rw,
 
   # NUT configuration

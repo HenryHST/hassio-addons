@@ -230,7 +230,7 @@ SOFTWARE.
 [corosyncd-version-shield]: https://img.shields.io/badge/version-v1.0.6-blue.svg
 [nut-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [nut-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
-[nut-version-shield]: https://img.shields.io/badge/version-v1.0.8-blue.svg
+[nut-version-shield]: https://img.shields.io/badge/version-v1.0.9-blue.svg
 [chronyd-aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg
 [chronyd-amd64-shield]: https://img.shields.io/badge/amd64-yes-green.svg
 [chronyd-version-shield]: https://img.shields.io/badge/version-v2.2.0-blue.svg
