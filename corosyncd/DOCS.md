@@ -67,17 +67,9 @@ Node A maintains quorum because it can reach QNetd, while Node B loses quorum an
 
 ### Configuration Options
 
-#### `qnetd_port`
+#### Port 5403 (fixed)
 
-**Type:** `port`  
-**Default:** `5403`  
-**Description:** TCP port for Corosync QNetd service.
-
-**Note:** Corosync QNetd typically uses port 5403 by default. Changing this requires additional configuration on both the QNetd side and the Proxmox cluster side.
-
-```yaml
-qnetd_port: 5403  # Default, recommended
-```
+Corosync QNetd listens on **TCP port 5403**. This is compiled into the daemon and cannot be changed via add-on options. Ensure Proxmox nodes and your firewall allow this port.
 
 #### `log_level`
 
@@ -99,31 +91,17 @@ log_level: info  # Production
 log_level: debug  # Troubleshooting
 ```
 
-#### `tls_enabled`
-
-**Type:** `bool`  
-**Default:** `false`  
-**Description:** Enable TLS encryption for QNetd connections (future feature).
-
-**Note:** Currently under development. When enabled, requires certificate setup.
-
-```yaml
-tls_enabled: false  # Currently not implemented
-```
-
 ### Example Configurations
 
 #### Production Configuration
 
 ```yaml
-qnetd_port: 5403
 log_level: info
 ```
 
 #### Debug Configuration
 
 ```yaml
-qnetd_port: 5403
 log_level: debug
 ```
 
@@ -147,7 +125,7 @@ In Home Assistant:
    ```
    -----------------------------------------------------------
     Corosync QNetd Add-on
-    Add-on Version: 1.0.0
+    Add-on Version: 1.0.3
     Corosync Version: 3.1.7
    -----------------------------------------------------------
    [corosync-qnetd] Starting Corosync QNetd daemon...
@@ -492,7 +470,7 @@ For critical setups, consider:
 
 This add-on uses **dual versioning**:
 
-### Addon Version (1.0.0)
+### Addon Version (1.0.3)
 
 Tracks Home Assistant add-on features:
 - Configuration options

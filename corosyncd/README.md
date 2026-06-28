@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Corosync QNetd
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 
@@ -32,7 +32,7 @@ Node A ──────X────── Node B
 
 - ✅ **Secure**: No SSH server, no hardcoded passwords
 - ✅ **Multi-architecture**: Supports aarch64, amd64
-- ✅ **Configurable**: Adjustable port and log level
+- ✅ **Configurable**: Adjustable log level (port 5403 is fixed)
 - ✅ **Health monitoring**: Built-in health checks
 - ✅ **Dual versioning**: Track addon and Corosync versions separately
 
@@ -51,7 +51,6 @@ Node A ──────X────── Node B
 ### Basic Configuration
 
 ```yaml
-qnetd_port: 5403
 log_level: info
 ```
 
@@ -59,21 +58,19 @@ log_level: info
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `qnetd_port` | port | `5403` | Port for Corosync QNetd service |
 | `log_level` | list | `info` | Log verbosity: `trace`, `debug`, `info`, `notice`, `warning`, `error`, `fatal` |
-| `tls_enabled` | bool | `false` | Enable TLS support (future feature) |
+
+QNetd listens on **port 5403/TCP** (fixed, not configurable via add-on options).
 
 ### Example Configurations
 
 **Minimal (default values):**
 ```yaml
-qnetd_port: 5403
 log_level: info
 ```
 
 **Debug mode:**
 ```yaml
-qnetd_port: 5403
 log_level: debug
 ```
 
@@ -158,7 +155,7 @@ Then check add-on logs for detailed connection information.
 
 This add-on uses **dual versioning**:
 
-- **Addon Version** (1.0.0): Add-on features, configuration options, bug fixes
+- **Addon Version** (1.0.3): Add-on features, configuration options, bug fixes
 - **Corosync Core Version** (3.1.7): Upstream Corosync QNetd version
 
 Both versions are displayed in:

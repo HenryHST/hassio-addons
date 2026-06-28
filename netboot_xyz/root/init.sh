@@ -28,11 +28,12 @@ mkdir -p \
 
 # download menus if not found
 if [[ ! -f /config/menus/remote/menu.ipxe ]]; then
-  if [[ -z ${MENU_VERSION+x} ]]; then
-    MENU_VERSION=$(curl -sL "https://api.github.com/repos/netbootxyz/netboot.xyz/releases/latest" | jq -r '.tag_name')
-    if [[ -z "${MENU_VERSION}" ]] || [[ "${MENU_VERSION}" == "null" ]]; then
-      echo "[netbootxyz-init] ERROR: Failed to fetch latest version from GitHub API"
-      exit 1
+  DEFAULT_MENU_VERSION="${NETBOOTXYZ_VERSION:-0.7.6}"
+  MENU_VERSION="${DEFAULT_MENU_VERSION}"
+  if [[ -f /data/options.json ]]; then
+    configured_menu=$(jq -r '.menu_version // empty' /data/options.json)
+    if [[ -n "${configured_menu}" ]]; then
+      MENU_VERSION="${configured_menu}"
     fi
   fi
   echo "[netbootxyz-init] Downloading netboot.xyz at ${MENU_VERSION}"

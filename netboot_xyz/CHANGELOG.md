@@ -5,6 +5,19 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.0.5] - 2025-06-23
+
+### Added
+
+- `menu_version` add-on option (optional override for boot menus)
+- `image:` field for GHCR publishing
+
+### Changed
+
+- Boot menus default to pinned webapp version (`NETBOOTXYZ_VERSION`), not GitHub `latest`
+- `url` points to `main` branch
+- Documentation synced to 1.0.5
+
 ## [1.0.4] - 2025-06-23
 
 ### Changed

@@ -36,7 +36,7 @@ This add-on is ideal for:
 
 The add-on supports the following configuration options:
 
-- **MENU_VERSION**: Specify a specific version of boot files (optional, defaults to latest)
+- **menu_version**: Optional boot-menu tag (e.g. `0.7.6`). Defaults to the pinned webapp version.
 
 ### Port Configuration
 

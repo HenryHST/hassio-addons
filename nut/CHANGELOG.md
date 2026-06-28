@@ -10,6 +10,11 @@ The add-on version tracks changes to the Home Assistant integration, configurati
 ### Changed
 
 - Removed deprecated `armv7` architecture (Home Assistant sunset of 32-bit platforms)
+- Config defaults aligned with schema (`shutdown_host` bool, `certverify`/`forcessl` strings)
+- Debug logging moved to `bashio::log.debug` in `nut.sh`
+- Removed duplicate SSL blocks in `nutclient.sh`
+- Documentation synced to 1.0.5; links point to `henryhst/hassio-addons`
+- `image:` field and `url` on `main` branch in `config.yaml`
 
 ## [1.0.4] - 2025-01-06
 

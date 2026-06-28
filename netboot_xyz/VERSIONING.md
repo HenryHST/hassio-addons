@@ -5,7 +5,7 @@
 This add-on uses **dual versioning** to distinguish between the add-on wrapper and the underlying netboot.xyz core:
 
 ```
-Add-on Version: 1.0.0 (semantic versioning)
+Add-on Version: 1.0.5 (semantic versioning)
 Core Version: 0.7.6 (netboot.xyz upstream version)
 ```
 
@@ -42,7 +42,7 @@ Both versions are displayed at add-on startup:
 
 ```
 -----------------------------------------------------------
- Home Assistant Add-on Version: 1.0.0
+ Home Assistant Add-on Version: 1.0.5
  netboot.xyz Core Version: 0.7.6
 -----------------------------------------------------------
 ```

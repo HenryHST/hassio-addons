@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-[![Release](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/henryhst/hassio-addons/tree/v1.0.0) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
+[![Release](https://img.shields.io/badge/version-v1.0.5-blue.svg)](https://github.com/henryhst/hassio-addons/tree/main/nut) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
 
 [![Discord](https://img.shields.io/discord/478094546522079232.svg)](https://discord.me/hassioaddons) [![Community Forum](https://img.shields.io/badge/community-forum-brightgreen.svg)](https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516)
 
@@ -8,7 +8,7 @@ A Network UPS Tools daemon to allow you to easily manage battery backup (UPS)
 devices connected to your Home Assistant machine.
 
 **Version Information:**
-- Add-on Version: 1.0.0 (Home Assistant integration)
+- Add-on Version: 1.0.5 (Home Assistant integration)
 - NUT Core: 2.8.1-5
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
@@ -80,7 +80,7 @@ forcessl: 0
 
 For detailed configuration options, see the [full documentation](https://github.com/henryhst/hassio-addons/blob/master/nut/DOCS.md).
 
-## SSL/TLS Support (New in 1.0.0)
+## SSL/TLS Support (since 1.0.0)
 
 This add-on now supports SSL/TLS for secure UPS monitoring:
 
@@ -104,7 +104,7 @@ Got questions?
 
 You have several options to get them answered:
 
-- The [netboot.xyz Discord](https://discord.me/hassioaddons)
+- [GitHub Issues](https://github.com/henryhst/hassio-addons/issues)
 - The [Home Assistant Community Forum](https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516)
 - [Open an issue on GitHub](https://github.com/henryhst/hassio-addons/issues)
 

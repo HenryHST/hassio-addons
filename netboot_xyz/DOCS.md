@@ -1,6 +1,6 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.0.0  
+**Add-on Version**: 1.0.5  
 **netboot.xyz Core Version**: 0.7.6
 
 > **Note**: The add-on version is independent of the netboot.xyz core version. The add-on version tracks 
@@ -17,7 +17,11 @@
 
 ## Configuration
 
-This add-on does not require any configuration options in the add-on configuration. All configuration is done through the web interface after installation.
+This add-on has one optional configuration option. All other setup is done through the web interface after installation.
+
+### `menu_version` (optional)
+
+Tag of the netboot.xyz boot menus to download on first start (e.g. `0.7.6`). Leave empty to use the pinned webapp version bundled with the add-on.
 
 **Note**: _Remember to restart the add-on when making changes through the web interface if needed._
 

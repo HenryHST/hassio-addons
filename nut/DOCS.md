@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-**Add-on Version**: 1.0.0  
+**Add-on Version**: 1.0.5  
 **NUT Core Version**: 2.8.1-5
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
@@ -407,15 +407,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 [addon-badge]: https://my.home-assistant.io/badges/supervisor_addon.svg
-[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=a0d7b954_nut&repository_url=https%3A%2F%2Fgithub.com%2Fhassio-addons%2Frepository
-[contributors]: https://github.com/hassio-addons/addon-nut/graphs/contributors
+[addon]: https://my.home-assistant.io/redirect/supervisor_addon/?addon=local_nut&repository_url=https%3A%2F%2Fgithub.com%2Fhenryhst%2Fhassio-addons
+[contributors]: https://github.com/henryhst/hassio-addons/graphs/contributors
 [critical-notif]: https://companion.home-assistant.io/docs/notifications/critical-notifications
 [dale3h]: https://github.com/dale3h
 [discord-ha]: https://discord.gg/c5DvZ4e
 [discord]: https://discord.me/hassioaddons
-[fake-usb]: https://github.com/hassio-addons/addon-nut/issues/24
+[fake-usb]: https://github.com/henryhst/hassio-addons/issues
 [forum]: https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516
-[issue]: https://github.com/hassio-addons/addon-nut/issues
+[issue]: https://github.com/henryhst/hassio-addons/issues
 [nut-acknowledgements]: https://networkupstools.org/acknowledgements.html
 [nut-compatible]: https://networkupstools.org/stable-hcl.html
 [nut-conf]: https://networkupstools.org/docs/man/nut.conf.html
@@ -425,7 +425,7 @@ SOFTWARE.
 [nut-notif-doc-2]: https://networkupstools.org/docs/man/upsmon.conf.html
 [nutupsdrv]: https://networkupstools.org/docs/man/nutupsdrv.html
 [reddit]: https://reddit.com/r/homeassistant
-[releases]: https://github.com/hassio-addons/addon-nut/releases
+[releases]: https://github.com/henryhst/hassio-addons/releases
 [semver]: https://semver.org/spec/v2.0.0
 [sleep]: https://linux.die.net/man/1/sleep
 [ups-conf]: https://networkupstools.org/docs/man/ups.conf.html

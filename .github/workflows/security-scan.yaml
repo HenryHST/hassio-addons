@@ -93,7 +93,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Scan Details" >> $GITHUB_STEP_SUMMARY
           echo "- **Image:** netboot_xyz" >> $GITHUB_STEP_SUMMARY
-          echo "- **Base:** Alpine 3.20" >> $GITHUB_STEP_SUMMARY
+          echo "- **Base:** Alpine 3.24" >> $GITHUB_STEP_SUMMARY
           echo "- **Scan Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Full results available in Security tab" >> $GITHUB_STEP_SUMMARY
