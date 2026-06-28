@@ -22,13 +22,14 @@ This add-on runs **Chrony** as an NTP server (UDP 123). It is based on the [Comm
 
 ```yaml
 set_system_clock: true
-mode: server
+ntp_pool: pool.ntp.org
 ntp_server:
   - de.pool.ntp.org
+pool_maxsources: 4
 log_level: info
 ```
 
-See [DOCS.md](DOCS.md) for details and 1.x migration.
+See [DOCS.md](DOCS.md) for details and migration notes.
 
 ## Version Information
 

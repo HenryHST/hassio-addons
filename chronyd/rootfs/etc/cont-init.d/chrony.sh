@@ -2,13 +2,14 @@
 # shellcheck shell=bash
 # ==============================================================================
 # Home Assistant Add-on: Chrony NTP
-# Configures chrony (based on hassio-addons/addon-chrony init-chrony)
+# Configures chrony (pool + server simultaneously; hassio-addons/addon-chrony #215)
 # ==============================================================================
 set -e
 
 readonly CHRONY_CONF='/etc/chrony/chrony.conf'
 readonly DATA_LIB='/data/chronyd/lib'
-declare mode
+declare ntp_pool
+declare pool_maxsources
 declare -a serverlist
 declare nts_suffix=""
 
@@ -43,15 +44,9 @@ ln -sfn "${DATA_LIB}" /var/lib/chrony
 chown -R _chrony:_chrony /data/chronyd /run/chrony "${DATA_LIB}" 2>/dev/null || true
 chmod 1750 /run/chrony 2>/dev/null || true
 
-if bashio::config.equals 'mode' 'pool' \
+if bashio::config.is_empty 'ntp_server' \
     && bashio::config.is_empty 'ntp_pool'; then
-    bashio::log.fatal 'pool mode is configured but ntp_pool is empty'
-    bashio::exit.nok
-fi
-
-if bashio::config.equals 'mode' 'server' \
-    && bashio::config.is_empty 'ntp_server'; then
-    bashio::log.fatal 'server mode is configured but ntp_server is empty'
+    bashio::log.fatal 'Both ntp_pool and ntp_server are empty in the add-on configuration.'
     bashio::exit.nok
 fi
 
@@ -59,12 +54,17 @@ if bashio::config.true 'enable_nts'; then
     nts_suffix=" nts"
 fi
 
-mode=$(bashio::config 'mode')
-bashio::log.info "Running in NTP mode: ${mode}"
+ntp_pool=$(bashio::config 'ntp_pool')
+if [[ -n "${ntp_pool}" ]]; then
+    pool_maxsources=$(bashio::config 'pool_maxsources')
+    bashio::log.info "Adding pool ${ntp_pool} (maxsources ${pool_maxsources})"
+    echo "pool ${ntp_pool} iburst maxsources ${pool_maxsources}${nts_suffix}" >> "${CHRONY_CONF}"
+    serverlist+=("${ntp_pool}")
+fi
 
-for server in $(bashio::config "ntp_${mode}"); do
-    bashio::log.info "Adding ${mode} ${server}"
-    echo "${mode} ${server} iburst${nts_suffix}" >> "${CHRONY_CONF}"
+for server in $(bashio::config 'ntp_server'); do
+    bashio::log.info "Adding server ${server}"
+    echo "server ${server} iburst${nts_suffix}" >> "${CHRONY_CONF}"
     serverlist+=("${server}")
 done
 
