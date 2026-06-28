@@ -1,38 +1,77 @@
-FROM alpine:3.24
+FROM debian:bookworm-slim
 
 ARG BUILD_VERSION
 ARG BUILD_DATE
 ARG BUILD_REF
+
+ENV ADDON_VERSION="${BUILD_VERSION}" \
+    CHRONY_VERSION_FILE=/etc/chrony-version
+
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
+
+# hadolint ignore=DL3008
+RUN \
+    apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        jq \
+        tzdata \
+        procps \
+        xz-utils \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ARG BASHIO_VERSION="0.16.2"
+RUN \
+    curl -L -o /tmp/bashio.tar.gz \
+        "https://github.com/hassio-addons/bashio/archive/v${BASHIO_VERSION}.tar.gz" \
+    && mkdir -p /tmp/bashio \
+    && tar -xzf /tmp/bashio.tar.gz -C /tmp/bashio --strip-components=1 \
+    && mv /tmp/bashio/lib /usr/lib/bashio \
+    && ln -s /usr/lib/bashio/bashio /usr/bin/bashio \
+    && rm -rf /tmp/*
+
+ARG S6_OVERLAY_VERSION="3.1.6.2"
+RUN \
+    ARCH="$(uname -m)" \
+    && case "${ARCH}" in \
+        x86_64) S6_ARCH="x86_64" ;; \
+        aarch64) S6_ARCH="aarch64" ;; \
+        armv7l) S6_ARCH="armhf" ;; \
+        *) echo "Unsupported architecture: ${ARCH}" && exit 1 ;; \
+    esac \
+    && curl -L -o /tmp/s6-overlay-noarch.tar.xz \
+        "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz" \
+    && curl -L -o /tmp/s6-overlay-arch.tar.xz \
+        "https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${S6_ARCH}.tar.xz" \
+    && tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz \
+    && tar -C / -Jxpf /tmp/s6-overlay-arch.tar.xz \
+    && rm -rf /tmp/*
+
+# hadolint ignore=DL3008
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        chrony \
+    && CHRONY_VERSION="$(dpkg-query -W -f='${Version}' chrony)" \
+    && echo "${CHRONY_VERSION}" > /etc/chrony-version \
+    && mkdir -p /run/chrony /var/lib/chrony \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY rootfs /
+
+RUN chmod +x /etc/cont-init.d/* \
+    && chmod +x /etc/services.d/chronyd/run \
+    && chmod +x /etc/services.d/chronyd/finish
+
 ARG BUILD_ARCH
 ARG BUILD_NAME
 ARG BUILD_DESCRIPTION
 ARG BUILD_REPOSITORY
-
-ENV ADDON_VERSION="${BUILD_VERSION}" \
-    CHRONY_VERSION_FILE=/etc/chrony-version \
-    NTP_DIRECTIVES="ratelimit\nrtcsync"
-
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-
-# hadolint ignore=DL3018
-RUN \
-    apk add --no-cache \
-        bash \
-        chrony-nts \
-        jq \
-        su-exec \
-        tzdata \
-    && CHRONY_VERSION="$(chronyd -v 2>&1 | head -n1 | awk '{print $2}')" \
-    && echo "${CHRONY_VERSION}" > /etc/chrony-version \
-    && rm /etc/chrony/chrony.conf \
-    && chmod 1750 /etc/chrony \
-    && mkdir -p /run/chrony /var/lib/chrony \
-    && chown -R chrony:chrony /etc/chrony /run/chrony /var/lib/chrony \
-    && chmod 1750 /etc/chrony /run/chrony /var/lib/chrony
-
-COPY assets/startup.sh /bin/startup
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /bin/startup /entrypoint.sh
 
 LABEL \
     io.hass.name="${BUILD_NAME}" \
@@ -58,4 +97,4 @@ EXPOSE 123/udp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD chronyc -n tracking || exit 1
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/init"]

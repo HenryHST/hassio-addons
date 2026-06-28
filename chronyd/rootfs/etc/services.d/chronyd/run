@@ -1,0 +1,16 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Add-on: Chrony NTP
+# Runs chronyd (based on hassio-addons/addon-chrony)
+# ==============================================================================
+declare -a options
+
+bashio::log.info "Starting chronyd..."
+
+options+=(-d)
+if bashio::config.false 'set_system_clock'; then
+    options+=(-x)
+fi
+
+exec chronyd "${options[@]}"

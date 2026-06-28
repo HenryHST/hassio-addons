@@ -13,27 +13,43 @@ profile chronyd flags=(attach_disconnected,mediate_deleted) {
   capability dac_read_search,
   capability sys_time,
 
-  /entrypoint.sh ix,
-  /bin/startup ix,
+  # S6-Overlay
+  /init ix,
   /bin/** ix,
   /usr/bin/** ix,
-  /sbin/** ix,
+  /run/{s6,s6-rc*,service}/** ix,
+  /package/** ix,
+  /command/** ix,
+  /etc/services.d/** rwix,
+  /etc/cont-init.d/** rwix,
+  /etc/cont-finish.d/** rwix,
+  /run/{,**} rwk,
+  /dev/tty rw,
+
+  # Bashio
+  /usr/lib/bashio/** ix,
+  /tmp/** rwk,
+
+  # Chrony
   /usr/sbin/chronyd ix,
   /usr/bin/chronyc ix,
-  /usr/sbin/su-exec ix,
-  /lib/** r,
-  /usr/lib/** r,
-
   /etc/chrony/** rw,
   /etc/chrony-version r,
   /run/chrony/** rw,
   /var/lib/chrony/** rw,
+
+  # Add-on configuration and state
   /data/** rw,
-  /tmp/** rwk,
+  owner /data/options.json r,
+
   /etc/TZ r,
   /etc/localtime r,
   /usr/share/zoneinfo/** r,
-  owner /data/options.json r,
+  /lib/** r,
+  /usr/lib/** r,
+
+  # PTP (optional, when enable_ptp and device mapped)
+  /dev/ptp0 rw,
 
   network inet dgram,
   network inet6 dgram,

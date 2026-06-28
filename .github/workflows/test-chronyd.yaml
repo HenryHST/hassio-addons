@@ -29,7 +29,7 @@ jobs:
       - name: Build image
         run: |
           docker build -t chronyd:test \
-            --build-arg BUILD_VERSION=1.0.0 \
+            --build-arg BUILD_VERSION=2.0.0 \
             --build-arg BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
             --build-arg BUILD_REF=test \
             --build-arg BUILD_ARCH=amd64 \
@@ -42,10 +42,10 @@ jobs:
         run: |
           set -euo pipefail
           data_dir="$(mktemp -d)"
-          echo '{"ntp_servers":"0.pool.ntp.org,1.pool.ntp.org","enable_nts":false,'\
-            '"enable_sysclk":false,"noclientlog":false,"log_level":0,'\
-            '"timezone":"UTC","enable_ptp":false}' \
+          echo '{"mode":"server","ntp_server":["0.pool.ntp.org"],"set_system_clock":false,'\
+            '"enable_nts":false,"enable_ptp":false,"log_level":"info"}' \
             > "${data_dir}/options.json"
+
           fail() {
             echo "::group::Container logs"
             docker logs "${cid}" 2>&1 || true
@@ -60,23 +60,23 @@ jobs:
 
           cleanup() {
             docker rm -f "${cid}" >/dev/null 2>&1 || true
-            # Container writes /data/chronyd as chrony; reclaim ownership before rm
             docker run --rm --user root \
               -v "${data_dir}:/data" \
-              alpine:3.24 \
+              debian:bookworm-slim \
               chown -R "$(id -u):$(id -g)" /data >/dev/null 2>&1 || true
             rm -rf "${data_dir}"
           }
           trap cleanup EXIT
 
           for _ in $(seq 1 45); do
-            if docker logs "${cid}" 2>&1 | grep -q "Chrony NTP Add-on"; then
+            if docker logs "${cid}" 2>&1 | grep -q "Starting chronyd"; then
               break
             fi
             sleep 1
           done
 
           docker logs "${cid}" 2>&1 | grep -q "Chrony NTP Add-on" || fail
+          docker logs "${cid}" 2>&1 | grep -q "Starting chronyd" || fail
           docker logs "${cid}" 2>&1 | grep -q "Drift file: /data/chronyd/lib/chrony.drift" || fail
 
           for _ in $(seq 1 30); do
