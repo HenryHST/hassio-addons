@@ -20,9 +20,10 @@ debug_log() {
         --arg msg "${message}" \
         --argjson dat "${data}" \
         --argjson ts "$(date +%s)000" \
-        '{sessionId:$sid,hypothesisId:$hid,location:$loc,message:$msg,data:$dat,timestamp:$ts,runId:"pre-fix"}')
+        '{sessionId:$sid,hypothesisId:$hid,location:$loc,message:$msg,data:$dat,timestamp:$ts,runId:"pre-fix"}' \
+        2>/dev/null) || return 0
     echo "[DEBUG-92f7bb] ${payload}" >&2
-    mkdir -p /data/chronyd
+    mkdir -p /data/chronyd 2>/dev/null || return 0
     echo "${payload}" >> "${DEBUG_LOG}" 2>/dev/null || true
 }
 # #endregion
@@ -54,6 +55,30 @@ setup_persistent_storage() {
     chmod 1750 "${ETC_CHRONY}" "${RUN_CHRONY}" 2>/dev/null || true
 }
 
+normalize_ntp_servers() {
+    local config="$1"
+    local ntp_type
+
+    ntp_type=$(jq -r '.ntp_servers | type' "${config}")
+    case "${ntp_type}" in
+        array)
+            local servers
+            servers=$(jq -r '.ntp_servers[] | select(length > 0)' "${config}" | paste -sd, -)
+            if [[ -z "${servers}" ]]; then
+                echo "0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
+            else
+                echo "${servers}"
+            fi
+            ;;
+        string)
+            jq -r '.ntp_servers' "${config}"
+            ;;
+        *)
+            echo "0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"
+            ;;
+    esac
+}
+
 load_options() {
     if [[ ! -f "${CONFIG_PATH}" ]]; then
         echo "WARNING: Configuration file not found, using defaults"
@@ -66,7 +91,7 @@ load_options() {
         return
     fi
 
-    NTP_SERVERS=$(jq -r '.ntp_servers // "0.pool.ntp.org,1.pool.ntp.org,2.pool.ntp.org,3.pool.ntp.org"' "${CONFIG_PATH}")
+    NTP_SERVERS=$(normalize_ntp_servers "${CONFIG_PATH}")
     ENABLE_NTS=$(jq -r '.enable_nts // false' "${CONFIG_PATH}")
     ENABLE_SYSCLK=$(jq -r '.enable_sysclk // false' "${CONFIG_PATH}")
     NOCLIENTLOG=$(jq -r '.noclientlog // false' "${CONFIG_PATH}")

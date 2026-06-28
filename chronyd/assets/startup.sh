@@ -15,8 +15,9 @@ debug_log() {
  _ts="$(date +%s)000"
  _line="{\"sessionId\":\"92f7bb\",\"hypothesisId\":\"${_hid}\",\"location\":\"startup.sh\",\"message\":\"${_msg}\",\"data\":${_data},\"timestamp\":${_ts},\"runId\":\"pre-fix\"}"
  echo "[DEBUG-92f7bb] ${_line}" >&2
- mkdir -p /data/chronyd 2>/dev/null || true
+ mkdir -p /data/chronyd 2>/dev/null || return 0
  echo "${_line}" >> "${DEBUG_LOG}" 2>/dev/null || true
+ return 0
 }
 # #endregion
 
@@ -89,16 +90,26 @@ else
 fi
 
 # #region agent log
-debug_log "H2" "startup before server loop" "{\"ENABLE_NTS\":\"${ENABLE_NTS:-false}\",\"NTP_SERVERS_len\":$(printf %s "${NTP_SERVERS}" | wc -c | tr -d ' '),\"chronyd_features\":\"$(chronyd -v 2>&1 | head -n1)\"}"
+_chronyd_features="$(chronyd -v 2>&1 | head -n1 | tr '"' "'")"
+debug_log "H2" "startup before server loop" "{\"ENABLE_NTS\":\"${ENABLE_NTS:-false}\",\"NTP_SERVERS_len\":$(printf %s "${NTP_SERVERS}" | wc -c | tr -d ' '),\"chronyd_features\":\"${_chronyd_features}\"}" || true
 # #endregion
 
-IFS=","
-for N in $NTP_SERVERS; do
- N_CLEANED=$(printf "%s" "$N" | tr -d '"')
+OLDIFS=${IFS}
+IFS=,
+set -- ${NTP_SERVERS}
+IFS=${OLDIFS}
+for N do
+ N_CLEANED=$(printf "%s" "$N" | tr -d '"' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 
  # #region agent log
- debug_log "H3" "server loop iteration" "{\"raw_token\":$(printf '%s' "$N" | jq -Rs .),\"cleaned\":$(printf '%s' "$N_CLEANED" | jq -Rs .)}"
+ _raw_json=$(printf '%s' "$N" | jq -Rs . 2>/dev/null || echo '""')
+ _clean_json=$(printf '%s' "$N_CLEANED" | jq -Rs . 2>/dev/null || echo '""')
+ debug_log "H3" "server loop iteration" "{\"raw_token\":${_raw_json},\"cleaned\":${_clean_json}}" || true
  # #endregion
+
+ case "${N_CLEANED}" in
+ ""|"["|"]") continue ;;
+ esac
 
  if echo "${N_CLEANED}" | grep -q '^127\.'; then
  echo "server ${N_CLEANED}" >> ${CHRONY_CONF_FILE}
@@ -131,8 +142,10 @@ fi
 } >> ${CHRONY_CONF_FILE}
 
 # #region agent log
-debug_log "H4" "generated chrony.conf head" "$(sed -n '1,12p' ${CHRONY_CONF_FILE} | jq -Rs '{conf_head:.}')"
-debug_log "H4" "chrony.conf line 7" "$(sed -n '7p' ${CHRONY_CONF_FILE} | jq -Rs '{line7:.}')"
+_conf_head_json=$(sed -n '1,12p' ${CHRONY_CONF_FILE} | jq -Rs '{conf_head:.}' 2>/dev/null || echo '{"conf_head":""}')
+_line7_json=$(sed -n '7p' ${CHRONY_CONF_FILE} | jq -Rs '{line7:.}' 2>/dev/null || echo '{"line7":""}')
+debug_log "H4" "generated chrony.conf head" "${_conf_head_json}" || true
+debug_log "H4" "chrony.conf line 7" "${_line7_json}" || true
 # #endregion
 
 SYSCLK="-x"

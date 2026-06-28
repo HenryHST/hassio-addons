@@ -18,7 +18,7 @@ SHELL ["/bin/sh", "-eo", "pipefail", "-c"]
 RUN \
     apk add --no-cache \
         bash \
-        chrony \
+        chrony-nts \
         jq \
         su-exec \
         tzdata \

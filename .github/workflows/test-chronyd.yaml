@@ -43,21 +43,28 @@ jobs:
           set -euo pipefail
           data_dir="$(mktemp -d)"
           cat > "${data_dir}/options.json" <<'EOF'
-          {
-            "ntp_servers": "0.pool.ntp.org,1.pool.ntp.org",
-            "enable_nts": false,
-            "enable_sysclk": false,
-            "noclientlog": false,
-            "log_level": 0,
-            "timezone": "UTC",
-            "enable_ptp": false
+{
+  "ntp_servers": "0.pool.ntp.org,1.pool.ntp.org",
+  "enable_nts": false,
+  "enable_sysclk": false,
+  "noclientlog": false,
+  "log_level": 0,
+  "timezone": "UTC",
+  "enable_ptp": false
+}
+EOF
+
+          fail() {
+            echo "::group::Container logs"
+            docker logs "${cid}" 2>&1 || true
+            echo "::endgroup::"
+            exit 1
           }
-          EOF
 
           cid=$(docker run -d --name chronyd-smoke \
             -v "${data_dir}:/data" \
             -p 10123:123/udp \
-            chronyd:test)
+            chronyd:test) || fail
 
           cleanup() {
             docker rm -f "${cid}" >/dev/null 2>&1 || true
@@ -77,8 +84,8 @@ jobs:
             sleep 1
           done
 
-          docker logs "${cid}" | grep -q "Chrony NTP Add-on"
-          docker logs "${cid}" | grep -q "Drift file: /data/chronyd/lib/chrony.drift"
+          docker logs "${cid}" 2>&1 | grep -q "Chrony NTP Add-on" || fail
+          docker logs "${cid}" 2>&1 | grep -q "Drift file: /data/chronyd/lib/chrony.drift" || fail
 
           for _ in $(seq 1 30); do
             if nc -zu localhost 10123 2>/dev/null; then
@@ -86,6 +93,6 @@ jobs:
             fi
             sleep 1
           done
-          nc -zu localhost 10123
+          nc -zu localhost 10123 || fail
 
-          docker exec "${cid}" chronyc -n tracking
+          docker exec "${cid}" chronyc -n tracking || fail
