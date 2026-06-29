@@ -148,10 +148,11 @@ if bashio::config.equals 'mode' 'netserver' ;then
     {
         echo "UPSUSER=upsmonprimary"
         echo "UPSPASS=${upsmonpwd}"
+        echo "UPS_HOST=localhost"
         echo "UPS_DEVICES=${ups_device_names[*]}"
     } > /data/nut/monitor.env
     chmod 600 /data/nut/monitor.env
-    bashio::log.debug "Wrote /data/nut/monitor.env for Home Assistant sensor sync"
+    bashio::log.debug "Wrote /data/nut/monitor.env for MQTT upsc polling"
 
     monitor_count=$(grep -c "^MONITOR" /etc/nut/upsmon.conf 2>/dev/null || echo 0)
     bashio::log.debug "Total MONITOR lines in upsmon.conf: ${monitor_count}"

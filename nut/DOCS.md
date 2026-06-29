@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-**Add-on Version**: 1.1.1  
+**Add-on Version**: 1.2.0  
 **NUT Core Version**: 2.8.1-5 (Debian trixie package; see `/etc/nut-version` in the container)
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
@@ -292,78 +292,102 @@ HaveIBeenPwned password requirement by setting it to `true`.
 **Note**: _We STRONGLY suggest picking a stronger/safer password instead of
 using this option! USE AT YOUR OWN RISK!_
 
-### Option: `enable_home_assistant_sensors`
+### Option: `enable_mqtt`
 
-When `true` (default), the add-on polls `upsc` and pushes sensor states to Home
-Assistant via the States API. Works without installing a separate integration.
+When `true` (default), the add-on polls `upsc` and publishes UPS status and
+numeric values to an MQTT broker. Works in **netserver** and **netclient** mode.
 
 ```yaml
-enable_home_assistant_sensors: true
-homeassistant_poll_interval: 30
+enable_mqtt: true
+mqtt_host: ""
+mqtt_port: 1883
+mqtt_username: ""
+mqtt_password: ""
+mqtt_topic: nut/ups
+mqtt_poll_interval: 30
+mqtt_use_tls: false
 ```
 
-Set to `false` if you use the [NUT Hass.io custom integration](integration/README.md).
+### Option: `mqtt_host`
 
-### Option: `homeassistant_poll_interval`
+MQTT broker hostname or IP. Leave empty to use the Home Assistant **Mosquitto
+broker** add-on automatically (`services: mqtt:want`).
 
-Seconds between `upsc` polls for add-on sensor push (10–300). Default: `30`.
+### Option: `mqtt_port`
 
-## Home Assistant Sensors
+MQTT broker port. Default: `1883` (use `8883` with `mqtt_use_tls: true` for
+typical TLS setups).
 
-Three ways to get UPS data in Home Assistant:
+### Option: `mqtt_username` / `mqtt_password`
 
-| Method | Install | Best for |
-|--------|---------|----------|
-| **A — Add-on push** | None (default) | Quick start, dashboards |
-| **B — Custom integration** | [integration/README.md](integration/README.md) | Proper devices/entities |
-| **C — Official NUT integration** | HA Integrations | All NUT variables |
+Credentials for the MQTT broker. Leave empty when using the Mosquitto add-on
+(auto-configured credentials).
 
-Use **either** add-on push **or** custom integration — not both (duplicate entities).
+### Option: `mqtt_topic`
+
+Base MQTT topic path (no trailing slash). Per-UPS topics are appended below this
+base. Default: `nut/ups`.
+
+Example with `mqtt_topic: home/ups` and UPS name `myups`:
+
+| Topic | Payload |
+|-------|---------|
+| `home/ups/myups/status` | `ONLINE`, `ONBATT`, `LOWBATT`, `FSD`, or `UNKNOWN` |
+| `home/ups/myups/raw_status` | Raw NUT `ups.status` tokens (e.g. `OL OL`) |
+| `home/ups/myups/battery_charge` | Battery charge (%) |
+| `home/ups/myups/input_voltage` | Input voltage (V) |
+| `home/ups/myups/load` | UPS load (%) |
+| `home/ups/myups/battery_runtime` | Battery runtime (s) |
+
+All messages are published **retained** so new subscribers receive the last known
+value. Numeric topics are only published when the UPS driver exposes the variable.
+
+### Option: `mqtt_poll_interval`
+
+Seconds between `upsc` polls for MQTT publishing (10–300). Default: `30`.
+
+Immediate updates on status changes (`ONLINE`, `ONBATT`, `LOWBATT`, `FSD`) are
+also sent via the `upsmon` notify handler.
+
+### Option: `mqtt_use_tls`
+
+Enable TLS for MQTT connections (`mosquitto_pub --cafile`). Default: `false`.
+
+## MQTT
 
 ### Status values
 
-| Sensor state | Meaning | NUT `ups.status` token |
-|--------------|---------|------------------------|
+| MQTT status | Meaning | NUT `ups.status` token |
+|-------------|---------|--------------------------|
 | `ONLINE` | Utility power present | `OL` |
 | `ONBATT` | Running on battery | `OB` |
 | `LOWBATT` | Battery low | `LB` |
 | `FSD` | Forced shutdown in progress | `FSD` |
 
-### Option A — Add-on sensor push (default)
+Priority when multiple tokens are present: FSD > LOWBATT > ONBATT > ONLINE.
 
-Entities (example UPS name `myups`):
+### Mosquitto add-on vs. external broker
 
-| Entity | Description |
-|--------|-------------|
-| `sensor.nut_addon_myups_status` | ONLINE / ONBATT / LOWBATT / FSD |
-| `sensor.nut_addon_myups_battery_charge` | Battery charge (%) |
-| `sensor.nut_addon_myups_input_voltage` | Input voltage (V) |
-| `sensor.nut_addon_myups_load` | Load (%) |
-| `sensor.nut_addon_myups_battery_runtime` | Runtime (s) |
+| Setup | `mqtt_host` | Notes |
+|-------|-------------|-------|
+| Mosquitto add-on | `""` (empty) | Install Mosquitto broker; credentials auto-discovered |
+| External broker | e.g. `192.168.0.10` | Set host, port, username, password manually |
 
-Numeric sensors appear only when the UPS driver exposes the variable.
+### netclient mode
 
-Example Lovelace:
+In **netclient** mode, `upsc` queries the remote `upsd` using your
+`remote_ups_*` settings. MQTT topics use the configured `remote_ups_name` as the
+UPS segment in the topic path.
+
+### Home Assistant MQTT sensor example
 
 ```yaml
-type: entities
-title: UPS
-entities:
-  - entity: sensor.nut_addon_myups_status
-  - entity: sensor.nut_addon_myups_battery_charge
-  - entity: sensor.nut_addon_myups_load
+mqtt:
+  sensor:
+    - name: "UPS Status"
+      state_topic: "nut/ups/myups/status"
+      unique_id: nut_myups_status
 ```
-
-### Option B — Custom integration `nut_hassio`
-
-1. Copy `integration/custom_components/nut_hassio` to `config/custom_components/`
-2. Restart Home Assistant
-3. Add integration: host = HA IP, port = add-on **3493** port, UPS name + user from add-on config
-4. Set `enable_home_assistant_sensors: false` in the add-on
-
-### Option C — Official [NUT integration](https://www.home-assistant.io/integrations/nut/)
-
-Connect to the add-on `upsd` port with a configured user for all standard NUT sensors.
 
 ### Example automation (critical alert)
 
@@ -371,70 +395,26 @@ Connect to the add-on `upsd` port with a configured user for all standard NUT se
 automation:
   - alias: "UPS low battery or shutdown"
     trigger:
-      - platform: state
-        entity_id: sensor.nut_addon_myups_status
-        to:
-          - LOWBATT
-          - FSD
+      - platform: mqtt
+        topic: nut/ups/myups/status
+    condition:
+      - condition: template
+        value_template: "{{ trigger.payload in ['LOWBATT', 'FSD'] }}"
     action:
       - service: notify.persistent_notification
         data:
           title: "UPS critical"
-          message: "UPS status is {{ states('sensor.nut_addon_myups_status') }}"
+          message: "UPS status is {{ trigger.payload }}"
 ```
 
-## Event Notifications
+### Breaking changes in 1.2.0
 
-Whenever your UPS changes state, an event named `nut.ups_event` will be fired.
-It's payload looks like this:
+- Removed: `enable_home_assistant_sensors`, `homeassistant_poll_interval`
+- Removed: `sensor.nut_addon_*` States API push
+- Removed: `nut.ups_event` Home Assistant event
+- Removed: `nut_hassio` custom integration from this repository
 
-| Key           | Value                                        |
-| ------------- | -------------------------------------------- |
-| `ups_name`    | The name of the UPS as you configured it     |
-| `notify_type` | The type of notification                     |
-| `notify_msg`  | The NUT default message for the notification |
-
-`notify_type` signifies what kind of notification it is.
-See the below table for more information as well as the message that will be in
-`notify_msg`. `%s` is automatically replaced by NUT with your UPS name.
-
-| Type       | Cause                                                                 | Default Message                                    |
-| ---------- | --------------------------------------------------------------------- | -------------------------------------------------- |
-| `ONLINE`   | UPS is back online                                                    | "UPS %s on line power"                             |
-| `ONBATT`   | UPS is on battery                                                     | "UPS %s on battery"                                |
-| `LOWBATT`  | UPS has a low battery (if also on battery, it's "critical")           | "UPS %s battery is low"                            |
-| `FSD`      | UPS is being shutdown by the master (FSD = "Forced Shutdown")         | "UPS %s: forced shutdown in progress"              |
-| `COMMOK`   | Communications established with the UPS                               | "Communications with UPS %s established"           |
-| `COMMBAD`  | Communications lost to the UPS                                        | "Communications with UPS %s lost"                  |
-| `SHUTDOWN` | The system is being shutdown                                          | "Auto logout and shutdown proceeding"              |
-| `REPLBATT` | The UPS battery is bad and needs to be replaced                       | "UPS %s battery needs to be replaced"              |
-| `NOCOMM`   | A UPS is unavailable (can't be contacted for monitoring)              | "UPS %s is unavailable"                            |
-| `NOPARENT` | The process that shuts down the system has died (shutdown impossible) | "upsmon parent process died - shutdown impossible" |
-
-This event allows you to create automations to do things like send a
-[critical notification][critical-notif] to your phone:
-
-```yaml
-automations:
-  - alias: "UPS changed state"
-    trigger:
-      - platform: event
-        event_type: nut.ups_event
-    action:
-      - service: notify.mobile_app_<your_device_id_here>
-        data_template:
-          title: "UPS changed state"
-          message: "{{ trigger.event.data.notify_msg }}"
-          data:
-            push:
-              sound:
-                name: default
-                critical: 1
-                volume: 1.0
-```
-
-For more information, see the NUT docs [here][nut-notif-doc-1] and
-[here][nut-notif-doc-2].
+Use MQTT (this add-on), the official [NUT integration](https://www.home-assistant.io/integrations/nut/), or subscribe to MQTT topics in automations.
 
 ## Changelog & Releases
 

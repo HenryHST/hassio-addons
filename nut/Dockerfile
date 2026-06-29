@@ -26,6 +26,7 @@ RUN \
         tzdata \
         procps \
         xz-utils \
+        mosquitto-clients \
     && echo "Installed versions:" \
     && dpkg -l | grep -E 'libcurl|libpam|libsqlite3|zlib1g' || true \
     && apt-get clean \
@@ -89,10 +90,10 @@ RUN chmod +x /etc/cont-init.d/* \
     && chmod +x /etc/services.d/upsd/finish \
     && chmod +x /usr/bin/notify \
     && chmod +x /usr/bin/nut-config-helpers.sh \
-    && chmod +x /usr/bin/ha-sensors-sync.sh \
+    && chmod +x /usr/bin/mqtt-publish.sh \
     && chmod +x /usr/bin/shutdownhost \
-    && chmod +x /etc/services.d/ha-sensors/run \
-    && chmod +x /etc/services.d/ha-sensors/finish
+    && chmod +x /etc/services.d/mqtt-publisher/run \
+    && chmod +x /etc/services.d/mqtt-publisher/finish
 
 # Build arguments
 ARG BUILD_ARCH

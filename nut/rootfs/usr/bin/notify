@@ -1,17 +1,9 @@
 #!/bin/bash
 # ==============================================================================
 # Home Assistant Community Add-on: Network UPS Tools
-# Notify handler script
+# Notify handler script — triggers immediate MQTT publish on UPS events
 # ==============================================================================
 set -e
-
-readonly NOTIFYMSG=${1}
-
-# Validate required environment variables
-if [[ -z "${SUPERVISOR_TOKEN}" ]]; then
-    echo "ERROR: SUPERVISOR_TOKEN not set" >&2
-    exit 1
-fi
 
 if [[ -z "${UPSNAME}" ]]; then
     echo "ERROR: UPSNAME not set" >&2
@@ -23,20 +15,5 @@ if [[ -z "${NOTIFYTYPE}" ]]; then
     exit 1
 fi
 
-payload=$(jq -n \
-    --arg ups_name "${UPSNAME}" \
-    --arg notify_type "${NOTIFYTYPE}" \
-    --arg notify_msg "${NOTIFYMSG}" \
-    '{ups_name: $ups_name, notify_type: $notify_type, notify_msg: $notify_msg}')
-
-# Send notification to Home Assistant
-if ! curl -sS -f -X "POST" \
-    -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
-    --data-binary "${payload}" \
-    "http://supervisor/core/api/events/nut.ups_event"; then
-    echo "ERROR: Failed to send UPS event to Home Assistant" >&2
-    exit 1
-fi
-
-/usr/bin/ha-sensors-sync.sh --event "${UPSNAME}" "${NOTIFYTYPE}" --quick \
-    || echo "WARNING: Home Assistant sensor sync after notify failed" >&2
+/usr/bin/mqtt-publish.sh --event "${UPSNAME}" "${NOTIFYTYPE}" --quick \
+    || echo "WARNING: MQTT publish after notify failed" >&2

@@ -13,7 +13,7 @@ normalize_upsmon_role() {
     esac
 }
 
-# Map ups.status tokens to Home Assistant status labels (FSD > LB > OB > OL).
+# Map ups.status tokens to MQTT status labels (FSD > LB > OB > OL).
 map_ups_status() {
     local raw="${1:-}"
     local upper
@@ -33,4 +33,19 @@ map_ups_status() {
     else
         echo "UNKNOWN"
     fi
+}
+
+# Build MQTT topic path: base + UPS name + suffix (no leading/trailing slashes on base).
+mqtt_topic_path() {
+    local base="${1:-}"
+    local ups_name="${2:-}"
+    local suffix="${3:-}"
+    local path
+
+    base="${base#/}"
+    base="${base%/}"
+    path="${base}/${ups_name}/${suffix}"
+    path=$(printf '%s' "${path}" | tr -s '/')
+    path="${path#/}"
+    printf '%s' "${path}"
 }

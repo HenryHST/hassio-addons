@@ -1,6 +1,6 @@
 # Home Assistant Add-on: Network UPS Tools
 
-[![Release](https://img.shields.io/badge/version-v1.1.1-blue.svg)](https://github.com/henryhst/hassio-addons/tree/main/nut) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
+[![Release](https://img.shields.io/badge/version-v1.2.0-blue.svg)](https://github.com/henryhst/hassio-addons/tree/main/nut) ![Project Maintenance](https://img.shields.io/maintenance/yes/2025.svg)
 
 [![Discord](https://img.shields.io/discord/478094546522079232.svg)](https://discord.me/hassioaddons) [![Community Forum](https://img.shields.io/badge/community-forum-brightgreen.svg)](https://community.home-assistant.io/t/community-hass-io-add-on-network-ups-tools/68516)
 
@@ -8,9 +8,9 @@ A Network UPS Tools daemon to allow you to easily manage battery backup (UPS)
 devices connected to your Home Assistant machine.
 
 **Version Information:**
-- Add-on Version: 1.1.1 (Home Assistant integration)
+- Add-on Version: 1.2.0
 - NUT Core: 2.8.1-5 (Debian trixie; runtime: `/etc/nut-version`)
-- Home Assistant: UPS status + numeric sensors (see [DOCS.md](DOCS.md#home-assistant-sensors))
+- MQTT: UPS status + numeric values (see [DOCS.md](DOCS.md#mqtt))
 
 > **Note**: The add-on version is independent of the NUT core version. The add-on version tracks 
 > changes to the Home Assistant integration, while the core version indicates the underlying Network 
@@ -40,7 +40,7 @@ see the [NUT integration documentation](https://www.home-assistant.io/integratio
 
 - **Monitor UPS Devices**: Monitor local and remote UPS devices
 - **SSL/TLS Support**: New SSL certificate verification and forced encryption
-- **Home Assistant Integration**: Automatic event notifications to Home Assistant
+- **MQTT Publishing**: UPS status (ONLINE/ONBATT/LOWBATT/FSD) and numeric values via configurable MQTT topics
 - **Multi-mode Operation**: Support for both netserver and netclient modes
 - **Wide Device Support**: 140+ manufacturers, thousands of models
 - **Hardware Support**: UART, USB, and UDEV support
@@ -75,6 +75,9 @@ mode: netserver
 shutdown_host: "false"
 certverify: 0
 forcessl: 0
+enable_mqtt: true
+mqtt_topic: nut/ups
+mqtt_poll_interval: 30
 ```
 
 **Note**: _This is just an example, don't copy and paste it! Create your own!_

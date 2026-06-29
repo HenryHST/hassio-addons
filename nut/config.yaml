@@ -1,6 +1,6 @@
 ---
 name: Network UPS Tools
-version: 1.1.1
+version: 1.2.0
 slug: nut
 description: Manage battery backup (UPS) devices
 url: https://github.com/henryhst/hassio-addons/tree/main/nut
@@ -16,7 +16,8 @@ apparmor: true
 backup: cold
 hassio_api: true
 hassio_role: manager
-homeassistant_api: true
+services:
+  - mqtt:want
 ports:
   3493/tcp: null
 ports_description:
@@ -38,8 +39,14 @@ options:
   shutdown_host: false
   certverify: "0"
   forcessl: "0"
-  enable_home_assistant_sensors: true
-  homeassistant_poll_interval: 30
+  enable_mqtt: true
+  mqtt_host: ""
+  mqtt_port: 1883
+  mqtt_username: ""
+  mqtt_password: ""
+  mqtt_topic: nut/ups
+  mqtt_poll_interval: 30
+  mqtt_use_tls: false
 schema:
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
   users:
@@ -69,5 +76,11 @@ schema:
   certverify: list(0|1)?
   forcessl: list(0|1)?
   i_like_to_be_pwned: bool?
-  enable_home_assistant_sensors: bool?
-  homeassistant_poll_interval: int(10,300)?
+  enable_mqtt: bool?
+  mqtt_host: str?
+  mqtt_port: port?
+  mqtt_username: str?
+  mqtt_password: password?
+  mqtt_topic: str?
+  mqtt_poll_interval: int(10,300)?
+  mqtt_use_tls: bool?

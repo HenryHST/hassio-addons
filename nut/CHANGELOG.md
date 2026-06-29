@@ -5,6 +5,28 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 **Note**: The add-on version (e.g., 1.0.0) is independent of the NUT core version (currently 2.8.1-5). 
 The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
 
+## [1.2.0] - 2026-06-23
+
+### Added
+
+- MQTT publishing: `enable_mqtt`, broker settings, configurable `mqtt_topic`
+- Status topics: ONLINE, ONBATT, LOWBATT, FSD via `upsc` + `mosquitto_pub` (retained)
+- Numeric topics: battery charge, input voltage, load, battery runtime (when supported)
+- Immediate MQTT update on UPS status events via `notify` script
+- `mqtt_topic_path()` helper and unit tests
+- netclient support: `monitor.env` with remote `upsc` host
+
+### Removed (breaking)
+
+- Home Assistant sensor push (`enable_home_assistant_sensors`, `sensor.nut_addon_*`)
+- Home Assistant event `nut.ups_event`
+- Custom HA integration `nut_hassio` (`nut/integration/`)
+- `homeassistant_api` add-on permission
+
+### Changed
+
+- `notify` script triggers MQTT publish instead of Supervisor Events API
+
 ## [1.1.1] - 2026-06-28
 
 ### Fixed

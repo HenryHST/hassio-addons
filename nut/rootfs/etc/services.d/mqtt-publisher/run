@@ -1,0 +1,20 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Network UPS Tools
+# Poll upsc and publish UPS data to MQTT
+# ==============================================================================
+declare interval
+
+if bashio::config.false 'enable_mqtt'; then
+    bashio::log.info "MQTT publishing disabled"
+    exec sleep infinity
+fi
+
+interval=$(bashio::config 'mqtt_poll_interval')
+bashio::log.info "MQTT publishing enabled (interval ${interval}s)"
+
+while true; do
+    /usr/bin/mqtt-publish.sh || bashio::log.warning "MQTT publish failed"
+    sleep "${interval}"
+done

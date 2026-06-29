@@ -46,7 +46,7 @@ profile nut flags=(attach_disconnected,mediate_deleted) {
   /dev/ttyUSB* rw,
   /dev/ttyACM* rw,
 
-  # Supervisor API (notify script)
+  # MQTT (mqtt-publish script)
   network inet stream,
   network inet6 stream,
 
@@ -89,7 +89,8 @@ profile nut flags=(attach_disconnected,mediate_deleted) {
     /usr/sbin/upsmon ix,
     /usr/bin/upsc ix,
   /usr/bin/notify ix,
-  /usr/bin/ha-sensors-sync.sh ix,
+  /usr/bin/mqtt-publish.sh ix,
+  /usr/bin/mosquitto_pub ix,
     /usr/bin/shutdownhost ix,
     /usr/bin/wall ix,
     /bin/bash ix,

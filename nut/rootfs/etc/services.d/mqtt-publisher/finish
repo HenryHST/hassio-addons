@@ -2,6 +2,6 @@
 # shellcheck shell=bash
 # ==============================================================================
 # Home Assistant Community Add-on: Network UPS Tools
-# ha-sensors sync stopped — restart without halting upsd/upsmon
+# mqtt-publisher stopped — restart without halting upsd/upsmon
 # ==============================================================================
-bashio::log.warning "Home Assistant sensor sync stopped, restarting..."
+bashio::log.warning "MQTT publisher stopped, restarting..."

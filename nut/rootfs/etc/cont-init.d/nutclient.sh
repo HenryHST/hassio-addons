@@ -26,6 +26,16 @@ if bashio::config.equals 'mode' 'netclient' ;then
     rpwd=$(bashio::config "remote_ups_password")
     echo "MONITOR ${rname}@${rhost} 1 ${ruser} ${rpwd} secondary" \
         >> /etc/nut/upsmon.conf
+
+    mkdir -p /data/nut
+    {
+        echo "UPSUSER=${ruser}"
+        echo "UPSPASS=${rpwd}"
+        echo "UPS_HOST=${rhost}"
+        echo "UPS_DEVICES=${rname}"
+    } > /data/nut/monitor.env
+    chmod 600 /data/nut/monitor.env
+    bashio::log.debug "Wrote /data/nut/monitor.env for MQTT upsc polling (netclient)"
 fi
 
 if bashio::config.has_value "upsmon_deadtime"; then
