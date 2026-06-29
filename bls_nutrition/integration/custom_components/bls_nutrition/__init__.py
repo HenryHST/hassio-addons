@@ -46,6 +46,8 @@ _SERVICE_NAMES = (
     SERVICE_ADD_TO_TODO_LIST,
 )
 
+_ENTRY_ID_FIELD = {vol.Optional(CONF_CONFIG_ENTRY_ID): str}
+
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Set up integration via YAML is not supported."""
@@ -116,11 +118,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 def _register_services(hass: HomeAssistant) -> None:
-    if hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
-        return
-
-    entry_id_schema = vol.Optional(CONF_CONFIG_ENTRY_ID): str
-
     async def handle_search(call: ServiceCall) -> dict[str, Any]:
         runtime, entry_id = _get_runtime(hass, call)
         results = await runtime.client.search_food(
@@ -214,105 +211,112 @@ def _register_services(hass: HomeAssistant) -> None:
             blocking=True,
         )
 
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_SEARCH_FOOD,
-        handle_search,
-        schema=vol.Schema(
-            {
-                vol.Required("query"): str,
-                vol.Optional("limit", default=20): vol.All(
-                    vol.Coerce(int), vol.Range(min=1, max=100)
-                ),
-                entry_id_schema,
-            }
-        ),
-        supports_response=SupportsResponse.ONLY,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_LOOKUP_BARCODE,
-        handle_barcode,
-        schema=vol.Schema(
-            {
-                vol.Required("barcode"): str,
-                vol.Optional("amount_g"): vol.Coerce(float),
-                entry_id_schema,
-            }
-        ),
-        supports_response=SupportsResponse.ONLY,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_CALCULATE_PORTION,
-        handle_portion,
-        schema=vol.Schema(
-            {
-                vol.Required("source"): vol.In(["bls", "off", "custom"]),
-                vol.Required("id"): str,
-                vol.Required("amount_g"): vol.Coerce(float),
-                entry_id_schema,
-            }
-        ),
-        supports_response=SupportsResponse.ONLY,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_CALCULATE_RECIPE,
-        handle_recipe,
-        schema=vol.Schema(
-            {
-                vol.Required("ingredients"): [dict],
-                vol.Optional("servings", default=1): vol.All(
-                    vol.Coerce(int), vol.Range(min=1)
-                ),
-                entry_id_schema,
-            }
-        ),
-        supports_response=SupportsResponse.ONLY,
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_SAVE_RECIPE,
-        handle_save_recipe,
-        schema=vol.Schema(
-            {
-                vol.Required("name"): str,
-                vol.Required("ingredients"): [dict],
-                vol.Optional("servings", default=1): vol.All(
-                    vol.Coerce(int), vol.Range(min=1)
-                ),
-                entry_id_schema,
-            }
-        ),
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_SAVE_CUSTOM_FOOD,
-        handle_save_custom_food,
-        schema=vol.Schema(
-            {
-                vol.Required("name"): str,
-                vol.Required("nutrients"): dict,
-                vol.Optional("notes"): str,
-                entry_id_schema,
-            }
-        ),
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_ADD_TO_TODO_LIST,
-        handle_add_to_todo_list,
-        schema=vol.Schema(
-            {
-                vol.Required("name"): str,
-                vol.Optional("barcode"): str,
-                vol.Optional("brand"): str,
-                vol.Optional("entity_id", default="todo.shopping_list"): str,
-                entry_id_schema,
-            }
-        ),
-    )
+    if not hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SEARCH_FOOD,
+            handle_search,
+            schema=vol.Schema(
+                {
+                    vol.Required("query"): str,
+                    vol.Optional("limit", default=20): vol.All(
+                        vol.Coerce(int), vol.Range(min=1, max=100)
+                    ),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_LOOKUP_BARCODE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_LOOKUP_BARCODE,
+            handle_barcode,
+            schema=vol.Schema(
+                {
+                    vol.Required("barcode"): str,
+                    vol.Optional("amount_g"): vol.Coerce(float),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_CALCULATE_PORTION):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_CALCULATE_PORTION,
+            handle_portion,
+            schema=vol.Schema(
+                {
+                    vol.Required("source"): vol.In(["bls", "off", "custom"]),
+                    vol.Required("id"): str,
+                    vol.Required("amount_g"): vol.Coerce(float),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_CALCULATE_RECIPE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_CALCULATE_RECIPE,
+            handle_recipe,
+            schema=vol.Schema(
+                {
+                    vol.Required("ingredients"): [dict],
+                    vol.Optional("servings", default=1): vol.All(
+                        vol.Coerce(int), vol.Range(min=1)
+                    ),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_SAVE_RECIPE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SAVE_RECIPE,
+            handle_save_recipe,
+            schema=vol.Schema(
+                {
+                    vol.Required("name"): str,
+                    vol.Required("ingredients"): [dict],
+                    vol.Optional("servings", default=1): vol.All(
+                        vol.Coerce(int), vol.Range(min=1)
+                    ),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_SAVE_CUSTOM_FOOD):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_SAVE_CUSTOM_FOOD,
+            handle_save_custom_food,
+            schema=vol.Schema(
+                {
+                    vol.Required("name"): str,
+                    vol.Required("nutrients"): dict,
+                    vol.Optional("notes"): str,
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_ADD_TO_TODO_LIST):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_ADD_TO_TODO_LIST,
+            handle_add_to_todo_list,
+            schema=vol.Schema(
+                {
+                    vol.Required("name"): str,
+                    vol.Optional("barcode"): str,
+                    vol.Optional("brand"): str,
+                    vol.Optional("entity_id", default="todo.shopping_list"): str,
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+        )
 
 
 def _unregister_services(hass: HomeAssistant) -> None:

@@ -47,5 +47,75 @@
       "nova": { "name": "Nova score" },
       "ecoscore": { "name": "Eco-Score" }
     }
+  },
+  "services": {
+    "search_food": {
+      "name": "Search food",
+      "description": "Search foods in the BLS database.",
+      "fields": {
+        "query": { "name": "Search term", "description": "Name or BLS code." },
+        "limit": { "name": "Limit", "description": "Maximum number of results." },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "lookup_barcode": {
+      "name": "Look up barcode",
+      "description": "Look up a packaged product via Open Food Facts and calculate the portion.",
+      "fields": {
+        "barcode": { "name": "Barcode (EAN)" },
+        "amount_g": { "name": "Amount (g)", "description": "Portion in grams (default from integration options)." },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "calculate_portion": {
+      "name": "Calculate portion",
+      "description": "Calculate nutrients and diabetes units for a portion.",
+      "fields": {
+        "source": { "name": "Source" },
+        "id": { "name": "ID", "description": "BLS code, barcode, or custom food ID." },
+        "amount_g": { "name": "Amount (g)" },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "calculate_recipe": {
+      "name": "Calculate recipe",
+      "description": "Aggregate nutrients and diabetes units from ingredients.",
+      "fields": {
+        "ingredients": { "name": "Ingredients", "description": "List with source, id, amount_g." },
+        "servings": { "name": "Servings" },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "save_recipe": {
+      "name": "Save recipe",
+      "description": "Save a recipe in the add-on.",
+      "fields": {
+        "name": { "name": "Name" },
+        "ingredients": { "name": "Ingredients" },
+        "servings": { "name": "Servings" },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "save_custom_food": {
+      "name": "Save custom food",
+      "description": "Save a user-defined food item.",
+      "fields": {
+        "name": { "name": "Name" },
+        "nutrients": { "name": "Nutrients per 100g" },
+        "notes": { "name": "Notes" },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    },
+    "add_to_todo_list": {
+      "name": "Add to shopping list",
+      "description": "Add an Open Food Facts product to a Home Assistant to-do list.",
+      "fields": {
+        "name": { "name": "Product name" },
+        "barcode": { "name": "Barcode (EAN)" },
+        "brand": { "name": "Brand" },
+        "entity_id": { "name": "To-do entity", "description": "Target list, e.g. todo.shopping_list." },
+        "config_entry_id": { "name": "Config entry ID", "description": "Required when multiple BLS integrations are configured." }
+      }
+    }
   }
 }

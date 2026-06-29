@@ -13,11 +13,14 @@ HACS erkennt es deshalb als Add-on-Repo und lehnt die Integration ab:
 
 ### Option A: Manuelle Installation (ohne HACS)
 
-Kopiere den Inhalt von `custom_components/bls_nutrition` nach:
+Kopiere den **gesamten Ordner** `custom_components/bls_nutrition` nach:
 
 ```text
 config/custom_components/bls_nutrition/
 ```
+
+**Wichtig:** Nicht nur einzelne Dateien (z. B. nur `__init__.py`) aktualisieren — alle Dateien
+im Ordner müssen zusammenpassen (`const.py`, `services.yaml`, `strings.json`, `translations/`, …).
 
 Home Assistant neu starten.
 

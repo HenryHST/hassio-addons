@@ -47,5 +47,75 @@
       "nova": { "name": "Nova-Score" },
       "ecoscore": { "name": "Eco-Score" }
     }
+  },
+  "services": {
+    "search_food": {
+      "name": "Lebensmittel suchen",
+      "description": "Sucht Lebensmittel in der BLS-Datenbank.",
+      "fields": {
+        "query": { "name": "Suchbegriff", "description": "Name oder BLS-Code." },
+        "limit": { "name": "Limit", "description": "Maximale Anzahl Ergebnisse." },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "lookup_barcode": {
+      "name": "Barcode suchen",
+      "description": "Sucht ein Packungsprodukt über Open Food Facts und berechnet die Portion.",
+      "fields": {
+        "barcode": { "name": "Barcode (EAN)" },
+        "amount_g": { "name": "Menge (g)", "description": "Portion in Gramm (Standard aus Integrations-Optionen)." },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "calculate_portion": {
+      "name": "Portion berechnen",
+      "description": "Berechnet Nährwerte und Diabetes-Einheiten für eine Portion.",
+      "fields": {
+        "source": { "name": "Quelle" },
+        "id": { "name": "ID", "description": "BLS-Code, Barcode oder Custom-Food-ID." },
+        "amount_g": { "name": "Menge (g)" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "calculate_recipe": {
+      "name": "Rezept berechnen",
+      "description": "Aggregiert Nährwerte und Diabetes-Einheiten aus Zutaten.",
+      "fields": {
+        "ingredients": { "name": "Zutaten", "description": "Liste mit source, id, amount_g." },
+        "servings": { "name": "Portionen" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "save_recipe": {
+      "name": "Rezept speichern",
+      "description": "Speichert ein Rezept im Add-on.",
+      "fields": {
+        "name": { "name": "Name" },
+        "ingredients": { "name": "Zutaten" },
+        "servings": { "name": "Portionen" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "save_custom_food": {
+      "name": "Eigenes Lebensmittel speichern",
+      "description": "Speichert ein benutzerdefiniertes Lebensmittel.",
+      "fields": {
+        "name": { "name": "Name" },
+        "nutrients": { "name": "Nährwerte pro 100g" },
+        "notes": { "name": "Notizen" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "add_to_todo_list": {
+      "name": "Zur Einkaufsliste hinzufügen",
+      "description": "Fügt ein Open-Food-Facts-Produkt zur Home-Assistant-To-do-Liste hinzu.",
+      "fields": {
+        "name": { "name": "Produktname" },
+        "barcode": { "name": "Barcode (EAN)" },
+        "brand": { "name": "Marke" },
+        "entity_id": { "name": "To-do-Entity", "description": "Ziel-Liste, z. B. todo.shopping_list." },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    }
   }
 }

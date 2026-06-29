@@ -1,159 +1,189 @@
-service: bls_nutrition.search_food
-name: Lebensmittel suchen
-description: Sucht Lebensmittel in der BLS-Datenbank.
-fields:
-  query:
-    name: Suchbegriff
-    description: Name oder BLS-Code.
-    required: true
-    example: Apfel
-    selector:
-      text:
-  limit:
-    name: Limit
-    description: Maximale Anzahl Ergebnisse.
-    default: 20
-    selector:
-      number:
-        min: 1
-        max: 100
+search_food:
+  name: Lebensmittel suchen
+  description: Sucht Lebensmittel in der BLS-Datenbank.
+  fields:
+    query:
+      name: Suchbegriff
+      description: Name oder BLS-Code.
+      required: true
+      example: Apfel
+      selector:
+        text:
+    limit:
+      name: Limit
+      description: Maximale Anzahl Ergebnisse.
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 100
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.lookup_barcode
-name: Barcode suchen
-description: Sucht ein Packungsprodukt über Open Food Facts und berechnet die Portion.
-fields:
-  barcode:
-    name: Barcode (EAN)
-    required: true
-    example: "4008400407321"
-    selector:
-      text:
-  amount_g:
-    name: Menge (g)
-    description: Portion in Gramm (Standard aus Integrations-Optionen).
-    selector:
-      number:
-        min: 0.1
-        step: 0.1
-        unit_of_measurement: g
-  config_entry_id:
-    name: Config Entry ID
-    description: Nur bei mehreren BLS-Integrationen erforderlich.
-    selector:
-      text:
+lookup_barcode:
+  name: Barcode suchen
+  description: Sucht ein Packungsprodukt über Open Food Facts und berechnet die Portion.
+  fields:
+    barcode:
+      name: Barcode (EAN)
+      required: true
+      example: "4008400407321"
+      selector:
+        text:
+    amount_g:
+      name: Menge (g)
+      description: Portion in Gramm (Standard aus Integrations-Optionen).
+      selector:
+        number:
+          min: 0.1
+          step: 0.1
+          unit_of_measurement: g
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.calculate_portion
-name: Portion berechnen
-description: Berechnet Nährwerte und Diabetes-Einheiten für eine Portion.
-fields:
-  source:
-    name: Quelle
-    required: true
-    example: bls
-    selector:
-      select:
-        options:
-          - bls
-          - off
-          - custom
-  id:
-    name: ID
-    description: BLS-Code, Barcode oder Custom-Food-ID.
-    required: true
-    selector:
-      text:
-  amount_g:
-    name: Menge (g)
-    required: true
-    selector:
-      number:
-        min: 0.1
-        step: 0.1
-        unit_of_measurement: g
+calculate_portion:
+  name: Portion berechnen
+  description: Berechnet Nährwerte und Diabetes-Einheiten für eine Portion.
+  fields:
+    source:
+      name: Quelle
+      required: true
+      example: bls
+      selector:
+        select:
+          options:
+            - bls
+            - off
+            - custom
+    id:
+      name: ID
+      description: BLS-Code, Barcode oder Custom-Food-ID.
+      required: true
+      selector:
+        text:
+    amount_g:
+      name: Menge (g)
+      required: true
+      selector:
+        number:
+          min: 0.1
+          step: 0.1
+          unit_of_measurement: g
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.calculate_recipe
-name: Rezept berechnen
-description: Aggregiert Nährwerte und Diabetes-Einheiten aus Zutaten.
-fields:
-  ingredients:
-    name: Zutaten
-    description: "Liste mit source, id, amount_g."
-    required: true
-    example: '[{"source": "bls", "id": "F110000", "amount_g": 150}]'
-  servings:
-    name: Portionen
-    default: 1
-    selector:
-      number:
-        min: 1
-        step: 1
+calculate_recipe:
+  name: Rezept berechnen
+  description: Aggregiert Nährwerte und Diabetes-Einheiten aus Zutaten.
+  fields:
+    ingredients:
+      name: Zutaten
+      description: "Liste mit source, id, amount_g."
+      required: true
+      example: '[{"source": "bls", "id": "F110000", "amount_g": 150}]'
+      selector:
+        object:
+    servings:
+      name: Portionen
+      default: 1
+      selector:
+        number:
+          min: 1
+          step: 1
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.save_recipe
-name: Rezept speichern
-description: Speichert ein Rezept im Add-on.
-fields:
-  name:
-    name: Name
-    required: true
-    selector:
-      text:
-  ingredients:
-    name: Zutaten
-    required: true
-  servings:
-    name: Portionen
-    default: 1
-    selector:
-      number:
-        min: 1
+save_recipe:
+  name: Rezept speichern
+  description: Speichert ein Rezept im Add-on.
+  fields:
+    name:
+      name: Name
+      required: true
+      selector:
+        text:
+    ingredients:
+      name: Zutaten
+      required: true
+      selector:
+        object:
+    servings:
+      name: Portionen
+      default: 1
+      selector:
+        number:
+          min: 1
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.save_custom_food
-name: Eigenes Lebensmittel speichern
-description: Speichert ein benutzerdefiniertes Lebensmittel.
-fields:
-  name:
-    name: Name
-    required: true
-    selector:
-      text:
-  nutrients:
-    name: Nährwerte pro 100g
-    required: true
-    example: '{"CHO": 12, "FAT": 0.2, "PROT625": 0.3}'
-  notes:
-    name: Notizen
-    selector:
-      text:
+save_custom_food:
+  name: Eigenes Lebensmittel speichern
+  description: Speichert ein benutzerdefiniertes Lebensmittel.
+  fields:
+    name:
+      name: Name
+      required: true
+      selector:
+        text:
+    nutrients:
+      name: Nährwerte pro 100g
+      required: true
+      example: '{"CHO": 12, "FAT": 0.2, "PROT625": 0.3}'
+      selector:
+        object:
+    notes:
+      name: Notizen
+      selector:
+        text:
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
 
----
-service: bls_nutrition.add_to_todo_list
-name: Zur Einkaufsliste hinzufügen
-description: Fügt ein Open-Food-Facts-Produkt zur Home-Assistant-To-do-Liste hinzu.
-fields:
-  name:
-    name: Produktname
-    required: true
-    example: Kölln Haferflocken
-    selector:
-      text:
-  barcode:
-    name: Barcode (EAN)
-    example: "4008400407321"
-    selector:
-      text:
-  brand:
-    name: Marke
-    example: Kölln
-    selector:
-      text:
-  entity_id:
-    name: To-do-Entity
-    description: Ziel-Liste, z. B. todo.shopping_list
-    default: todo.shopping_list
-    selector:
-      text:
+add_to_todo_list:
+  name: Zur Einkaufsliste hinzufügen
+  description: Fügt ein Open-Food-Facts-Produkt zur Home-Assistant-To-do-Liste hinzu.
+  fields:
+    name:
+      name: Produktname
+      required: true
+      example: Kölln Haferflocken
+      selector:
+        text:
+    barcode:
+      name: Barcode (EAN)
+      example: "4008400407321"
+      selector:
+        text:
+    brand:
+      name: Marke
+      example: Kölln
+      selector:
+        text:
+    entity_id:
+      name: To-do-Entity
+      description: Ziel-Liste, z. B. todo.shopping_list
+      default: todo.shopping_list
+      selector:
+        text:
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
