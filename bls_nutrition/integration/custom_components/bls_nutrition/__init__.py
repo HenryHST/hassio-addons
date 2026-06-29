@@ -12,6 +12,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.dispatcher import dispatcher_send
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -35,6 +36,8 @@ from .data import BlsRuntimeData
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 _SERVICE_NAMES = (
     SERVICE_SEARCH_FOOD,

@@ -58,9 +58,9 @@ calculate_portion:
       selector:
         select:
           options:
-            - bls
-            - off
-            - custom
+            - "bls"
+            - "off"
+            - "custom"
     id:
       name: ID
       description: BLS-Code, Barcode oder Custom-Food-ID.

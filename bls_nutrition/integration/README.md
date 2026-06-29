@@ -22,6 +22,9 @@ config/custom_components/bls_nutrition/
 **Wichtig:** Nicht nur einzelne Dateien (z. B. nur `__init__.py`) aktualisieren — alle Dateien
 im Ordner müssen zusammenpassen (`const.py`, `services.yaml`, `strings.json`, `translations/`, …).
 
+Das Lovelace-Dashboard liegt unter `dashboards/bls_nutrition.yaml` und wird manuell importiert
+(nicht mehr über `manifest.json`).
+
 Home Assistant neu starten.
 
 ### Option B: HACS (separates GitHub-Repository)
