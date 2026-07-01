@@ -110,3 +110,34 @@ class BlsNutritionClient:
 
     async def remove_favorite(self, favorite_id: int) -> dict[str, Any]:
         return await self._request("DELETE", f"/favorites/{favorite_id}")
+
+    async def export_favorites(self, export_format: str = "json") -> bytes:
+        url = f"{self._base_url}/favorites/export"
+        async with self._session.get(url, params={"format": export_format}) as resp:
+            if resp.status >= 400:
+                text = await resp.text()
+                raise BlsNutritionApiError(f"HTTP {resp.status}: {text}")
+            return await resp.read()
+
+    async def import_favorites(
+        self, file_path: str, mode: str = "merge"
+    ) -> dict[str, Any]:
+        from pathlib import Path
+
+        path = Path(file_path)
+        if not path.is_file():
+            raise BlsNutritionApiError(f"Datei nicht gefunden: {file_path}")
+        data = path.read_bytes()
+        form = aiohttp.FormData()
+        form.add_field(
+            "file",
+            data,
+            filename=path.name,
+            content_type="application/octet-stream",
+        )
+        url = f"{self._base_url}/favorites/import"
+        async with self._session.post(url, params={"mode": mode}, data=form) as resp:
+            if resp.status >= 400:
+                text = await resp.text()
+                raise BlsNutritionApiError(f"HTTP {resp.status}: {text}")
+            return await resp.json()

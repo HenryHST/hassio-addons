@@ -226,6 +226,7 @@ todo_list_entity_id: todo.shopping_list
 map_enabled: false
 map_radius_km: 20
 favorites_enabled: true
+favorites_confirm_delete: true
 ```
 
 | Option | Werte | Beschreibung |
@@ -239,6 +240,7 @@ favorites_enabled: true
 | `map_enabled` | `true`, `false` | Optionalen Map-Tab in der Ingress-UI anzeigen |
 | `map_radius_km` | `1`–`50` | Radius in km fuer Supermarkt-Suche um den HA-Standort |
 | `favorites_enabled` | `true`, `false` | Favoriten-Tab, Herz-Buttons und REST/HA-Favoriten-API |
+| `favorites_confirm_delete` | `true`, `false` | Bestätigungsdialog beim Entfernen im Favoriten-Tab |
 
 ### Caching (Open Food Facts)
 
@@ -338,6 +340,27 @@ service: bls_nutrition.remove_favorite
 data:
   favorite_id: 1
 ```
+
+### `bls_nutrition.export_favorites`
+
+```yaml
+service: bls_nutrition.export_favorites
+data:
+  format: json
+```
+
+Gibt `content` (JSON-Objekt oder CSV-Text) und `format` zurück.
+
+### `bls_nutrition.import_favorites`
+
+```yaml
+service: bls_nutrition.import_favorites
+data:
+  file_path: /config/favorites.json
+  mode: merge
+```
+
+`mode`: `merge` (Duplikate überspringen) oder `replace` (alle Favoriten ersetzen).
 
 ## Dashboard
 

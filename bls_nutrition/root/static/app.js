@@ -26,6 +26,8 @@
   let searchRecentsEnabled = true;
   let mapEnabled = false;
   let favoritesEnabled = false;
+  let favoritesConfirmDelete = true;
+  let activePanel = "search";
   let mapRadiusKm = 20;
   const favoriteByKey = new Map();
   let searchAbortController = null;
@@ -92,6 +94,157 @@
         switchPanel("search");
       }
     }
+  }
+
+  function updateFavoritesIoVisibility(panelName) {
+    const wrap = $("favorites-io-wrap");
+    if (!wrap) return;
+    wrap.hidden = !favoritesEnabled || panelName !== "favorites";
+    if (wrap.hidden) closeFavoritesIoMenu();
+  }
+
+  function closeFavoritesIoMenu() {
+    const menu = $("favorites-io-menu");
+    const btn = $("favorites-io-btn");
+    if (menu) menu.hidden = true;
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleFavoritesIoMenu() {
+    const menu = $("favorites-io-menu");
+    const btn = $("favorites-io-btn");
+    if (!menu || !btn) return;
+    const open = menu.hidden;
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+  }
+
+  function confirmFavoriteDelete() {
+    if (!favoritesConfirmDelete) return Promise.resolve(true);
+    const dialog = $("favorite-delete-dialog");
+    if (!dialog || typeof dialog.showModal !== "function") {
+      return Promise.resolve(window.confirm("Favorit wirklich löschen?"));
+    }
+    return new Promise((resolve) => {
+      const cancelBtn = $("favorite-delete-cancel");
+      const confirmBtn = $("favorite-delete-confirm");
+      const onCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+      const onConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+      const cleanup = () => {
+        dialog.close();
+        cancelBtn?.removeEventListener("click", onCancel);
+        confirmBtn?.removeEventListener("click", onConfirm);
+        dialog.removeEventListener("cancel", onCancel);
+      };
+      cancelBtn?.addEventListener("click", onCancel);
+      confirmBtn?.addEventListener("click", onConfirm);
+      dialog.addEventListener("cancel", onCancel);
+      dialog.showModal();
+    });
+  }
+
+  async function downloadFavoritesExport(format) {
+    const res = await fetch(`favorites/export?format=${format}`);
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = body.detail || detail;
+      } catch (_) { /* ignore */ }
+      throw new Error(detail);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get("Content-Disposition") || "";
+    const match = disposition.match(/filename="([^"]+)"/);
+    const filename = match ? match[1] : `bls-favorites.${format}`;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importFavoritesFile(file) {
+    const replace = window.confirm(
+      "Alle bestehenden Favoriten ersetzen?\n\nOK = Ersetzen\nAbbrechen = Zusammenführen (Duplikate überspringen)"
+    );
+    const mode = replace ? "replace" : "merge";
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`favorites/import?mode=${mode}`, {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = body.detail || detail;
+      } catch (_) { /* ignore */ }
+      throw new Error(detail);
+    }
+    const result = await res.json();
+    await loadFavoritesIndex();
+    const parts = [`${result.imported} importiert`];
+    if (result.skipped) parts.push(`${result.skipped} übersprungen`);
+    if (result.errors?.length) parts.push(`${result.errors.length} Fehler`);
+    showStatus(`Import abgeschlossen: ${parts.join(", ")}.`, false);
+    if (result.errors?.length) {
+      showError(result.errors.slice(0, 3).join(" · "));
+    }
+  }
+
+  function initFavoritesIo() {
+    const btn = $("favorites-io-btn");
+    const menu = $("favorites-io-menu");
+    const fileInput = $("favorites-import-input");
+    btn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleFavoritesIoMenu();
+    });
+    menu?.querySelectorAll("[data-action]").forEach((item) => {
+      item.addEventListener("click", async () => {
+        const action = item.dataset.action;
+        closeFavoritesIoMenu();
+        try {
+          if (action === "export-json") {
+            await downloadFavoritesExport("json");
+            showStatus("Favoriten als JSON exportiert.", false);
+          } else if (action === "export-csv") {
+            await downloadFavoritesExport("csv");
+            showStatus("Favoriten als CSV exportiert.", false);
+          } else if (action === "import" && fileInput) {
+            fileInput.value = "";
+            fileInput.click();
+          }
+        } catch (err) {
+          showError(err.message);
+        }
+      });
+    });
+    fileInput?.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      try {
+        await importFavoritesFile(file);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        fileInput.value = "";
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (!menu || menu.hidden) return;
+      const wrap = $("favorites-io-wrap");
+      if (wrap && !wrap.contains(event.target)) closeFavoritesIoMenu();
+    });
   }
 
   function updateHeroTilesVisibility(panelName) {
@@ -384,6 +537,8 @@
       delBtn.textContent = "Entfernen";
       delBtn.addEventListener("click", async () => {
         try {
+          const confirmed = await confirmFavoriteDelete();
+          if (!confirmed) return;
           await apiDelete(`favorites/${fav.id}`);
           await loadFavoritesIndex();
           showStatus("Favorit entfernt.", false);
@@ -1289,6 +1444,7 @@
     if (panelName === "favorites" && !favoritesEnabled) {
       panelName = "search";
     }
+    activePanel = panelName;
     if (panelName !== "barcode") stopBarcodeScan();
     document.querySelectorAll(".panel").forEach((panel) => {
       const isActive = panel.id === `panel-${panelName}`;
@@ -1308,6 +1464,7 @@
       loadFavoritesIndex().catch(() => {});
     }
     updateHeroTilesVisibility(panelName);
+    updateFavoritesIoVisibility(panelName);
     showError(null);
   }
 
@@ -1391,12 +1548,14 @@
       searchRecentsEnabled = parseConfigFlag(health.search_recents_enabled, true);
       mapEnabled = parseConfigFlag(health.map_enabled, false);
       favoritesEnabled = parseConfigFlag(health.favorites_enabled, true);
+      favoritesConfirmDelete = parseConfigFlag(health.favorites_confirm_delete, true);
       mapRadiusKm = Math.max(1, Math.min(50, Number(health.map_radius_km) || 20));
       applySearchLayout(health.search_layout || "stacked");
       applyTodoListVisibility();
       renderRecents();
       updateMapVisibility();
       updateFavoritesVisibility();
+      updateFavoritesIoVisibility(activePanel);
       await loadFavoritesIndex();
     } catch (_) {
       const dbStatus = $("db-status-line");
@@ -1409,6 +1568,7 @@
       applyTodoListVisibility();
       updateMapVisibility();
       updateFavoritesVisibility();
+      updateFavoritesIoVisibility(activePanel);
     }
   }
 
@@ -1432,6 +1592,7 @@
     initTheme();
     initNavigation();
     initDetailsToggle();
+    initFavoritesIo();
     await loadHealth();
     initLiveSearch();
     initRecipeIngredients();

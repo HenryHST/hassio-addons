@@ -913,3 +913,51 @@ def delete_favorite_by_source(
         [source_type, source_id],
     )
     return True
+
+
+def delete_all_favorites(conn: duckdb.DuckDBPyConnection) -> int:
+    row = _fetchone_dict(conn.execute("SELECT COUNT(*) AS cnt FROM favorites"))
+    count = int(row["cnt"]) if row else 0
+    conn.execute("DELETE FROM favorites")
+    return count
+
+
+def import_favorites(
+    conn: duckdb.DuckDBPyConnection, items: list[dict[str, Any]], mode: str
+) -> dict[str, Any]:
+    imported = 0
+    skipped = 0
+    errors: list[str] = []
+    if mode not in ("merge", "replace"):
+        return {"imported": 0, "skipped": 0, "errors": [f"Ungültiger Modus: {mode}"]}
+    if mode == "replace":
+        delete_all_favorites(conn)
+    for idx, item in enumerate(items):
+        try:
+            source = item["source"]
+            source_id = item["source_id"]
+            if mode == "merge" and get_favorite_by_source(conn, source, source_id):
+                skipped += 1
+                continue
+            favorite = create_favorite(
+                conn,
+                item["display_name"],
+                source,
+                source_id,
+                barcode=item.get("barcode"),
+                brand=item.get("brand"),
+                default_amount_g=item.get("default_amount_g", 100.0),
+            )
+            favorite_id = int(favorite["id"])
+            if item.get("image_url"):
+                update_favorite(conn, favorite_id, image_url=item["image_url"])
+            sort_order = item.get("sort_order")
+            if sort_order is not None:
+                conn.execute(
+                    "UPDATE favorites SET sort_order = ? WHERE id = ?",
+                    [int(sort_order), favorite_id],
+                )
+            imported += 1
+        except Exception as exc:
+            errors.append(f"Zeile {idx + 1}: {exc}")
+    return {"imported": imported, "skipped": skipped, "errors": errors}

@@ -260,3 +260,45 @@ remove_favorite:
       description: Nur bei mehreren BLS-Integrationen erforderlich.
       selector:
         text:
+
+export_favorites:
+  name: Favoriten exportieren
+  description: Exportiert alle Favoriten als JSON oder CSV.
+  fields:
+    format:
+      name: Format
+      default: json
+      selector:
+        select:
+          options:
+            - "json"
+            - "csv"
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
+
+import_favorites:
+  name: Favoriten importieren
+  description: Importiert Favoriten aus einer JSON- oder CSV-Datei.
+  fields:
+    file_path:
+      name: Dateipfad
+      description: Absoluter Pfad zur Import-Datei auf dem Home-Assistant-Host.
+      required: true
+      selector:
+        text:
+    mode:
+      name: Modus
+      default: merge
+      selector:
+        select:
+          options:
+            - "merge"
+            - "replace"
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:

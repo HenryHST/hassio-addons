@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import html as html_module
+import json
 import threading
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
+from datetime import date
+
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from app import bootstrap, calculator, db, favorites, home_assistant, open_food_facts, opening_hours_display, overpass
+from app import bootstrap, calculator, db, favorites, favorites_io, home_assistant, open_food_facts, opening_hours_display, overpass
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
@@ -43,7 +46,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.8.3",
+    version="1.8.4",
     lifespan=lifespan,
 )
 
@@ -99,6 +102,7 @@ def health() -> dict[str, Any]:
             "map_enabled": settings.map_enabled,
             "map_radius_km": settings.map_radius_km,
             "favorites_enabled": settings.favorites_enabled,
+            "favorites_confirm_delete": settings.favorites_confirm_delete,
             "favorites_count": db.favorites_count(conn),
         }
 
@@ -230,6 +234,55 @@ def list_favorites() -> list[dict[str, Any]]:
     _require_favorites_enabled(settings)
     with db.get_connection(settings.db_path) as conn:
         return _enrich_favorites_list(conn, settings)
+
+
+@app.get("/favorites/export")
+def export_favorites(format: str = Query("json", pattern="^(json|csv)$")) -> Response:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        items = db.list_favorites(conn)
+    stamp = date.today().strftime("%Y%m%d")
+    if format == "csv":
+        content = favorites_io.export_csv_bytes(items)
+        media_type = "text/csv; charset=utf-8"
+        filename = f"bls-favorites-{stamp}.csv"
+    else:
+        content = favorites_io.export_json_bytes(items, settings.addon_version)
+        media_type = "application/json; charset=utf-8"
+        filename = f"bls-favorites-{stamp}.json"
+    return Response(
+        content=content,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/favorites/import")
+async def import_favorites(
+    file: UploadFile = File(...),
+    mode: str = Query("merge", pattern="^(merge|replace)$"),
+) -> dict[str, Any]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="Leere Datei")
+    try:
+        items = favorites_io.parse_import_bytes(data, file.filename or "")
+    except (ValueError, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    with db.get_connection(settings.db_path) as conn:
+        if mode == "replace":
+            for fav in db.list_favorites(conn):
+                if fav.get("image_path"):
+                    local = favorites.local_image_file(
+                        settings.data_dir, str(fav["image_path"])
+                    )
+                    if local:
+                        local.unlink(missing_ok=True)
+        result = db.import_favorites(conn, items, mode)
+    return result
 
 
 @app.post("/favorites")

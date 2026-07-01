@@ -27,6 +27,7 @@ if [[ -f "${CONFIG_PATH}" ]]; then
     BLS_MAP_ENABLED=$(jq -r '.map_enabled // false' "${CONFIG_PATH}")
     BLS_MAP_RADIUS_KM=$(jq -r '.map_radius_km // 20' "${CONFIG_PATH}")
     BLS_FAVORITES_ENABLED=$(jq -r '.favorites_enabled // true' "${CONFIG_PATH}")
+    BLS_FAVORITES_CONFIRM_DELETE=$(jq -r '.favorites_confirm_delete // true' "${CONFIG_PATH}")
 else
     BLS_AUTO_UPDATE=true
     BLS_UPDATE_INTERVAL_DAYS=30
@@ -41,6 +42,7 @@ else
     BLS_MAP_ENABLED=false
     BLS_MAP_RADIUS_KM=20
     BLS_FAVORITES_ENABLED=true
+    BLS_FAVORITES_CONFIRM_DELETE=true
 fi
 
 export BLS_AUTO_UPDATE
@@ -56,6 +58,7 @@ export BLS_TODO_LIST_ENTITY_ID
 export BLS_MAP_ENABLED
 export BLS_MAP_RADIUS_KM
 export BLS_FAVORITES_ENABLED
+export BLS_FAVORITES_CONFIRM_DELETE
 
 echo "[bls_nutrition] Configuration:"
 echo "  - auto_update: ${BLS_AUTO_UPDATE}"
@@ -71,6 +74,7 @@ echo "  - todo_list_entity_id: ${BLS_TODO_LIST_ENTITY_ID}"
 echo "  - map_enabled: ${BLS_MAP_ENABLED}"
 echo "  - map_radius_km: ${BLS_MAP_RADIUS_KM}"
 echo "  - favorites_enabled: ${BLS_FAVORITES_ENABLED}"
+echo "  - favorites_confirm_delete: ${BLS_FAVORITES_CONFIRM_DELETE}"
 
 echo "[bls_nutrition] Starting API on port 8090..."
 exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8090

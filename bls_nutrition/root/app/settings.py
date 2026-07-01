@@ -27,6 +27,7 @@ class Settings:
     map_enabled: bool
     map_radius_km: int
     favorites_enabled: bool
+    favorites_confirm_delete: bool
     bls_version: str
     addon_version: str
 
@@ -113,6 +114,9 @@ def get_settings() -> Settings:
         ),
         favorites_enabled=_read_option_bool(
             data_dir, "favorites_enabled", "BLS_FAVORITES_ENABLED", True
+        ),
+        favorites_confirm_delete=_read_option_bool(
+            data_dir, "favorites_confirm_delete", "BLS_FAVORITES_CONFIRM_DELETE", True
         ),
         bls_version=os.environ.get("BLS_VERSION", "4.0"),
         addon_version=os.environ.get("ADDON_VERSION", "1.0.0"),

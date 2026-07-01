@@ -145,6 +145,23 @@
         "favorite_id": { "name": "Favoriten-ID" },
         "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
       }
+    },
+    "export_favorites": {
+      "name": "Favoriten exportieren",
+      "description": "Exportiert alle Favoriten als JSON oder CSV.",
+      "fields": {
+        "format": { "name": "Format" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "import_favorites": {
+      "name": "Favoriten importieren",
+      "description": "Importiert Favoriten aus einer JSON- oder CSV-Datei.",
+      "fields": {
+        "file_path": { "name": "Dateipfad", "description": "Absoluter Pfad zur Import-Datei auf dem Home-Assistant-Host." },
+        "mode": { "name": "Modus" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
     }
   }
 }

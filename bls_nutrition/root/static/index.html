@@ -27,6 +27,14 @@
         </div>
       </div>
       <div class="header-actions">
+        <div class="favorites-io-wrap" id="favorites-io-wrap" hidden>
+          <button type="button" class="favorites-io-btn" id="favorites-io-btn" aria-label="Favoriten importieren oder exportieren" title="Import / Export" aria-haspopup="menu" aria-expanded="false">↕</button>
+          <div class="favorites-io-menu" id="favorites-io-menu" hidden role="menu">
+            <button type="button" class="favorites-io-menu-item" data-action="export-json" role="menuitem">Export JSON</button>
+            <button type="button" class="favorites-io-menu-item" data-action="export-csv" role="menuitem">Export CSV</button>
+            <button type="button" class="favorites-io-menu-item" data-action="import" role="menuitem">Import…</button>
+          </div>
+        </div>
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Darstellung wechseln" title="Hell / Dunkel / System">
           <span class="theme-toggle-icon" id="theme-toggle-icon" aria-hidden="true">◐</span>
         </button>
@@ -199,7 +207,17 @@
     </footer>
   </div>
 
+  <input type="file" id="favorites-import-input" accept=".json,.csv,application/json,text/csv" hidden>
+
+  <dialog id="favorite-delete-dialog" class="confirm-dialog">
+    <p class="confirm-dialog-text">Favorit wirklich löschen?</p>
+    <div class="confirm-dialog-actions">
+      <button type="button" class="btn btn-secondary" id="favorite-delete-cancel">Nein</button>
+      <button type="button" class="btn btn-primary" id="favorite-delete-confirm">Ja</button>
+    </div>
+  </dialog>
+
   <script src="static/vendor/leaflet/leaflet.js" defer></script>
-  <script src="static/app.js?v=1.8.3" defer></script>
+  <script src="static/app.js?v=1.8.4" defer></script>
 </body>
 </html>

@@ -27,6 +27,8 @@ from .const import (
     SERVICE_ADD_FAVORITE,
     SERVICE_LIST_FAVORITES,
     SERVICE_REMOVE_FAVORITE,
+    SERVICE_EXPORT_FAVORITES,
+    SERVICE_IMPORT_FAVORITES,
     SERVICE_CALCULATE_PORTION,
     SERVICE_CALCULATE_RECIPE,
     SERVICE_LOOKUP_BARCODE,
@@ -53,6 +55,8 @@ _SERVICE_NAMES = (
     SERVICE_ADD_FAVORITE,
     SERVICE_LIST_FAVORITES,
     SERVICE_REMOVE_FAVORITE,
+    SERVICE_EXPORT_FAVORITES,
+    SERVICE_IMPORT_FAVORITES,
 )
 
 _ENTRY_ID_FIELD = {vol.Optional(CONF_CONFIG_ENTRY_ID): str}
@@ -247,6 +251,24 @@ def _register_services(hass: HomeAssistant) -> None:
         result = await runtime.client.remove_favorite(int(call.data["favorite_id"]))
         return {"result": result}
 
+    async def handle_export_favorites(call: ServiceCall) -> dict[str, Any]:
+        import json
+
+        runtime, _entry_id = _get_runtime(hass, call)
+        export_format = call.data.get("format", "json")
+        data = await runtime.client.export_favorites(export_format)
+        if export_format == "json":
+            return {"format": export_format, "content": json.loads(data.decode("utf-8"))}
+        return {"format": export_format, "content": data.decode("utf-8")}
+
+    async def handle_import_favorites(call: ServiceCall) -> dict[str, Any]:
+        runtime, _entry_id = _get_runtime(hass, call)
+        result = await runtime.client.import_favorites(
+            call.data["file_path"],
+            mode=call.data.get("mode", "merge"),
+        )
+        return result
+
     if not hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
         hass.services.async_register(
             DOMAIN,
@@ -387,6 +409,33 @@ def _register_services(hass: HomeAssistant) -> None:
             schema=vol.Schema(
                 {
                     vol.Required("favorite_id"): vol.Coerce(int),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_EXPORT_FAVORITES):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_EXPORT_FAVORITES,
+            handle_export_favorites,
+            schema=vol.Schema(
+                {
+                    vol.Optional("format", default="json"): vol.In(["json", "csv"]),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_IMPORT_FAVORITES):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_IMPORT_FAVORITES,
+            handle_import_favorites,
+            schema=vol.Schema(
+                {
+                    vol.Required("file_path"): str,
+                    vol.Optional("mode", default="merge"): vol.In(["merge", "replace"]),
                     **_ENTRY_ID_FIELD,
                 }
             ),

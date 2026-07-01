@@ -16,6 +16,8 @@ SERVICE_ADD_TO_TODO_LIST = "add_to_todo_list"
 SERVICE_ADD_FAVORITE = "add_favorite"
 SERVICE_LIST_FAVORITES = "list_favorites"
 SERVICE_REMOVE_FAVORITE = "remove_favorite"
+SERVICE_EXPORT_FAVORITES = "export_favorites"
+SERVICE_IMPORT_FAVORITES = "import_favorites"
 
 EVENT_SEARCH_RESULT = "bls_nutrition_search_result"
 EVENT_CALCULATION_RESULT = "bls_nutrition_calculation_result"
