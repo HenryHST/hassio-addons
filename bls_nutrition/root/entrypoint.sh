@@ -68,18 +68,7 @@ echo "  - todo_list_entity_id: ${BLS_TODO_LIST_ENTITY_ID}"
 echo "  - map_enabled: ${BLS_MAP_ENABLED}"
 echo "  - map_radius_km: ${BLS_MAP_RADIUS_KM}"
 
-echo "[bls_nutrition] Ensuring database is ready..."
-# #region agent log
-BOOT_START_TS=$(date +%s)
-echo "[bls-debug] entrypoint bootstrap start ts=${BOOT_START_TS}"
-# #endregion
-python -m app.bootstrap
-# #region agent log
-BOOT_END_TS=$(date +%s)
-echo "[bls-debug] entrypoint bootstrap end elapsed=$((BOOT_END_TS-BOOT_START_TS))s"
-# #endregion
-
-echo "[bls_nutrition] Starting API on port 8090..."
+echo "[bls_nutrition] Starting API on port 8090 (database prep/import in app lifespan)..."
 # #region agent log
 echo "[bls-debug] entrypoint uvicorn exec now"
 # #endregion

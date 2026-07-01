@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 import html as html_module
-from typing import Any, AsyncIterator
-
+import threading
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import calculator, db, home_assistant, open_food_facts, opening_hours_display, overpass
+from app import bootstrap, calculator, db, home_assistant, open_food_facts, opening_hours_display, overpass
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
@@ -28,6 +29,17 @@ from app.settings import Settings, get_settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    import_needed = bootstrap.prepare_database()
+    if import_needed:
+        print("[bls-debug] lifespan starting background import thread")
+        thread = threading.Thread(
+            target=bootstrap.run_bls_import,
+            name="bls-import",
+            daemon=True,
+        )
+        thread.start()
+    else:
+        print("[bls-debug] lifespan no background import needed")
     yield
 
 
