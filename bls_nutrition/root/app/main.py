@@ -43,7 +43,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.8.2",
+    version="1.8.3",
     lifespan=lifespan,
 )
 
@@ -373,7 +373,7 @@ async def upload_favorite_image(
         )
 
 
-@app.get("/favorites/{favorite_id}/image")
+@app.get("/favorites/{favorite_id}/image", response_model=None)
 def favorite_image(favorite_id: int) -> FileResponse | RedirectResponse:
     settings = _settings()
     _require_favorites_enabled(settings)
