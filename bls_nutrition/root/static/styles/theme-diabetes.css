@@ -264,6 +264,11 @@ body {
   color: var(--color-header-text);
 }
 
+.favorites-io-btn {
+  background: var(--color-badge-bg);
+  color: var(--color-header-text);
+}
+
 .btn-secondary {
   background: var(--color-surface);
   color: var(--color-text);

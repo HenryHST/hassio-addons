@@ -5,8 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from app import db
-from app import favorites_io
+from app import db, favorites_io
 
 
 def test_export_import_json_round_trip(tmp_path: Path) -> None:
