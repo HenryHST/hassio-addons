@@ -117,6 +117,10 @@
     const open = menu.hidden;
     menu.hidden = !open;
     btn.setAttribute("aria-expanded", String(open));
+    // #region agent log
+    const sampleItem = menu.querySelector(".favorites-io-menu-item");
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:toggleFavoritesIoMenu',message:'menu toggled',data:{open,menuHidden:menu.hidden,itemColor:sampleItem?getComputedStyle(sampleItem).color:null,menuBg:sampleItem?getComputedStyle(menu).backgroundColor:null},timestamp:Date.now(),hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
   }
 
   function confirmFavoriteDelete() {
@@ -150,6 +154,9 @@
   }
 
   async function downloadFavoritesExport(format) {
+    // #region agent log
+    fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:downloadFavoritesExport',message:'export started',data:{format},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
     const res = await fetch(`favorites/export?format=${format}`);
     if (!res.ok) {
       let detail = res.statusText;
@@ -207,11 +214,17 @@
     const fileInput = $("favorites-import-input");
     btn?.addEventListener("click", (event) => {
       event.stopPropagation();
+      // #region agent log
+      fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:favorites-io-btn-click',message:'io button clicked',data:{favoritesEnabled,activePanel},timestamp:Date.now(),hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       toggleFavoritesIoMenu();
     });
     menu?.querySelectorAll("[data-action]").forEach((item) => {
       item.addEventListener("click", async () => {
         const action = item.dataset.action;
+        // #region agent log
+        fetch('http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'92f7bb'},body:JSON.stringify({sessionId:'92f7bb',location:'app.js:favorites-io-menu-item',message:'menu item clicked',data:{action},timestamp:Date.now(),hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         closeFavoritesIoMenu();
         try {
           if (action === "export-json") {
