@@ -32,7 +32,8 @@ RUN \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt \
+    && python -c "import duckdb; c=duckdb.connect(); c.execute('INSTALL sqlite'); c.execute('LOAD sqlite'); c.close()"
 
 COPY root/app /app/app
 COPY root/static /app/static

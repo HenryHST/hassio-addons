@@ -1,14 +1,15 @@
-"""Import BLS 4.0 XLSX files into SQLite."""
+"""Import BLS 4.0 XLSX files into DuckDB."""
 
 from __future__ import annotations
 
 import re
-import sqlite3
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from openpyxl import load_workbook
 
-from app import db
+if TYPE_CHECKING:
+    import duckdb
 
 
 def _parse_nutrient_header(header: str) -> tuple[str, str, str] | None:
@@ -26,7 +27,7 @@ def _parse_nutrient_header(header: str) -> tuple[str, str, str] | None:
     return code, name.strip(), (unit or "").strip()
 
 
-def import_components(conn: sqlite3.Connection, components_path: Path | None) -> None:
+def import_components(conn: duckdb.DuckDBPyConnection, components_path: Path | None) -> None:
     if components_path is None or not components_path.exists():
         return
 
@@ -98,7 +99,7 @@ def _parse_value(raw: object) -> float | None:
         return None
 
 
-def import_data(conn: sqlite3.Connection, data_path: Path) -> int:
+def import_data(conn: duckdb.DuckDBPyConnection, data_path: Path) -> int:
     workbook = load_workbook(data_path, read_only=True, data_only=True)
     sheet = workbook.active
     row_iter = sheet.iter_rows(values_only=True)
@@ -154,12 +155,11 @@ def import_data(conn: sqlite3.Connection, data_path: Path) -> int:
 
     _flush_batches(conn, batch_foods, batch_values)
     workbook.close()
-    db.rebuild_foods_fts(conn)
     return imported
 
 
 def _flush_batches(
-    conn: sqlite3.Connection,
+    conn: duckdb.DuckDBPyConnection,
     foods: list[tuple[str, str, str | None]],
     values: list[tuple[str, str, float | None, str | None, str | None]],
 ) -> None:

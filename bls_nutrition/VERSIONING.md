@@ -16,5 +16,5 @@ The bundled data version from Max Rubner-Institut (currently **4.0**). Visible i
 
 ## Open Food Facts
 
-Live API lookups with persistent SQLite caching (barcode, text search, negative barcode cache).
+Live API lookups with persistent DuckDB caching in `/data/bls.duckdb` (barcode, text search, negative barcode cache).
 See [DOCS.md](DOCS.md#caching-open-food-facts) for cache options.

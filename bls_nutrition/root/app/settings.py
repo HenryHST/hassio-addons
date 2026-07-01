@@ -12,6 +12,7 @@ from pathlib import Path
 class Settings:
     data_dir: Path
     db_path: Path
+    legacy_sqlite_path: Path
     downloads_dir: Path
     auto_update: bool
     update_interval_days: int
@@ -81,7 +82,8 @@ def get_settings() -> Settings:
         layout = "stacked"
     return Settings(
         data_dir=data_dir,
-        db_path=data_dir / "bls.sqlite",
+        db_path=data_dir / "bls.duckdb",
+        legacy_sqlite_path=data_dir / "bls.sqlite",
         downloads_dir=data_dir / "downloads",
         auto_update=os.environ.get("BLS_AUTO_UPDATE", "true").lower() == "true",
         update_interval_days=int(os.environ.get("BLS_UPDATE_INTERVAL_DAYS", "30")),

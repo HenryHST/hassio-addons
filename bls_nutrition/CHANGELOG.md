@@ -5,6 +5,22 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-06-23
+
+### Changed
+
+- Datenbank von SQLite auf **DuckDB** (`/data/bls.duckdb`) umgestellt
+- Einmalige Migration bestehender `/data/bls.sqlite`-Installationen beim ersten Start
+- BLS-Suche ohne FTS5: ILIKE/Prefix-Suche in DuckDB
+- OFF-Cache: abgelaufene Einträge werden beim Start per TTL bereinigt
+- Ingress-Footer zeigt DB-Engine, Status, letzten BLS-Import und OFF-Cache-Anzahl (Header-Badge entfernt)
+- `/health`: Felder `database_engine`, `database_status`, `off_products_count`
+
+### Added
+
+- DuckDB-Abhängigkeit (`duckdb==1.2.2`); SQLite-Extension im Docker-Image vorinstalliert
+- Unit-Tests für DuckDB-Schema, Suche und Cache-Purge
+
 ## [1.7.7] - 2026-06-29
 
 ### Fixed

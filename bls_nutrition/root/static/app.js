@@ -1014,13 +1014,53 @@
     }
   }
 
+  function formatImportedAt(iso) {
+    if (!iso) return null;
+    try {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return null;
+      return date.toLocaleString("de-DE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function formatDbStatusLine(health) {
+    const status = health.database_status || "ready";
+    const engine = (health.database_engine || "duckdb").toUpperCase();
+    if (status === "importing") {
+      return `Datenbank (${engine}): Import läuft…`;
+    }
+    if (status === "error") {
+      return `Datenbank (${engine}): Fehler beim Import`;
+    }
+    const parts = [`Datenbank (${engine}): bereit`];
+    const imported = formatImportedAt(health.imported_at);
+    if (imported) {
+      parts.push(`BLS-Import: ${imported}`);
+    }
+    if (health.food_count != null) {
+      parts.push(`${Number(health.food_count).toLocaleString("de-DE")} Lebensmittel`);
+    }
+    if (health.off_products_count != null && health.off_products_count > 0) {
+      parts.push(`${Number(health.off_products_count).toLocaleString("de-DE")} OFF-Produkte im Cache`);
+    }
+    return parts.join(" · ");
+  }
+
   async function loadHealth() {
     try {
       const health = await apiGet("health");
-      $("food-count-badge").textContent =
-        health.food_count != null
-          ? `${health.food_count.toLocaleString("de-DE")} LM`
-          : "—";
+      const dbStatus = $("db-status-line");
+      if (dbStatus) {
+        dbStatus.textContent = formatDbStatusLine(health);
+      }
       $("bls-version").textContent = `BLS ${health.bls_version || "4.0"}`;
       offEnabled = parseConfigFlag(health.open_food_facts_enabled, true);
       todoListEnabled = parseConfigFlag(health.todo_list_enabled, false);
@@ -1032,7 +1072,10 @@
       renderRecents();
       updateMapVisibility();
     } catch (_) {
-      $("food-count-badge").textContent = "offline";
+      const dbStatus = $("db-status-line");
+      if (dbStatus) {
+        dbStatus.textContent = "Datenbank: nicht erreichbar";
+      }
       todoListEnabled = false;
       mapEnabled = false;
       applyTodoListVisibility();

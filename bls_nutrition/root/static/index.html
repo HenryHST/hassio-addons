@@ -27,7 +27,6 @@
         </div>
       </div>
       <div class="header-actions">
-        <span class="status-badge" id="food-count-badge">—</span>
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Darstellung wechseln" title="Hell / Dunkel / System">
           <span class="theme-toggle-icon" id="theme-toggle-icon" aria-hidden="true">◐</span>
         </button>
@@ -179,6 +178,7 @@
     </nav>
 
     <footer class="footer">
+      <p id="db-status-line" class="footer-db-status">Datenbank: wird geladen…</p>
       <p>Daten: <a href="https://blsdb.de" target="_blank" rel="noopener">Max Rubner-Institut BLS 4.0</a> (CC BY 4.0)</p>
       <p>Barcode: <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> (ODbL)</p>
       <p><em>Hinweis: Keine medizinische Beratung. Diabetes-Berechnungen dienen nur der Information.</em></p>
@@ -186,6 +186,6 @@
   </div>
 
   <script src="static/vendor/leaflet/leaflet.js" defer></script>
-  <script src="static/app.js?v=1.7.4" defer></script>
+  <script src="static/app.js?v=1.8.0" defer></script>
 </body>
 </html>

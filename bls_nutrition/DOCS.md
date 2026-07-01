@@ -228,7 +228,7 @@ map_radius_km: 20
 
 | Option | Werte | Beschreibung |
 |--------|-------|--------------|
-| `off_cache_ttl_days` | `1`–`365` | Gültigkeit des **Barcode**-Caches in SQLite (`off_products`, `off_barcode_miss`) |
+| `off_cache_ttl_days` | `1`–`365` | Gültigkeit des **Barcode**-Caches in DuckDB (`off_products`, `off_barcode_miss`) |
 | `off_search_cache_ttl_days` | `1`–`90` | Gültigkeit des **Textsuche**-Caches (`off_search_cache`); kürzer als Barcode-Cache empfohlen |
 | `search_layout` | `stacked`, `side_by_side` | `stacked`: BLS und OFF untereinander; `side_by_side`: nebeneinander |
 | `search_recents_enabled` | `true`, `false` | Chips „Zuletzt berechnet“ unter dem Suchfeld in der Ingress-UI |
@@ -239,7 +239,7 @@ map_radius_km: 20
 
 ### Caching (Open Food Facts)
 
-Alle Caches liegen persistent in `/data/bls.sqlite`:
+Alle Caches liegen persistent in `/data/bls.duckdb` (früher `/data/bls.sqlite`; bestehende SQLite-Dateien werden beim ersten Start automatisch migriert):
 
 | Cache | Tabelle | Option | Verhalten |
 |-------|---------|--------|-----------|
@@ -248,7 +248,7 @@ Alle Caches liegen persistent in `/data/bls.sqlite`:
 | Textsuche (Query) | `off_search_cache` | `off_search_cache_ttl_days` | Komplette Suchergebnisliste pro Suchbegriff |
 | Textsuche (lokal) | `off_products` | — | Vor API-Call: bereits gespeicherte Produkte nach Name/Marke durchsuchen |
 
-BLS-Suche nutzt einen **FTS5-Volltextindex** (`foods_fts`), der beim Import bzw. beim ersten Start nachzieht.
+BLS-Suche nutzt **ILIKE/Prefix-Suche** in DuckDB (kein FTS5 mehr). Abgelaufene OFF-Cache-Einträge werden beim Add-on-Start anhand der TTL-Optionen entfernt.
 
 ## Services
 
