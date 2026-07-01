@@ -9,6 +9,27 @@ from pathlib import Path
 from app import db, download, import_bls
 from app.settings import get_settings
 
+DEBUG_LOG_PATH = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
+
+
+def _debug_log(
+    hypothesis_id: str, location: str, message: str, data: dict[str, object] | None = None
+) -> None:
+    payload = {
+        "sessionId": "92f7bb",
+        "runId": "run1",
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data or {},
+        "timestamp": int(datetime.now(timezone.utc).timestamp() * 1000),
+    }
+    try:
+        with DEBUG_LOG_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, ensure_ascii=True) + "\n")
+    except OSError:
+        pass
+
 
 def _version_info_path(data_dir: Path) -> Path:
     return data_dir / "bls_version.json"
@@ -27,10 +48,24 @@ def _needs_update(info_path: Path, interval_days: int) -> bool:
 
 def ensure_database() -> None:
     settings = get_settings()
+    # #region agent log
+    _debug_log(
+        "H1",
+        "bootstrap.py:52",
+        "ensure_database_enter",
+        {"db_path": str(settings.db_path), "legacy_sqlite_path": str(settings.legacy_sqlite_path)},
+    )
+    # #endregion
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.downloads_dir.mkdir(parents=True, exist_ok=True)
 
+    # #region agent log
+    _debug_log("H1", "bootstrap.py:62", "migrate_from_sqlite_start")
+    # #endregion
     db.migrate_from_sqlite(settings.legacy_sqlite_path, settings.db_path)
+    # #region agent log
+    _debug_log("H1", "bootstrap.py:65", "migrate_from_sqlite_done")
+    # #endregion
 
     with db.get_connection(settings.db_path) as conn:
         db.init_schema(conn)
@@ -40,6 +75,9 @@ def ensure_database() -> None:
             settings.off_search_cache_ttl_days,
         )
         count = db.food_count(conn)
+        # #region agent log
+        _debug_log("H2", "bootstrap.py:75", "database_count_after_init", {"food_count": count})
+        # #endregion
 
     should_import = count == 0
     if settings.auto_update and not should_import:
@@ -54,6 +92,9 @@ def ensure_database() -> None:
         return
 
     print("[bls-bootstrap] Importing BLS 4.0 data...")
+    # #region agent log
+    _debug_log("H3", "bootstrap.py:90", "import_required", {"reason": "count_zero_or_update_due"})
+    # #endregion
     with db.get_connection(settings.db_path) as conn:
         db.set_database_status(conn, "importing")
 
@@ -69,6 +110,9 @@ def ensure_database() -> None:
         db.init_schema(conn)
         import_bls.import_components(conn, components_path)
         imported = import_bls.import_data(conn, data_path)
+        # #region agent log
+        _debug_log("H4", "bootstrap.py:108", "import_data_done", {"imported": imported})
+        # #endregion
         db.set_meta(conn, "bls_version", settings.bls_version)
         db.set_meta(conn, "imported_at", datetime.now(timezone.utc).isoformat())
         db.set_meta(conn, "food_count", str(imported))

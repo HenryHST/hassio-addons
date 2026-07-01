@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -14,6 +16,26 @@ GOVDATA_URL = (
     "https://www.govdata.de/suche/daten/"
     "bundeslebensmittelschlussel-bls-version-4-0-deutsche-nahrstoffdatenbank"
 )
+DEBUG_LOG_PATH = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
+
+
+def _debug_log(
+    hypothesis_id: str, location: str, message: str, data: dict[str, object] | None = None
+) -> None:
+    payload = {
+        "sessionId": "92f7bb",
+        "runId": "run1",
+        "hypothesisId": hypothesis_id,
+        "location": location,
+        "message": message,
+        "data": data or {},
+        "timestamp": int(datetime.now(timezone.utc).timestamp() * 1000),
+    }
+    try:
+        with DEBUG_LOG_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(payload, ensure_ascii=True) + "\n")
+    except OSError:
+        pass
 
 
 def _extract_zip_link(html_text: str) -> str | None:
@@ -37,6 +59,9 @@ def download_bls_archive(dest_dir: Path) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     zip_path = dest_dir / "bls_4_0.zip"
 
+    # #region agent log
+    _debug_log("H3", "download.py:66", "download_bls_archive_start", {"dest_dir": str(dest_dir)})
+    # #endregion
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
         response = client.get(DOWNLOAD_PAGE)
         response.raise_for_status()
@@ -44,6 +69,9 @@ def download_bls_archive(dest_dir: Path) -> Path:
         if not zip_url:
             raise RuntimeError("Could not find BLS download link on blsdb.de/download")
 
+        # #region agent log
+        _debug_log("H3", "download.py:75", "download_zip_stream_start", {"zip_url": zip_url})
+        # #endregion
         print(f"[bls-download] Fetching {zip_url}")
         with client.stream("GET", zip_url) as stream:
             stream.raise_for_status()
@@ -51,6 +79,9 @@ def download_bls_archive(dest_dir: Path) -> Path:
                 for chunk in stream.iter_bytes():
                     handle.write(chunk)
 
+    # #region agent log
+    _debug_log("H3", "download.py:84", "download_bls_archive_done", {"zip_path": str(zip_path)})
+    # #endregion
     return zip_path
 
 
