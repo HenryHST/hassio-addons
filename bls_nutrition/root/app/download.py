@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 import json
 import re
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -58,6 +59,8 @@ def _extract_zip_link(html_text: str) -> str | None:
 def download_bls_archive(dest_dir: Path) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     zip_path = dest_dir / "bls_4_0.zip"
+    started = time.monotonic()
+    print(f"[bls-debug] download enter t=0.0s dest={dest_dir}")
 
     # #region agent log
     _debug_log("H3", "download.py:66", "download_bls_archive_start", {"dest_dir": str(dest_dir)})
@@ -65,6 +68,7 @@ def download_bls_archive(dest_dir: Path) -> Path:
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
         response = client.get(DOWNLOAD_PAGE)
         response.raise_for_status()
+        print(f"[bls-debug] download page fetched t={time.monotonic()-started:.1f}s")
         zip_url = _extract_zip_link(response.text)
         if not zip_url:
             raise RuntimeError("Could not find BLS download link on blsdb.de/download")
@@ -78,6 +82,7 @@ def download_bls_archive(dest_dir: Path) -> Path:
             with zip_path.open("wb") as handle:
                 for chunk in stream.iter_bytes():
                     handle.write(chunk)
+        print(f"[bls-debug] zip stream fetched t={time.monotonic()-started:.1f}s")
 
     # #region agent log
     _debug_log("H3", "download.py:84", "download_bls_archive_done", {"zip_path": str(zip_path)})

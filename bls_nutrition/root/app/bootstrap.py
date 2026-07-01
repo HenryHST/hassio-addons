@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -47,7 +48,9 @@ def _needs_update(info_path: Path, interval_days: int) -> bool:
 
 
 def ensure_database() -> None:
+    started = time.monotonic()
     settings = get_settings()
+    print(f"[bls-debug] ensure_database enter t=0.0s db={settings.db_path}")
     # #region agent log
     _debug_log(
         "H1",
@@ -63,6 +66,7 @@ def ensure_database() -> None:
     _debug_log("H1", "bootstrap.py:62", "migrate_from_sqlite_start")
     # #endregion
     db.migrate_from_sqlite(settings.legacy_sqlite_path, settings.db_path)
+    print(f"[bls-debug] migrate_from_sqlite done t={time.monotonic()-started:.1f}s")
     # #region agent log
     _debug_log("H1", "bootstrap.py:65", "migrate_from_sqlite_done")
     # #endregion
@@ -75,6 +79,7 @@ def ensure_database() -> None:
             settings.off_search_cache_ttl_days,
         )
         count = db.food_count(conn)
+        print(f"[bls-debug] init_schema+purge done t={time.monotonic()-started:.1f}s count={count}")
         # #region agent log
         _debug_log("H2", "bootstrap.py:75", "database_count_after_init", {"food_count": count})
         # #endregion
@@ -89,9 +94,11 @@ def ensure_database() -> None:
         with db.get_connection(settings.db_path) as conn:
             db.set_database_status(conn, "ready")
         print(f"[bls-bootstrap] Database ready ({count} foods)")
+        print(f"[bls-debug] ensure_database exit t={time.monotonic()-started:.1f}s path=no_import")
         return
 
     print("[bls-bootstrap] Importing BLS 4.0 data...")
+    print(f"[bls-debug] import path selected t={time.monotonic()-started:.1f}s")
     # #region agent log
     _debug_log("H3", "bootstrap.py:90", "import_required", {"reason": "count_zero_or_update_due"})
     # #endregion
@@ -99,9 +106,11 @@ def ensure_database() -> None:
         db.set_database_status(conn, "importing")
 
     zip_path = download.download_bls_archive(settings.downloads_dir)
+    print(f"[bls-debug] download_bls_archive done t={time.monotonic()-started:.1f}s zip={zip_path}")
     data_path, components_path = download.extract_bls_files(
         zip_path, settings.downloads_dir
     )
+    print(f"[bls-debug] extract_bls_files done t={time.monotonic()-started:.1f}s")
 
     with db.get_connection(settings.db_path) as conn:
         conn.execute("DELETE FROM food_nutrients")
@@ -110,6 +119,7 @@ def ensure_database() -> None:
         db.init_schema(conn)
         import_bls.import_components(conn, components_path)
         imported = import_bls.import_data(conn, data_path)
+        print(f"[bls-debug] import_data done t={time.monotonic()-started:.1f}s imported={imported}")
         # #region agent log
         _debug_log("H4", "bootstrap.py:108", "import_data_done", {"imported": imported})
         # #endregion
@@ -129,6 +139,7 @@ def ensure_database() -> None:
         json.dumps(info, indent=2), encoding="utf-8"
     )
     print(f"[bls-bootstrap] Imported {imported} foods")
+    print(f"[bls-debug] ensure_database exit t={time.monotonic()-started:.1f}s path=import")
 
 
 if __name__ == "__main__":
