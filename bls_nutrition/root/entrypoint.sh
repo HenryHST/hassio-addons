@@ -68,8 +68,5 @@ echo "  - todo_list_entity_id: ${BLS_TODO_LIST_ENTITY_ID}"
 echo "  - map_enabled: ${BLS_MAP_ENABLED}"
 echo "  - map_radius_km: ${BLS_MAP_RADIUS_KM}"
 
-echo "[bls_nutrition] Starting API on port 8090 (database prep/import in app lifespan)..."
-# #region agent log
-echo "[bls-debug] entrypoint uvicorn exec now"
-# #endregion
+echo "[bls_nutrition] Starting API on port 8090..."
 exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8090

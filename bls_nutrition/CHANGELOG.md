@@ -5,6 +5,13 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2026-07-01
+
+### Fixed
+
+- Supervisor-Start-Timeout: BLS-Import läuft im Hintergrund, API/Healthcheck startet sofort
+- hassfest: Manifest-Keys alphabetisch sortiert (`integration_type` vor `issue_tracker`)
+
 ## [1.8.0] - 2026-06-23
 
 ### Changed

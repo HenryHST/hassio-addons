@@ -100,9 +100,6 @@ def _parse_value(raw: object) -> float | None:
 
 
 def import_data(conn: duckdb.DuckDBPyConnection, data_path: Path) -> int:
-    # #region agent log
-    print(f"[bls-debug] import_data enter data_path={data_path}")
-    # #endregion
     workbook = load_workbook(data_path, read_only=True, data_only=True)
     sheet = workbook.active
     row_iter = sheet.iter_rows(values_only=True)
@@ -151,13 +148,6 @@ def import_data(conn: duckdb.DuckDBPyConnection, data_path: Path) -> int:
                 batch_values.append((bls_code, code, value, provenance, reference))
 
         imported += 1
-        # #region agent log
-        if imported % 1000 == 0:
-            print(
-                f"[bls-debug] import_data progress rows={imported} "
-                f"batched_foods={len(batch_foods)} batched_values={len(batch_values)}"
-            )
-        # #endregion
         if imported % 250 == 0:
             _flush_batches(conn, batch_foods, batch_values)
             batch_foods.clear()
@@ -165,9 +155,6 @@ def import_data(conn: duckdb.DuckDBPyConnection, data_path: Path) -> int:
 
     _flush_batches(conn, batch_foods, batch_values)
     workbook.close()
-    # #region agent log
-    print(f"[bls-debug] import_data exit imported={imported}")
-    # #endregion
     return imported
 
 

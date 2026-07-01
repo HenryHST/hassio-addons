@@ -3,33 +3,11 @@
 from __future__ import annotations
 
 import json
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app import db, download, import_bls
-from app.settings import get_settings
-
-DEBUG_LOG_PATH = Path("/Users/henry/Projects/hassio-addons/.cursor/debug-92f7bb.log")
-
-
-def _debug_log(
-    hypothesis_id: str, location: str, message: str, data: dict[str, object] | None = None
-) -> None:
-    payload = {
-        "sessionId": "92f7bb",
-        "runId": "post-fix",
-        "hypothesisId": hypothesis_id,
-        "location": location,
-        "message": message,
-        "data": data or {},
-        "timestamp": int(datetime.now(timezone.utc).timestamp() * 1000),
-    }
-    try:
-        with DEBUG_LOG_PATH.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(payload, ensure_ascii=True) + "\n")
-    except OSError:
-        pass
+from app.settings import Settings, get_settings
 
 
 def _version_info_path(data_dir: Path) -> Path:
@@ -47,7 +25,7 @@ def _needs_update(info_path: Path, interval_days: int) -> bool:
     return imported_at < datetime.now(timezone.utc) - timedelta(days=interval_days)
 
 
-def _import_required(settings: object, count: int) -> bool:
+def _import_required(settings: Settings, count: int) -> bool:
     if count == 0:
         return True
     if not settings.auto_update:
@@ -57,22 +35,11 @@ def _import_required(settings: object, count: int) -> bool:
 
 def prepare_database() -> bool:
     """Fast startup: migrate, schema, purge. Returns True if BLS import should run."""
-    started = time.monotonic()
     settings = get_settings()
-    print(f"[bls-debug] prepare_database enter t=0.0s db={settings.db_path}")
-    # #region agent log
-    _debug_log(
-        "H1",
-        "bootstrap.py:prepare_database",
-        "prepare_database_enter",
-        {"db_path": str(settings.db_path), "legacy_sqlite_path": str(settings.legacy_sqlite_path)},
-    )
-    # #endregion
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     settings.downloads_dir.mkdir(parents=True, exist_ok=True)
 
     db.migrate_from_sqlite(settings.legacy_sqlite_path, settings.db_path)
-    print(f"[bls-debug] migrate_from_sqlite done t={time.monotonic()-started:.1f}s")
 
     with db.get_connection(settings.db_path) as conn:
         db.init_schema(conn)
@@ -82,41 +49,28 @@ def prepare_database() -> bool:
             settings.off_search_cache_ttl_days,
         )
         count = db.food_count(conn)
-        print(f"[bls-debug] init_schema+purge done t={time.monotonic()-started:.1f}s count={count}")
-        # #region agent log
-        _debug_log("H2", "bootstrap.py:prepare_database", "database_count_after_init", {"food_count": count})
-        # #endregion
 
         if not _import_required(settings, count):
             db.set_database_status(conn, "ready")
             print(f"[bls-bootstrap] Database ready ({count} foods)")
-            print(f"[bls-debug] prepare_database exit t={time.monotonic()-started:.1f}s import_needed=false")
             return False
 
         db.set_database_status(conn, "importing")
 
     print("[bls-bootstrap] BLS import scheduled in background")
-    print(f"[bls-debug] prepare_database exit t={time.monotonic()-started:.1f}s import_needed=true")
-    # #region agent log
-    _debug_log("H4", "bootstrap.py:prepare_database", "import_scheduled_background")
-    # #endregion
     return True
 
 
 def run_bls_import() -> None:
     """Download and import BLS data. Intended for a background thread."""
-    started = time.monotonic()
     settings = get_settings()
     print("[bls-bootstrap] Importing BLS 4.0 data...")
-    print(f"[bls-debug] background import start t=0.0s")
 
     try:
         zip_path = download.download_bls_archive(settings.downloads_dir)
-        print(f"[bls-debug] download_bls_archive done t={time.monotonic()-started:.1f}s zip={zip_path}")
         data_path, components_path = download.extract_bls_files(
             zip_path, settings.downloads_dir
         )
-        print(f"[bls-debug] extract_bls_files done t={time.monotonic()-started:.1f}s")
 
         with db.get_connection(settings.db_path) as conn:
             conn.execute("DELETE FROM food_nutrients")
@@ -125,10 +79,6 @@ def run_bls_import() -> None:
             db.init_schema(conn)
             import_bls.import_components(conn, components_path)
             imported = import_bls.import_data(conn, data_path)
-            print(f"[bls-debug] import_data done t={time.monotonic()-started:.1f}s imported={imported}")
-            # #region agent log
-            _debug_log("H4", "bootstrap.py:run_bls_import", "import_data_done", {"imported": imported})
-            # #endregion
             db.set_meta(conn, "bls_version", settings.bls_version)
             db.set_meta(conn, "imported_at", datetime.now(timezone.utc).isoformat())
             db.set_meta(conn, "food_count", str(imported))
@@ -145,12 +95,8 @@ def run_bls_import() -> None:
             json.dumps(info, indent=2), encoding="utf-8"
         )
         print(f"[bls-bootstrap] Imported {imported} foods")
-        print(f"[bls-debug] background import exit t={time.monotonic()-started:.1f}s path=import")
     except Exception as exc:
         print(f"[bls-bootstrap] Import failed: {exc}")
-        # #region agent log
-        _debug_log("H4", "bootstrap.py:run_bls_import", "import_failed", {"error": str(exc)})
-        # #endregion
         with db.get_connection(settings.db_path) as conn:
             db.set_database_status(conn, "error")
         raise

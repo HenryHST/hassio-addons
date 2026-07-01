@@ -29,23 +29,19 @@ from app.settings import Settings, get_settings
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    import_needed = bootstrap.prepare_database()
-    if import_needed:
-        print("[bls-debug] lifespan starting background import thread")
+    if bootstrap.prepare_database():
         thread = threading.Thread(
             target=bootstrap.run_bls_import,
             name="bls-import",
             daemon=True,
         )
         thread.start()
-    else:
-        print("[bls-debug] lifespan no background import needed")
     yield
 
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.8.0",
+    version="1.8.1",
     lifespan=lifespan,
 )
 
