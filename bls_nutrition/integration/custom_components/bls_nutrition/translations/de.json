@@ -151,6 +151,7 @@
       "description": "Exportiert alle Favoriten als JSON oder CSV.",
       "fields": {
         "format": { "name": "Format" },
+        "file_path": { "name": "Dateipfad", "description": "Optional. Schreibt Export nach /config/…" },
         "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
       }
     },

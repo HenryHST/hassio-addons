@@ -26,6 +26,16 @@ input_text:
   bls_ingredient_3_id:
     name: BLS Zutat 3 ID
     max: 64
+  bls_favorites_export_path:
+    name: BLS Favoriten Export
+    icon: mdi:export
+    max: 255
+    initial: /config/bls-favorites.json
+  bls_favorites_import_path:
+    name: BLS Favoriten Import
+    icon: mdi:import
+    max: 255
+    initial: /config/bls-favorites.json
 
 input_number:
   bls_amount_g:
@@ -86,6 +96,18 @@ input_select:
       - bls
       - off
       - custom
+  bls_favorites_format:
+    name: BLS Favoriten Format
+    options:
+      - json
+      - csv
+    icon: mdi:file-document
+  bls_favorites_import_mode:
+    name: BLS Favoriten Import Modus
+    options:
+      - merge
+      - replace
+    icon: mdi:database-import
 
 script:
   bls_nutrition_calculate_recipe:
@@ -110,3 +132,21 @@ script:
         data:
           servings: "{{ states('input_number.bls_recipe_servings') | int(1) }}"
           ingredients: "{{ ingredients }}"
+
+  bls_nutrition_export_favorites:
+    alias: BLS Favoriten exportieren
+    mode: single
+    sequence:
+      - service: bls_nutrition.export_favorites
+        data:
+          format: "{{ states('input_select.bls_favorites_format') }}"
+          file_path: "{{ states('input_text.bls_favorites_export_path') }}"
+
+  bls_nutrition_import_favorites:
+    alias: BLS Favoriten importieren
+    mode: single
+    sequence:
+      - service: bls_nutrition.import_favorites
+        data:
+          file_path: "{{ states('input_text.bls_favorites_import_path') }}"
+          mode: "{{ states('input_select.bls_favorites_import_mode') }}"

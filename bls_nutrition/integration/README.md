@@ -23,7 +23,8 @@ config/custom_components/bls_nutrition/
 im Ordner müssen zusammenpassen (`const.py`, `services.yaml`, `strings.json`, `translations/`, …).
 
 Das Lovelace-Dashboard liegt unter `dashboards/bls_nutrition.yaml` und wird manuell importiert
-(nicht mehr über `manifest.json`).
+(nicht mehr über `manifest.json`). Das Package `packages/bls_nutrition.yaml` stellt Helper für
+Suche, Barcode, Rezept und **Favoriten Import/Export** bereit.
 
 Home Assistant neu starten.
 
@@ -33,7 +34,7 @@ Home Assistant neu starten.
 2. Kopiere den Inhalt **dieses Ordners** (`integration/`) als Root in das neue Repo:
    - `custom_components/bls_nutrition/` (inkl. `brand/icon.png`, `dashboards/`)
    - `brand/icon.png` (für HACS-Store-Anzeige)
-   - `packages/bls_nutrition.yaml` (Helper für Dashboard)
+   - `packages/bls_nutrition.yaml` (Helper für Dashboard, inkl. Favoriten Export/Import)
    - `hacs.json`
    - `README.md`
 3. **Kein** `repository.json` im neuen Repo!

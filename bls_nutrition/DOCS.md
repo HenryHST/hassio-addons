@@ -208,7 +208,7 @@ eigenes GitHub-Repo (z. B. `homeassistant-bls-nutrition`).
 3. Host: `bls_nutrition` (Supervisor-intern), Port: `8090`
 4. Optional: **Konfigurieren** → Host/Port oder Standard-Barcode-Menge (g) anpassen
 
-Services `search_food`, `lookup_barcode`, `calculate_portion` und `calculate_recipe` liefern eine **Antwort** (kein Event-Polling nötig). Bei mehreren Integrationen `config_entry_id` angeben.
+Services `search_food`, `lookup_barcode`, `calculate_portion`, `calculate_recipe`, `export_favorites` und `import_favorites` liefern eine **Antwort** (kein Event-Polling nötig). Bei mehreren Integrationen `config_entry_id` angeben.
 
 ## Configuration
 
@@ -347,20 +347,32 @@ data:
 service: bls_nutrition.export_favorites
 data:
   format: json
+  file_path: /config/bls-favorites-backup.json
+response_variable: export_result
 ```
 
-Gibt `content` (JSON-Objekt oder CSV-Text) und `format` zurück.
+Gibt `content` (JSON-Objekt oder CSV-Text), `format` und `favorites_count` zurück. Mit `file_path` wird die Datei zusätzlich auf dem HA-Host geschrieben.
+
+Der Sensor `sensor.bls_nutrition_favorites_count` enthält danach das Attribut `last_io` mit dem letzten Export-/Import-Ergebnis.
 
 ### `bls_nutrition.import_favorites`
 
 ```yaml
 service: bls_nutrition.import_favorites
 data:
-  file_path: /config/favorites.json
+  file_path: /config/bls-favorites-backup.json
   mode: merge
+response_variable: import_result
 ```
 
 `mode`: `merge` (Duplikate überspringen) oder `replace` (alle Favoriten ersetzen).
+
+### Dashboard: Favoriten
+
+Im Dashboard **BLS Nährwert** (nach Installation des Helper-Pakets `packages/bls_nutrition.yaml`):
+
+- Favoriten-Anzahl, Export/Import-Pfade und Buttons wie bei der Lebensmittelsuche
+- Scripts: `script.bls_nutrition_export_favorites`, `script.bls_nutrition_import_favorites`
 
 ## Dashboard
 

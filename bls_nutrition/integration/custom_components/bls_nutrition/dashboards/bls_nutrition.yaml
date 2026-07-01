@@ -16,6 +16,77 @@ views:
           - entity: sensor.bls_nutrition_food_count
           - entity: sensor.bls_nutrition_bls_version
 
+      - type: entities
+        title: Favoriten
+        show_header_toggle: false
+        entities:
+          - entity: sensor.bls_nutrition_favorites_count
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_select.bls_favorites_format
+            name: Format
+          - type: entity
+            entity: input_text.bls_favorites_export_path
+            name: Export-Pfad
+          - type: button
+            name: Exportieren
+            icon: mdi:export
+            tap_action:
+              action: call-service
+              service: script.bls_nutrition_export_favorites
+
+      - type: horizontal-stack
+        cards:
+          - type: entity
+            entity: input_text.bls_favorites_import_path
+            name: Import-Pfad
+          - type: entity
+            entity: input_select.bls_favorites_import_mode
+            name: Modus
+          - type: button
+            name: Importieren
+            icon: mdi:import
+            tap_action:
+              action: call-service
+              service: script.bls_nutrition_import_favorites
+
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Favoriten auflisten
+            icon: mdi:heart
+            tap_action:
+              action: call-service
+              service: bls_nutrition.list_favorites
+
+      - type: markdown
+        title: Favoriten Status
+        content: >
+          {% set io = state_attr('sensor.bls_nutrition_favorites_count', 'last_io') or {} %}
+          {% if io.action is defined %}
+          **Letzte Aktion:** {{ io.action }}
+          {% if io.action == 'export' %}
+          Format: {{ io.format }} · Anzahl: {{ io.favorites_count }}
+          {% if io.file_path %} · Datei: `{{ io.file_path }}`{% endif %}
+          {% elif io.action == 'import' %}
+          Importiert: {{ io.imported }} · Übersprungen: {{ io.skipped }}
+          {% if io.errors | length > 0 %} · Fehler: {{ io.errors | length }}{% endif %}
+          {% elif io.action == 'list' %}
+          {% set favs = io.favorites or [] %}
+          {% if favs | length == 0 %}
+          *Keine Favoriten gespeichert.*
+          {% else %}
+          {% for fav in favs[:8] %}
+          - **{{ fav.display_name }}** ({{ fav.source }}, {{ fav.default_amount_g }} g)
+          {% endfor %}
+          {% endif %}
+          {% endif %}
+          {% else %}
+          *Noch kein Export, Import oder Auflisten ausgeführt.*
+          {% endif %}
+
       - type: horizontal-stack
         cards:
           - type: entity

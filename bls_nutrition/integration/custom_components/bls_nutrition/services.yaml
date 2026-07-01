@@ -273,6 +273,12 @@ export_favorites:
           options:
             - "json"
             - "csv"
+    file_path:
+      name: Dateipfad
+      description: Optional. Schreibt Export nach /config/…
+      example: /config/bls-favorites.json
+      selector:
+        text:
     config_entry_id:
       name: Config Entry ID
       description: Nur bei mehreren BLS-Integrationen erforderlich.
@@ -287,6 +293,7 @@ import_favorites:
       name: Dateipfad
       description: Absoluter Pfad zur Import-Datei auf dem Home-Assistant-Host.
       required: true
+      example: /config/bls-favorites.json
       selector:
         text:
     mode:

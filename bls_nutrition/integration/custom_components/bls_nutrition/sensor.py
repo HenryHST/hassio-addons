@@ -154,6 +154,12 @@ class BlsFavoritesCountSensor(BlsSensorBase):
     def native_value(self) -> int | None:
         return self.coordinator.data.get("favorites_count")
 
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {
+            "last_io": self._runtime.last_favorites_io or None,
+        }
+
 
 class BlsVersionSensor(BlsSensorBase):
     _attr_translation_key = "bls_version"

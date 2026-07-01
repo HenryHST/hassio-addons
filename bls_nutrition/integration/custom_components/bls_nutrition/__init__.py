@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 from datetime import timedelta
+from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
@@ -11,9 +14,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers.dispatcher import dispatcher_send
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.dispatcher import dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import BlsNutritionApiError, BlsNutritionClient
@@ -23,15 +26,15 @@ from .const import (
     DOMAIN,
     EVENT_CALCULATION_RESULT,
     EVENT_SEARCH_RESULT,
-    SERVICE_ADD_TO_TODO_LIST,
     SERVICE_ADD_FAVORITE,
-    SERVICE_LIST_FAVORITES,
-    SERVICE_REMOVE_FAVORITE,
-    SERVICE_EXPORT_FAVORITES,
-    SERVICE_IMPORT_FAVORITES,
+    SERVICE_ADD_TO_TODO_LIST,
     SERVICE_CALCULATE_PORTION,
     SERVICE_CALCULATE_RECIPE,
+    SERVICE_EXPORT_FAVORITES,
+    SERVICE_IMPORT_FAVORITES,
+    SERVICE_LIST_FAVORITES,
     SERVICE_LOOKUP_BARCODE,
+    SERVICE_REMOVE_FAVORITE,
     SERVICE_SAVE_CUSTOM_FOOD,
     SERVICE_SAVE_RECIPE,
     SERVICE_SEARCH_FOOD,
@@ -242,8 +245,14 @@ def _register_services(hass: HomeAssistant) -> None:
         return {"favorite": favorite}
 
     async def handle_list_favorites(call: ServiceCall) -> dict[str, Any]:
-        runtime, _entry_id = _get_runtime(hass, call)
+        runtime, entry_id = _get_runtime(hass, call)
         favorites_list = await runtime.client.list_favorites()
+        runtime.set_favorites_io(
+            "list",
+            favorites=favorites_list[:10],
+            count=len(favorites_list),
+        )
+        _notify_updated(hass, entry_id)
         return {"favorites": favorites_list, "count": len(favorites_list)}
 
     async def handle_remove_favorite(call: ServiceCall) -> dict[str, Any]:
@@ -252,21 +261,51 @@ def _register_services(hass: HomeAssistant) -> None:
         return {"result": result}
 
     async def handle_export_favorites(call: ServiceCall) -> dict[str, Any]:
-        import json
-
-        runtime, _entry_id = _get_runtime(hass, call)
+        runtime, entry_id = _get_runtime(hass, call)
         export_format = call.data.get("format", "json")
+        file_path = call.data.get("file_path")
         data = await runtime.client.export_favorites(export_format)
+        if file_path:
+            await asyncio.to_thread(Path(file_path).write_bytes, data)
         if export_format == "json":
-            return {"format": export_format, "content": json.loads(data.decode("utf-8"))}
-        return {"format": export_format, "content": data.decode("utf-8")}
+            content: str | dict[str, Any] = json.loads(data.decode("utf-8"))
+        else:
+            content = data.decode("utf-8")
+        await runtime.coordinator.async_request_refresh()
+        favorites_count = runtime.coordinator.data.get("favorites_count")
+        runtime.set_favorites_io(
+            "export",
+            format=export_format,
+            file_path=file_path,
+            favorites_count=favorites_count,
+        )
+        _notify_updated(hass, entry_id)
+        response: dict[str, Any] = {
+            "format": export_format,
+            "content": content,
+            "favorites_count": favorites_count,
+        }
+        if file_path:
+            response["file_path"] = file_path
+        return response
 
     async def handle_import_favorites(call: ServiceCall) -> dict[str, Any]:
-        runtime, _entry_id = _get_runtime(hass, call)
-        result = await runtime.client.import_favorites(
-            call.data["file_path"],
-            mode=call.data.get("mode", "merge"),
+        runtime, entry_id = _get_runtime(hass, call)
+        file_path = call.data["file_path"]
+        mode = call.data.get("mode", "merge")
+        result = await runtime.client.import_favorites(file_path, mode=mode)
+        await runtime.coordinator.async_request_refresh()
+        favorites_count = runtime.coordinator.data.get("favorites_count")
+        runtime.set_favorites_io(
+            "import",
+            file_path=file_path,
+            mode=mode,
+            imported=result.get("imported", 0),
+            skipped=result.get("skipped", 0),
+            errors=result.get("errors", []),
+            favorites_count=favorites_count,
         )
+        _notify_updated(hass, entry_id)
         return result
 
     if not hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
@@ -422,6 +461,7 @@ def _register_services(hass: HomeAssistant) -> None:
             schema=vol.Schema(
                 {
                     vol.Optional("format", default="json"): vol.In(["json", "csv"]),
+                    vol.Optional("file_path"): str,
                     **_ENTRY_ID_FIELD,
                 }
             ),

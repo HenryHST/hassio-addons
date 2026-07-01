@@ -199,6 +199,36 @@
           "description": "Required when multiple BLS integrations are configured."
         }
       }
+    },
+    "export_favorites": {
+      "name": "Export favorites",
+      "description": "Export all favorites as JSON or CSV.",
+      "fields": {
+        "format": { "name": "Format" },
+        "file_path": {
+          "name": "File path",
+          "description": "Optional. Writes export to /config/…"
+        },
+        "config_entry_id": {
+          "name": "Config entry ID",
+          "description": "Required when multiple BLS integrations are configured."
+        }
+      }
+    },
+    "import_favorites": {
+      "name": "Import favorites",
+      "description": "Import favorites from a JSON or CSV file.",
+      "fields": {
+        "file_path": {
+          "name": "File path",
+          "description": "Absolute path to the import file on the Home Assistant host."
+        },
+        "mode": { "name": "Mode" },
+        "config_entry_id": {
+          "name": "Config entry ID",
+          "description": "Required when multiple BLS integrations are configured."
+        }
+      }
     }
   }
 }

@@ -20,6 +20,7 @@ class BlsRuntimeData:
     last_search_query: str = ""
     last_calculation: dict[str, Any] = field(default_factory=dict)
     last_calculation_type: str = ""
+    last_favorites_io: dict[str, Any] = field(default_factory=dict)
 
     def set_search(self, query: str, results: list[dict[str, Any]]) -> None:
         self.last_search_query = query
@@ -28,3 +29,6 @@ class BlsRuntimeData:
     def set_calculation(self, calc_type: str, result: dict[str, Any]) -> None:
         self.last_calculation_type = calc_type
         self.last_calculation = result
+
+    def set_favorites_io(self, action: str, **kwargs: Any) -> None:
+        self.last_favorites_io = {"action": action, **kwargs}

@@ -5,6 +5,16 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.5] - 2026-07-01
+
+### Added
+
+- HA-Services `export_favorites` / `import_favorites` vervollständigt wie `search_food`
+- Export optional in Datei (`file_path`), Sensor-Attribut `last_io` am Favoriten-Zähler
+- Dashboard-Abschnitt Favoriten mit Export/Import-Buttons
+- Package-Helper und Scripts `bls_nutrition_export_favorites` / `bls_nutrition_import_favorites`
+- `strings.json`-Einträge für hassfest-Konsistenz
+
 ## [1.8.4] - 2026-07-01
 
 ### Added
