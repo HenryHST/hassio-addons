@@ -187,3 +187,76 @@ add_to_todo_list:
       description: Nur bei mehreren BLS-Integrationen erforderlich.
       selector:
         text:
+
+add_favorite:
+  name: Favorit hinzufügen
+  description: Speichert ein Lebensmittel als Favorit im Add-on.
+  fields:
+    display_name:
+      name: Anzeigename
+      required: true
+      selector:
+        text:
+    source:
+      name: Quelle
+      required: true
+      selector:
+        select:
+          options:
+            - "bls"
+            - "off"
+            - "custom"
+    id:
+      name: ID
+      description: BLS-Code, Barcode oder Custom-Food-ID.
+      required: true
+      selector:
+        text:
+    barcode:
+      name: Barcode (EAN)
+      selector:
+        text:
+    brand:
+      name: Marke
+      selector:
+        text:
+    default_amount_g:
+      name: Standardmenge (g)
+      default: 100
+      selector:
+        number:
+          min: 0.1
+          step: 0.1
+          unit_of_measurement: g
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
+
+list_favorites:
+  name: Favoriten auflisten
+  description: Gibt alle gespeicherten Favoriten zurück.
+  fields:
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:
+
+remove_favorite:
+  name: Favorit entfernen
+  description: Entfernt einen Favoriten anhand der Favoriten-ID.
+  fields:
+    favorite_id:
+      name: Favoriten-ID
+      required: true
+      selector:
+        number:
+          min: 1
+          step: 1
+    config_entry_id:
+      name: Config Entry ID
+      description: Nur bei mehreren BLS-Integrationen erforderlich.
+      selector:
+        text:

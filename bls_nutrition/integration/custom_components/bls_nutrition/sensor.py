@@ -21,6 +21,7 @@ from .const import (
     ENTITY_ECOSCORE,
     ENTITY_ENERGY,
     ENTITY_FAT,
+    ENTITY_FAVORITES_COUNT,
     ENTITY_FOOD_COUNT,
     ENTITY_FPE,
     ENTITY_G_KH,
@@ -44,6 +45,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             BlsFoodCountSensor(runtime, entry),
+            BlsFavoritesCountSensor(runtime, entry),
             BlsVersionSensor(runtime, entry),
             BlsLastFoodSensor(runtime, entry),
             BlsSearchHitsSensor(runtime, entry),
@@ -133,6 +135,24 @@ class BlsFoodCountSensor(BlsSensorBase):
     @property
     def native_value(self) -> int | None:
         return self.coordinator.data.get("food_count")
+
+
+class BlsFavoritesCountSensor(BlsSensorBase):
+    _attr_translation_key = "favorites_count"
+    _attr_icon = "mdi:heart"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    @property
+    def unique_id(self) -> str:
+        return f"{self._entry.entry_id}_{ENTITY_FAVORITES_COUNT}"
+
+    @property
+    def suggested_object_id(self) -> str:
+        return ENTITY_FAVORITES_COUNT
+
+    @property
+    def native_value(self) -> int | None:
+        return self.coordinator.data.get("favorites_count")
 
 
 class BlsVersionSensor(BlsSensorBase):

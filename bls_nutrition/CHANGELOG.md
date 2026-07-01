@@ -5,6 +5,17 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-07-01
+
+### Added
+
+- **Favoriten**: Neuer Ingress-Tab mit Herz-Icon, optional per `favorites_enabled`
+- Favoriten in DuckDB (Umbenennen, Standard-Portion in g, eigenes Bild)
+- OFF-Bild-Fallback über Open Food Facts, wenn kein lokales Bild vorhanden ist
+- Herz-Button in Suche, Barcode-Ansicht und „Zuletzt berechnet“
+- HA-Services `add_favorite`, `list_favorites`, `remove_favorite`
+- Sensor `sensor.bls_nutrition_favorites_count`
+
 ## [1.8.1] - 2026-07-01
 
 ### Fixed

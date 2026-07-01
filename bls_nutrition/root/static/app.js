@@ -25,7 +25,9 @@
   let todoListEnabled = false;
   let searchRecentsEnabled = true;
   let mapEnabled = false;
+  let favoritesEnabled = false;
   let mapRadiusKm = 20;
+  const favoriteByKey = new Map();
   let searchAbortController = null;
   let searchDebounceTimer = null;
   let ingredientCounter = 0;
@@ -131,6 +133,40 @@
     return res.json();
   }
 
+  async function apiPatch(path, data) {
+    const res = await fetch(path, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = body.detail || detail;
+      } catch (_) { /* ignore */ }
+      throw new Error(detail);
+    }
+    return res.json();
+  }
+
+  async function apiDelete(path) {
+    const res = await fetch(path, { method: "DELETE" });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = body.detail || detail;
+      } catch (_) { /* ignore */ }
+      throw new Error(detail);
+    }
+    try {
+      return await res.json();
+    } catch (_) {
+      return {};
+    }
+  }
+
   // --- Theme ---
 
   const THEME_META_COLORS = { light: "#1b5e20", dark: "#121212", auto: "#1b5e20" };
@@ -195,6 +231,13 @@
     wrap.hidden = false;
     chips.innerHTML = "";
     for (const r of recents) {
+      const wrapChip = document.createElement("span");
+      wrapChip.className = "recent-chip-wrap";
+      const heartBtn = createFavoriteButton(
+        { source: r.source, id: r.id, name: r.name, brand: r.brand },
+        r.amount_g
+      );
+      if (heartBtn) wrapChip.appendChild(heartBtn);
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "recent-chip";
@@ -206,7 +249,268 @@
           false
         );
       });
-      chips.appendChild(btn);
+      wrapChip.appendChild(btn);
+      chips.appendChild(wrapChip);
+    }
+  }
+
+  // --- Favorites ---
+
+  function favoriteKey(source, id) {
+    return `${source}:${id}`;
+  }
+
+  function heartIconHtml(active) {
+    const fill = active ? "currentColor" : "none";
+    return (
+      `<svg class="favorite-heart-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">` +
+      `<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="${fill}" stroke="currentColor" stroke-width="1.5"/></svg>`
+    );
+  }
+
+  function createFavoriteButton(item, defaultAmount = 100) {
+    if (!favoritesEnabled) return null;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn-favorite-heart";
+    btn.setAttribute("aria-label", "Favorit");
+    const key = favoriteKey(item.source || "bls", item.id);
+    if (favoriteByKey.has(key)) btn.classList.add("is-active");
+    btn.innerHTML = heartIconHtml(favoriteByKey.has(key));
+    btn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      toggleFavorite(item, defaultAmount);
+    });
+    return btn;
+  }
+
+  async function loadFavoritesIndex() {
+    favoriteByKey.clear();
+    if (!favoritesEnabled) {
+      renderFavoritesList([]);
+      return;
+    }
+    try {
+      const items = await apiGet("favorites");
+      for (const fav of items) {
+        favoriteByKey.set(favoriteKey(fav.source, fav.source_id), fav);
+      }
+      renderFavoritesList(items);
+    } catch (err) {
+      renderFavoritesList([]);
+    }
+  }
+
+  function favoriteImageSrc(fav) {
+    const resolved = fav.resolved_image;
+    if (resolved && String(resolved).startsWith("http")) return resolved;
+    if (resolved) return resolved;
+    if (fav.has_local_image) return `favorites/${fav.id}/image`;
+    return null;
+  }
+
+  function renderFavoritesList(items) {
+    const list = $("favorites-list");
+    const empty = $("favorites-empty");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!favoritesEnabled) {
+      if (empty) empty.hidden = true;
+      return;
+    }
+    if (!items.length) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+
+    for (const fav of items) {
+      const li = document.createElement("li");
+      li.className = "favorite-card";
+      li.dataset.favoriteId = String(fav.id);
+
+      const thumbWrap = document.createElement("div");
+      thumbWrap.className = "favorite-thumb-wrap";
+      const imgSrc = favoriteImageSrc(fav);
+      if (imgSrc) {
+        const img = document.createElement("img");
+        img.className = "favorite-thumb";
+        img.alt = "";
+        img.src = imgSrc;
+        thumbWrap.appendChild(img);
+      } else {
+        thumbWrap.innerHTML = heartIconHtml(true);
+        thumbWrap.querySelector("svg")?.classList.add("favorite-thumb-placeholder");
+      }
+
+      const body = document.createElement("div");
+      body.className = "favorite-body";
+      const name = document.createElement("p");
+      name.className = "favorite-name";
+      name.textContent = fav.display_name;
+      const meta = document.createElement("p");
+      meta.className = "favorite-meta";
+      meta.textContent = `${fav.source.toUpperCase()} · ${fav.default_amount_g} g Standard`;
+      body.appendChild(name);
+      body.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.className = "favorite-actions";
+      const calcBtn = document.createElement("button");
+      calcBtn.type = "button";
+      calcBtn.className = "btn btn-primary btn-sm";
+      calcBtn.textContent = "Berechnen";
+      calcBtn.addEventListener("click", () => {
+        runQuickPortion(
+          {
+            source: fav.source,
+            id: fav.source_id,
+            name: fav.display_name,
+            brand: fav.brand,
+          },
+          fav.default_amount_g,
+          true
+        );
+      });
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn btn-secondary btn-sm";
+      editBtn.textContent = "Bearbeiten";
+      editBtn.addEventListener("click", () => openFavoriteEditor(li, fav));
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn btn-secondary btn-sm";
+      delBtn.textContent = "Entfernen";
+      delBtn.addEventListener("click", async () => {
+        try {
+          await apiDelete(`favorites/${fav.id}`);
+          await loadFavoritesIndex();
+          showStatus("Favorit entfernt.", false);
+        } catch (err) {
+          showError(err.message);
+        }
+      });
+      actions.appendChild(calcBtn);
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      thumbWrap.addEventListener("click", () => calcBtn.click());
+      body.addEventListener("click", () => calcBtn.click());
+
+      li.appendChild(thumbWrap);
+      li.appendChild(body);
+      li.appendChild(actions);
+      list.appendChild(li);
+    }
+  }
+
+  function openFavoriteEditor(card, fav) {
+    if (card.classList.contains("is-editing")) return;
+    card.classList.add("is-editing");
+    card.innerHTML = "";
+
+    const form = document.createElement("div");
+    form.className = "favorite-edit-form";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.className = "input";
+    nameInput.value = fav.display_name;
+    nameInput.setAttribute("aria-label", "Anzeigename");
+
+    const amountInput = document.createElement("input");
+    amountInput.type = "number";
+    amountInput.className = "input input-narrow";
+    amountInput.min = "1";
+    amountInput.step = "1";
+    amountInput.value = String(fav.default_amount_g);
+    amountInput.setAttribute("aria-label", "Standardmenge in Gramm");
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/jpeg,image/png,image/webp";
+    fileInput.setAttribute("aria-label", "Eigenes Bild");
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "btn btn-primary";
+    saveBtn.textContent = "Speichern";
+    saveBtn.addEventListener("click", async () => {
+      try {
+        await apiPatch(`favorites/${fav.id}`, {
+          display_name: nameInput.value.trim() || fav.display_name,
+          default_amount_g: parseFloat(amountInput.value) || fav.default_amount_g,
+        });
+        if (fileInput.files && fileInput.files[0]) {
+          const body = new FormData();
+          body.append("file", fileInput.files[0]);
+          const res = await fetch(`favorites/${fav.id}/image`, {
+            method: "POST",
+            body,
+          });
+          if (!res.ok) {
+            const payload = await res.json().catch(() => ({}));
+            throw new Error(payload.detail || res.statusText);
+          }
+        }
+        await loadFavoritesIndex();
+        showStatus("Favorit gespeichert.", false);
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "btn btn-secondary";
+    cancelBtn.textContent = "Abbrechen";
+    cancelBtn.addEventListener("click", () => loadFavoritesIndex());
+
+    form.appendChild(nameInput);
+    form.appendChild(amountInput);
+    form.appendChild(fileInput);
+    form.appendChild(saveBtn);
+    form.appendChild(cancelBtn);
+    card.appendChild(form);
+  }
+
+  async function toggleFavorite(item, defaultAmount = 100) {
+    if (!favoritesEnabled || !item?.id) return;
+    const source = item.source || "bls";
+    const key = favoriteKey(source, item.id);
+    try {
+      if (favoriteByKey.has(key)) {
+        const fav = favoriteByKey.get(key);
+        await apiDelete(`favorites/${fav.id}`);
+        showStatus("Aus Favoriten entfernt.", false);
+      } else {
+        await apiPost("favorites", {
+          display_name: (item.name || item.id).trim(),
+          source,
+          id: item.id,
+          barcode: source === "off" ? item.id : item.barcode || null,
+          brand: item.brand || null,
+          default_amount_g: defaultAmount,
+        });
+        showStatus("Zu Favoriten hinzugefügt.", false);
+      }
+      await loadFavoritesIndex();
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  function updateFavoritesVisibility() {
+    const navBtn = $("nav-favorites-btn");
+    const panel = $("panel-favorites");
+    if (navBtn) navBtn.hidden = !favoritesEnabled;
+    if (panel && !favoritesEnabled) {
+      panel.hidden = true;
+      panel.classList.remove("active");
+      if (document.querySelector('.nav-btn[data-panel="favorites"]')?.classList.contains("active")) {
+        switchPanel("search");
+      }
     }
   }
 
@@ -481,6 +785,12 @@
         `<span class="result-item-meta">${meta}</span>` +
         scoresHtml;
 
+      const header = document.createElement("div");
+      header.className = "result-item-header";
+      const heartBtn = createFavoriteButton(item);
+      if (heartBtn) header.appendChild(heartBtn);
+      header.appendChild(button);
+
       const quickPanel = createQuickPortionPanel(item);
       button.addEventListener("click", () => {
         const wasExpanded = wrap.classList.contains("is-expanded");
@@ -491,7 +801,7 @@
         }
       });
 
-      wrap.appendChild(button);
+      wrap.appendChild(header);
       wrap.appendChild(quickPanel);
 
       if (showScores && todoListEnabled) {
@@ -693,6 +1003,14 @@
         `<strong>${escapeHtml(product.name || "Unbekannt")}</strong>` +
         (product.brand ? `<br><span class="result-item-meta">${escapeHtml(product.brand)}</span>` : "") +
         renderScoreBadges(product);
+      const favRow = document.createElement("div");
+      favRow.className = "barcode-favorite-row";
+      const heartBtn = createFavoriteButton(
+        { source: "off", id: product.id, name: product.name, brand: product.brand },
+        parseFloat($("barcode-amount")?.value) || 100
+      );
+      if (heartBtn) favRow.appendChild(heartBtn);
+      if (favRow.childElementCount) resultEl.appendChild(favRow);
       if (todoListEnabled) {
         const actions = document.createElement("div");
         actions.className = "result-item-actions";
@@ -968,6 +1286,9 @@
     if (panelName === "map" && !mapEnabled) {
       panelName = "search";
     }
+    if (panelName === "favorites" && !favoritesEnabled) {
+      panelName = "search";
+    }
     if (panelName !== "barcode") stopBarcodeScan();
     document.querySelectorAll(".panel").forEach((panel) => {
       const isActive = panel.id === `panel-${panelName}`;
@@ -982,6 +1303,9 @@
     });
     if (panelName === "map" && mapEnabled && !mapLoaded) {
       loadMapData().catch((err) => showMapStatus(err.message));
+    }
+    if (panelName === "favorites" && favoritesEnabled) {
+      loadFavoritesIndex().catch(() => {});
     }
     updateHeroTilesVisibility(panelName);
     showError(null);
@@ -1066,11 +1390,14 @@
       todoListEnabled = parseConfigFlag(health.todo_list_enabled, false);
       searchRecentsEnabled = parseConfigFlag(health.search_recents_enabled, true);
       mapEnabled = parseConfigFlag(health.map_enabled, false);
+      favoritesEnabled = parseConfigFlag(health.favorites_enabled, true);
       mapRadiusKm = Math.max(1, Math.min(50, Number(health.map_radius_km) || 20));
       applySearchLayout(health.search_layout || "stacked");
       applyTodoListVisibility();
       renderRecents();
       updateMapVisibility();
+      updateFavoritesVisibility();
+      await loadFavoritesIndex();
     } catch (_) {
       const dbStatus = $("db-status-line");
       if (dbStatus) {
@@ -1078,8 +1405,10 @@
       }
       todoListEnabled = false;
       mapEnabled = false;
+      favoritesEnabled = false;
       applyTodoListVisibility();
       updateMapVisibility();
+      updateFavoritesVisibility();
     }
   }
 

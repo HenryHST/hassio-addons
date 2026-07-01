@@ -57,6 +57,33 @@ def _parse_off_scores(product: dict[str, Any]) -> dict[str, str | int | None]:
     }
 
 
+def _extract_image_url(product: dict[str, Any]) -> str | None:
+    for key in ("image_front_url", "image_url", "image_small_url"):
+        url = product.get(key)
+        if isinstance(url, str) and url.startswith("http"):
+            return url
+    return None
+
+
+def fetch_product_image_url(barcode: str) -> str | None:
+    barcode = barcode.strip()
+    if not barcode:
+        return None
+    with httpx.Client(timeout=20.0) as client:
+        response = client.get(
+            OFF_API.format(barcode=barcode),
+            params={"fields": "image_front_url,image_url,image_small_url"},
+            headers={"User-Agent": USER_AGENT},
+        )
+        if response.status_code == 404:
+            return None
+        response.raise_for_status()
+        payload = response.json()
+    if payload.get("status") != 1:
+        return None
+    return _extract_image_url(payload.get("product", {}))
+
+
 def _map_off_nutriments(nutriments: dict[str, Any]) -> dict[str, float | None]:
     mapping = {
         "energy_kcal": nutriments.get("energy-kcal_100g") or nutriments.get("energy_100g"),

@@ -32,6 +32,7 @@
   "entity": {
     "sensor": {
       "food_count": { "name": "Lebensmittel Anzahl" },
+      "favorites_count": { "name": "Favoriten Anzahl" },
       "bls_version": { "name": "Datenbank Version" },
       "last_food": { "name": "Letztes Lebensmittel" },
       "search_hits": { "name": "Suchtreffer" },
@@ -114,6 +115,34 @@
         "barcode": { "name": "Barcode (EAN)" },
         "brand": { "name": "Marke" },
         "entity_id": { "name": "To-do-Entity", "description": "Ziel-Liste, z. B. todo.shopping_list." },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "add_favorite": {
+      "name": "Favorit hinzufügen",
+      "description": "Speichert ein Lebensmittel als Favorit im Add-on.",
+      "fields": {
+        "display_name": { "name": "Anzeigename" },
+        "source": { "name": "Quelle" },
+        "id": { "name": "ID", "description": "BLS-Code, Barcode oder Custom-Food-ID." },
+        "barcode": { "name": "Barcode (EAN)" },
+        "brand": { "name": "Marke" },
+        "default_amount_g": { "name": "Standardmenge (g)" },
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "list_favorites": {
+      "name": "Favoriten auflisten",
+      "description": "Gibt alle gespeicherten Favoriten zurück.",
+      "fields": {
+        "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
+      }
+    },
+    "remove_favorite": {
+      "name": "Favorit entfernen",
+      "description": "Entfernt einen Favoriten anhand der Favoriten-ID.",
+      "fields": {
+        "favorite_id": { "name": "Favoriten-ID" },
         "config_entry_id": { "name": "Config Entry ID", "description": "Nur bei mehreren BLS-Integrationen erforderlich." }
       }
     }

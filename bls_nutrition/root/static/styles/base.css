@@ -728,3 +728,146 @@ body {
     font-size: 1.5rem;
   }
 }
+
+.nav-icon-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-heart-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.favorites-hint {
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+  opacity: 0.85;
+}
+
+.favorites-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.favorite-card {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  background: var(--surface-elevated, rgba(255, 255, 255, 0.04));
+}
+
+.favorite-card.is-editing {
+  grid-template-columns: 1fr;
+}
+
+.favorite-thumb-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-muted, rgba(0, 0, 0, 0.06));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favorite-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.favorite-thumb-placeholder {
+  width: 1.75rem;
+  height: 1.75rem;
+  opacity: 0.45;
+}
+
+.favorite-body {
+  min-width: 0;
+}
+
+.favorite-name {
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  word-break: break-word;
+}
+
+.favorite-meta {
+  font-size: 0.75rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
+.favorite-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.favorite-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.favorite-edit-form .input {
+  width: 100%;
+}
+
+.btn-favorite-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  color: var(--text-muted, #666);
+  touch-action: manipulation;
+}
+
+.btn-favorite-heart.is-active {
+  color: #e53935;
+}
+
+.favorite-heart-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.recent-chip-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.recent-chip-wrap .btn-favorite-heart {
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.result-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.result-item-header .result-item {
+  flex: 1;
+  min-width: 0;
+}

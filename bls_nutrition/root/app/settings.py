@@ -26,6 +26,7 @@ class Settings:
     todo_list_entity_id: str
     map_enabled: bool
     map_radius_km: int
+    favorites_enabled: bool
     bls_version: str
     addon_version: str
 
@@ -109,6 +110,9 @@ def get_settings() -> Settings:
         ),
         map_radius_km=_read_option_int(
             data_dir, "map_radius_km", "BLS_MAP_RADIUS_KM", 20, 1, 50
+        ),
+        favorites_enabled=_read_option_bool(
+            data_dir, "favorites_enabled", "BLS_FAVORITES_ENABLED", True
         ),
         bls_version=os.environ.get("BLS_VERSION", "4.0"),
         addon_version=os.environ.get("ADDON_VERSION", "1.0.0"),

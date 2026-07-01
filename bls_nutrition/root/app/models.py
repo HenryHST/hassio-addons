@@ -45,6 +45,20 @@ class CustomRecipeCreate(BaseModel):
     ingredients: list[Ingredient] = Field(default_factory=list)
 
 
+class FavoriteCreate(BaseModel):
+    display_name: str = Field(min_length=1)
+    source: SourceType
+    id: str = Field(min_length=1)
+    barcode: str | None = None
+    brand: str | None = None
+    default_amount_g: float = Field(default=100, gt=0)
+
+
+class FavoriteUpdate(BaseModel):
+    display_name: str | None = Field(default=None, min_length=1)
+    default_amount_g: float | None = Field(default=None, gt=0)
+
+
 class TodoListItemRequest(BaseModel):
     name: str = Field(min_length=1)
     barcode: str | None = None

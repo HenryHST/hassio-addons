@@ -81,3 +81,32 @@ class BlsNutritionClient:
             "/custom-foods",
             json={"name": name, "nutrients": nutrients, "notes": notes},
         )
+
+    async def list_favorites(self) -> list[dict[str, Any]]:
+        return await self._request("GET", "/favorites")
+
+    async def add_favorite(
+        self,
+        display_name: str,
+        source: str,
+        item_id: str,
+        *,
+        barcode: str | None = None,
+        brand: str | None = None,
+        default_amount_g: float = 100.0,
+    ) -> dict[str, Any]:
+        return await self._request(
+            "POST",
+            "/favorites",
+            json={
+                "display_name": display_name,
+                "source": source,
+                "id": item_id,
+                "barcode": barcode,
+                "brand": brand,
+                "default_amount_g": default_amount_g,
+            },
+        )
+
+    async def remove_favorite(self, favorite_id: int) -> dict[str, Any]:
+        return await self._request("DELETE", f"/favorites/{favorite_id}")

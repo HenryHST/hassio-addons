@@ -13,6 +13,9 @@ SERVICE_CALCULATE_RECIPE = "calculate_recipe"
 SERVICE_SAVE_RECIPE = "save_recipe"
 SERVICE_SAVE_CUSTOM_FOOD = "save_custom_food"
 SERVICE_ADD_TO_TODO_LIST = "add_to_todo_list"
+SERVICE_ADD_FAVORITE = "add_favorite"
+SERVICE_LIST_FAVORITES = "list_favorites"
+SERVICE_REMOVE_FAVORITE = "remove_favorite"
 
 EVENT_SEARCH_RESULT = "bls_nutrition_search_result"
 EVENT_CALCULATION_RESULT = "bls_nutrition_calculation_result"
@@ -20,6 +23,7 @@ SIGNAL_RESULT_UPDATED = f"{DOMAIN}_result_updated"
 
 # Stable entity IDs for dashboard (via suggested_object_id)
 ENTITY_FOOD_COUNT = "bls_nutrition_food_count"
+ENTITY_FAVORITES_COUNT = "bls_nutrition_favorites_count"
 ENTITY_BLS_VERSION = "bls_nutrition_bls_version"
 ENTITY_LAST_FOOD = "bls_nutrition_last_food"
 ENTITY_G_KH = "bls_nutrition_g_kh"

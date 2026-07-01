@@ -1,6 +1,6 @@
 # Home Assistant Add-on: BLS Nährwertdatenbank
 
-![Version](https://img.shields.io/badge/version-1.8.1-blue.svg)
+![Version](https://img.shields.io/badge/version-1.8.2-blue.svg)
 ![Supports aarch64 Architecture](https://img.shields.io/badge/aarch64-yes-green.svg)
 ![Supports amd64 Architecture](https://img.shields.io/badge/amd64-yes-green.svg)
 
@@ -55,6 +55,7 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `todo_list_entity_id` | `todo.shopping_list` | Ziel-To-do-Entity |
 | `map_enabled` | `false` | Map-Tab in der Ingress-UI aktivieren |
 | `map_radius_km` | `20` | Suchradius für Supermärkte in km (`1`–`50`) |
+| `favorites_enabled` | `true` | Favoriten-Tab und Herz-Buttons in der Ingress-UI |
 
 ## API Endpoints
 
@@ -65,6 +66,10 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `GET /foods/search/off?q=` | Open Food Facts Textsuche |
 | `GET /foods/barcode/{ean}` | Barcode-Lookup |
 | `GET /map/supermarkets` | Supermärkte im Radius um den HA-Standort |
+| `GET /favorites` | Favoriten auflisten |
+| `POST /favorites` | Favorit anlegen |
+| `PATCH /favorites/{id}` | Favorit umbenennen / Standard-Portion |
+| `POST /favorites/{id}/image` | Eigenes Bild hochladen |
 | `POST /calculate/portion` | Portion berechnen |
 | `POST /calculate/recipe` | Rezept aggregieren |
 

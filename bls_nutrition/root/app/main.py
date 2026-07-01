@@ -9,17 +9,19 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import bootstrap, calculator, db, home_assistant, open_food_facts, opening_hours_display, overpass
+from app import bootstrap, calculator, db, favorites, home_assistant, open_food_facts, opening_hours_display, overpass
 from app.models import (
     CalculationResult,
     CustomFoodCreate,
     CustomFoodUpdate,
     CustomRecipeCreate,
     DiabetesUnits,
+    FavoriteCreate,
+    FavoriteUpdate,
     PortionRequest,
     RecipeRequest,
     TodoListItemRequest,
@@ -41,7 +43,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title="BLS Nährwertdatenbank",
-    version="1.8.1",
+    version="1.8.2",
     lifespan=lifespan,
 )
 
@@ -56,6 +58,24 @@ def _settings() -> Settings:
 
 def _diabetes_model(data: dict[str, Any]) -> DiabetesUnits:
     return DiabetesUnits(**data)
+
+
+def _require_favorites_enabled(settings: Settings) -> None:
+    if not settings.favorites_enabled:
+        raise HTTPException(status_code=403, detail="Favoriten sind deaktiviert")
+
+
+def _enrich_favorites_list(conn: Any, settings: Settings) -> list[dict[str, Any]]:
+    items = db.list_favorites(conn)
+    return [
+        favorites.enrich_favorite(
+            item,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+        for item in items
+    ]
 
 
 @app.get("/health")
@@ -78,6 +98,8 @@ def health() -> dict[str, Any]:
             "todo_list_entity_id": settings.todo_list_entity_id,
             "map_enabled": settings.map_enabled,
             "map_radius_km": settings.map_radius_km,
+            "favorites_enabled": settings.favorites_enabled,
+            "favorites_count": db.favorites_count(conn),
         }
 
 
@@ -200,6 +222,183 @@ def map_supermarkets(radius_km: int | None = Query(default=None, ge=1, le=50)) -
         "count": len(supermarkets),
         "items": supermarkets,
     }
+
+
+@app.get("/favorites")
+def list_favorites() -> list[dict[str, Any]]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        return _enrich_favorites_list(conn, settings)
+
+
+@app.post("/favorites")
+def create_favorite(payload: FavoriteCreate) -> dict[str, Any]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    barcode = payload.barcode
+    if payload.source == "off" and not barcode:
+        barcode = payload.id
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.create_favorite(
+            conn,
+            payload.display_name.strip(),
+            payload.source,
+            payload.id,
+            barcode=barcode,
+            brand=payload.brand,
+            default_amount_g=payload.default_amount_g,
+        )
+        return favorites.enrich_favorite(
+            favorite,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+
+
+@app.get("/favorites/{favorite_id}")
+def get_favorite(favorite_id: int) -> dict[str, Any]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.get_favorite(conn, favorite_id)
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+        return favorites.enrich_favorite(
+            favorite,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+
+
+@app.patch("/favorites/{favorite_id}")
+def update_favorite(favorite_id: int, payload: FavoriteUpdate) -> dict[str, Any]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.update_favorite(
+            conn,
+            favorite_id,
+            display_name=payload.display_name.strip() if payload.display_name else None,
+            default_amount_g=payload.default_amount_g,
+        )
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+        return favorites.enrich_favorite(
+            favorite,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+
+
+@app.delete("/favorites/{favorite_id}")
+def remove_favorite(favorite_id: int) -> dict[str, str]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.get_favorite(conn, favorite_id)
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+        if favorite.get("image_path"):
+            local = favorites.local_image_file(
+                settings.data_dir, str(favorite["image_path"])
+            )
+            if local:
+                local.unlink(missing_ok=True)
+        if not db.delete_favorite(conn, favorite_id):
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+    return {"status": "deleted"}
+
+
+@app.delete("/favorites/by-source/{source}/{item_id}")
+def remove_favorite_by_source(source: str, item_id: str) -> dict[str, str]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    if source not in ("bls", "off", "custom"):
+        raise HTTPException(status_code=400, detail="Ungültige Quelle")
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.get_favorite_by_source(conn, source, item_id)
+        if favorite and favorite.get("image_path"):
+            local = favorites.local_image_file(
+                settings.data_dir, str(favorite["image_path"])
+            )
+            if local:
+                local.unlink(missing_ok=True)
+        if not db.delete_favorite_by_source(conn, source, item_id):
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+    return {"status": "deleted"}
+
+
+@app.post("/favorites/{favorite_id}/image")
+async def upload_favorite_image(
+    favorite_id: int, file: UploadFile = File(...)
+) -> dict[str, Any]:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    content_type = (file.content_type or "").lower()
+    if content_type not in ("image/jpeg", "image/png", "image/webp"):
+        raise HTTPException(status_code=400, detail="Nur JPEG, PNG oder WebP erlaubt")
+    suffix = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+    }[content_type]
+    data = await file.read()
+    if not data or len(data) > 2_000_000:
+        raise HTTPException(status_code=400, detail="Bild zu groß (max. 2 MB)")
+
+    media_dir = favorites.favorites_media_dir(settings.data_dir)
+    relative_path = f"favorites/{favorite_id}{suffix}"
+    target = media_dir / f"{favorite_id}{suffix}"
+    target.write_bytes(data)
+
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.update_favorite(
+            conn,
+            favorite_id,
+            image_path=relative_path,
+            clear_image_url=True,
+        )
+        if not favorite:
+            target.unlink(missing_ok=True)
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+        return favorites.enrich_favorite(
+            favorite,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+
+
+@app.get("/favorites/{favorite_id}/image")
+def favorite_image(favorite_id: int) -> FileResponse | RedirectResponse:
+    settings = _settings()
+    _require_favorites_enabled(settings)
+    with db.get_connection(settings.db_path) as conn:
+        favorite = db.get_favorite(conn, favorite_id)
+        if not favorite:
+            raise HTTPException(status_code=404, detail="Favorit nicht gefunden")
+        local = favorites.local_image_file(settings.data_dir, favorite.get("image_path"))
+        if local:
+            media_type = "image/jpeg"
+            if local.suffix == ".png":
+                media_type = "image/png"
+            elif local.suffix == ".webp":
+                media_type = "image/webp"
+            return FileResponse(local, media_type=media_type)
+        enriched = favorites.enrich_favorite(
+            favorite,
+            data_dir=settings.data_dir,
+            enable_network=settings.enable_open_food_facts,
+            conn=conn,
+        )
+        image_url = enriched.get("resolved_image")
+        if image_url and str(image_url).startswith("http"):
+            return RedirectResponse(image_url)
+    raise HTTPException(status_code=404, detail="Kein Bild verfügbar")
 
 
 @app.post("/calculate/portion", response_model=CalculationResult)

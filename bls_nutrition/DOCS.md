@@ -140,6 +140,7 @@ OSM-Öffnungszeiten können unvollständig oder veraltet sein.
 | **Scan** | EAN/Barcode oder Kamera → OFF-Produkt laden, Menge setzen, berechnen |
 | **Rezept** | Dynamische Zutatenliste und Portionenanzahl |
 | **Map** | Supermärkte im Umkreis des HA-Standorts (optional via `map_enabled`) |
+| **Favoriten** | Gespeicherte Lebensmittel mit Standard-Portion (optional via `favorites_enabled`) |
 
 ### Nutri-Score, Nova-Score und Eco-Score
 
@@ -224,6 +225,7 @@ todo_list_enabled: true
 todo_list_entity_id: todo.shopping_list
 map_enabled: false
 map_radius_km: 20
+favorites_enabled: true
 ```
 
 | Option | Werte | Beschreibung |
@@ -236,6 +238,7 @@ map_radius_km: 20
 | `todo_list_entity_id` | z. B. `todo.shopping_list` | Ziel-Entity der HA-To-do-Liste |
 | `map_enabled` | `true`, `false` | Optionalen Map-Tab in der Ingress-UI anzeigen |
 | `map_radius_km` | `1`–`50` | Radius in km fuer Supermarkt-Suche um den HA-Standort |
+| `favorites_enabled` | `true`, `false` | Favoriten-Tab, Herz-Buttons und REST/HA-Favoriten-API |
 
 ### Caching (Open Food Facts)
 
@@ -309,6 +312,31 @@ data:
   barcode: "4008400407321"
   brand: Kölln
   entity_id: todo.shopping_list
+```
+
+### `bls_nutrition.add_favorite`
+
+```yaml
+service: bls_nutrition.add_favorite
+data:
+  display_name: Apfel
+  source: bls
+  id: F110000
+  default_amount_g: 120
+```
+
+### `bls_nutrition.list_favorites`
+
+```yaml
+service: bls_nutrition.list_favorites
+```
+
+### `bls_nutrition.remove_favorite`
+
+```yaml
+service: bls_nutrition.remove_favorite
+data:
+  favorite_id: 1
 ```
 
 ## Dashboard

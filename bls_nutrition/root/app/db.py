@@ -24,6 +24,7 @@ _MIGRATION_TABLES = (
     "off_products",
     "off_search_cache",
     "off_barcode_miss",
+    "favorites",
 )
 
 
@@ -136,6 +137,22 @@ def init_schema(conn: duckdb.DuckDBPyConnection) -> None:
         CREATE TABLE IF NOT EXISTS off_barcode_miss (
             barcode VARCHAR PRIMARY KEY,
             fetched_at VARCHAR NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS favorites (
+            id INTEGER PRIMARY KEY,
+            display_name VARCHAR NOT NULL,
+            source_type VARCHAR NOT NULL,
+            source_id VARCHAR NOT NULL,
+            barcode VARCHAR,
+            brand VARCHAR,
+            default_amount_g DOUBLE NOT NULL DEFAULT 100,
+            image_path VARCHAR,
+            image_url VARCHAR,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            created_at VARCHAR NOT NULL,
+            updated_at VARCHAR NOT NULL,
+            UNIQUE(source_type, source_id)
         );
         """
     )
@@ -718,3 +735,181 @@ def migrate_from_sqlite(sqlite_path: Path, duckdb_path: Path) -> None:
     set_meta(conn, "migrated_from_sqlite_at", datetime.now(timezone.utc).isoformat())
     conn.close()
     print("[bls-db] Migration complete")
+
+
+def favorites_count(conn: duckdb.DuckDBPyConnection) -> int:
+    row = _fetchone_dict(conn.execute("SELECT COUNT(*) AS c FROM favorites"))
+    return int(row["c"]) if row else 0
+
+
+def _next_favorite_id(conn: duckdb.DuckDBPyConnection) -> int:
+    row = _fetchone_dict(
+        conn.execute("SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM favorites")
+    )
+    return int(row["next_id"]) if row else 1
+
+
+def _favorite_from_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": int(row["id"]),
+        "display_name": row["display_name"],
+        "source": row["source_type"],
+        "source_id": row["source_id"],
+        "barcode": row.get("barcode"),
+        "brand": row.get("brand"),
+        "default_amount_g": float(row["default_amount_g"]),
+        "image_path": row.get("image_path"),
+        "image_url": row.get("image_url"),
+        "sort_order": int(row["sort_order"]),
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def list_favorites(conn: duckdb.DuckDBPyConnection) -> list[dict[str, Any]]:
+    rows = _fetchall_dicts(
+        conn.execute(
+            """
+            SELECT * FROM favorites
+            ORDER BY sort_order ASC, display_name ASC, id ASC
+            """
+        )
+    )
+    return [_favorite_from_row(row) for row in rows]
+
+
+def get_favorite(conn: duckdb.DuckDBPyConnection, favorite_id: int) -> dict[str, Any] | None:
+    row = _fetchone_dict(
+        conn.execute("SELECT * FROM favorites WHERE id = ?", [favorite_id])
+    )
+    return _favorite_from_row(row) if row else None
+
+
+def get_favorite_by_source(
+    conn: duckdb.DuckDBPyConnection, source_type: str, source_id: str
+) -> dict[str, Any] | None:
+    row = _fetchone_dict(
+        conn.execute(
+            "SELECT * FROM favorites WHERE source_type = ? AND source_id = ?",
+            [source_type, source_id],
+        )
+    )
+    return _favorite_from_row(row) if row else None
+
+
+def create_favorite(
+    conn: duckdb.DuckDBPyConnection,
+    display_name: str,
+    source_type: str,
+    source_id: str,
+    *,
+    barcode: str | None = None,
+    brand: str | None = None,
+    default_amount_g: float = 100.0,
+) -> dict[str, Any]:
+    existing = get_favorite_by_source(conn, source_type, source_id)
+    if existing:
+        return existing
+    now = datetime.now(timezone.utc).isoformat()
+    favorite_id = _next_favorite_id(conn)
+    sort_row = _fetchone_dict(
+        conn.execute("SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_order FROM favorites")
+    )
+    sort_order = int(sort_row["next_order"]) if sort_row else 0
+    conn.execute(
+        """
+        INSERT INTO favorites(
+            id, display_name, source_type, source_id, barcode, brand,
+            default_amount_g, sort_order, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        [
+            favorite_id,
+            display_name,
+            source_type,
+            source_id,
+            barcode,
+            brand,
+            default_amount_g,
+            sort_order,
+            now,
+            now,
+        ],
+    )
+    favorite = get_favorite(conn, favorite_id)
+    if not favorite:
+        raise RuntimeError("Failed to create favorite")
+    return favorite
+
+
+def update_favorite(
+    conn: duckdb.DuckDBPyConnection,
+    favorite_id: int,
+    *,
+    display_name: str | None = None,
+    default_amount_g: float | None = None,
+    image_path: str | None = None,
+    image_url: str | None = None,
+    clear_image_path: bool = False,
+    clear_image_url: bool = False,
+) -> dict[str, Any] | None:
+    favorite = get_favorite(conn, favorite_id)
+    if not favorite:
+        return None
+    if display_name is not None:
+        conn.execute(
+            "UPDATE favorites SET display_name = ? WHERE id = ?",
+            [display_name, favorite_id],
+        )
+    if default_amount_g is not None:
+        conn.execute(
+            "UPDATE favorites SET default_amount_g = ? WHERE id = ?",
+            [default_amount_g, favorite_id],
+        )
+    if clear_image_path:
+        conn.execute("UPDATE favorites SET image_path = NULL WHERE id = ?", [favorite_id])
+    elif image_path is not None:
+        conn.execute(
+            "UPDATE favorites SET image_path = ? WHERE id = ?",
+            [image_path, favorite_id],
+        )
+    if clear_image_url:
+        conn.execute("UPDATE favorites SET image_url = NULL WHERE id = ?", [favorite_id])
+    elif image_url is not None:
+        conn.execute(
+            "UPDATE favorites SET image_url = ? WHERE id = ?",
+            [image_url, favorite_id],
+        )
+    conn.execute(
+        "UPDATE favorites SET updated_at = ? WHERE id = ?",
+        [datetime.now(timezone.utc).isoformat(), favorite_id],
+    )
+    return get_favorite(conn, favorite_id)
+
+
+def delete_favorite(conn: duckdb.DuckDBPyConnection, favorite_id: int) -> bool:
+    row = _fetchone_dict(
+        conn.execute("SELECT id FROM favorites WHERE id = ?", [favorite_id])
+    )
+    if not row:
+        return False
+    conn.execute("DELETE FROM favorites WHERE id = ?", [favorite_id])
+    return True
+
+
+def delete_favorite_by_source(
+    conn: duckdb.DuckDBPyConnection, source_type: str, source_id: str
+) -> bool:
+    row = _fetchone_dict(
+        conn.execute(
+            "SELECT id FROM favorites WHERE source_type = ? AND source_id = ?",
+            [source_type, source_id],
+        )
+    )
+    if not row:
+        return False
+    conn.execute(
+        "DELETE FROM favorites WHERE source_type = ? AND source_id = ?",
+        [source_type, source_id],
+    )
+    return True

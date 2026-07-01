@@ -137,6 +137,12 @@
         <div class="map-canvas" id="map-canvas" hidden></div>
       </div>
 
+      <div class="panel" id="panel-favorites" role="tabpanel" hidden>
+        <h2 class="panel-title">Favoriten</h2>
+        <p class="favorites-hint" id="favorites-empty" hidden>Noch keine Favoriten. Herz in Suche, Scan oder „Zuletzt berechnet“ tippen.</p>
+        <ul class="favorites-list" id="favorites-list"></ul>
+      </div>
+
       <section class="details" id="details-section" hidden>
         <button type="button" class="details-toggle" id="details-toggle" aria-expanded="false">
           Details <span class="details-chevron">▼</span>
@@ -171,6 +177,14 @@
         <span class="nav-icon" aria-hidden="true">📋</span>
         <span class="nav-label">Rezept</span>
       </button>
+      <button type="button" class="nav-btn" data-panel="favorites" id="nav-favorites-btn" hidden>
+        <span class="nav-icon nav-icon-svg" aria-hidden="true">
+          <svg class="nav-heart-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Favoriten</span>
+      </button>
       <button type="button" class="nav-btn" data-panel="map" id="nav-map-btn" hidden>
         <span class="nav-icon" aria-hidden="true">🗺️</span>
         <span class="nav-label">Map</span>
@@ -186,6 +200,6 @@
   </div>
 
   <script src="static/vendor/leaflet/leaflet.js" defer></script>
-  <script src="static/app.js?v=1.8.1" defer></script>
+  <script src="static/app.js?v=1.8.2" defer></script>
 </body>
 </html>

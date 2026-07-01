@@ -24,6 +24,9 @@ from .const import (
     EVENT_CALCULATION_RESULT,
     EVENT_SEARCH_RESULT,
     SERVICE_ADD_TO_TODO_LIST,
+    SERVICE_ADD_FAVORITE,
+    SERVICE_LIST_FAVORITES,
+    SERVICE_REMOVE_FAVORITE,
     SERVICE_CALCULATE_PORTION,
     SERVICE_CALCULATE_RECIPE,
     SERVICE_LOOKUP_BARCODE,
@@ -47,6 +50,9 @@ _SERVICE_NAMES = (
     SERVICE_SAVE_RECIPE,
     SERVICE_SAVE_CUSTOM_FOOD,
     SERVICE_ADD_TO_TODO_LIST,
+    SERVICE_ADD_FAVORITE,
+    SERVICE_LIST_FAVORITES,
+    SERVICE_REMOVE_FAVORITE,
 )
 
 _ENTRY_ID_FIELD = {vol.Optional(CONF_CONFIG_ENTRY_ID): str}
@@ -214,6 +220,33 @@ def _register_services(hass: HomeAssistant) -> None:
             blocking=True,
         )
 
+    async def handle_add_favorite(call: ServiceCall) -> dict[str, Any]:
+        runtime, _entry_id = _get_runtime(hass, call)
+        source = call.data["source"]
+        item_id = call.data["id"]
+        barcode = call.data.get("barcode")
+        if source == "off" and not barcode:
+            barcode = item_id
+        favorite = await runtime.client.add_favorite(
+            call.data["display_name"],
+            source,
+            item_id,
+            barcode=barcode,
+            brand=call.data.get("brand"),
+            default_amount_g=float(call.data.get("default_amount_g", 100)),
+        )
+        return {"favorite": favorite}
+
+    async def handle_list_favorites(call: ServiceCall) -> dict[str, Any]:
+        runtime, _entry_id = _get_runtime(hass, call)
+        favorites_list = await runtime.client.list_favorites()
+        return {"favorites": favorites_list, "count": len(favorites_list)}
+
+    async def handle_remove_favorite(call: ServiceCall) -> dict[str, Any]:
+        runtime, _entry_id = _get_runtime(hass, call)
+        result = await runtime.client.remove_favorite(int(call.data["favorite_id"]))
+        return {"result": result}
+
     if not hass.services.has_service(DOMAIN, SERVICE_SEARCH_FOOD):
         hass.services.async_register(
             DOMAIN,
@@ -319,6 +352,45 @@ def _register_services(hass: HomeAssistant) -> None:
                     **_ENTRY_ID_FIELD,
                 }
             ),
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_ADD_FAVORITE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_ADD_FAVORITE,
+            handle_add_favorite,
+            schema=vol.Schema(
+                {
+                    vol.Required("display_name"): str,
+                    vol.Required("source"): vol.In(["bls", "off", "custom"]),
+                    vol.Required("id"): str,
+                    vol.Optional("barcode"): str,
+                    vol.Optional("brand"): str,
+                    vol.Optional("default_amount_g", default=100): vol.Coerce(float),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_LIST_FAVORITES):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_LIST_FAVORITES,
+            handle_list_favorites,
+            schema=vol.Schema({**_ENTRY_ID_FIELD}),
+            supports_response=SupportsResponse.ONLY,
+        )
+    if not hass.services.has_service(DOMAIN, SERVICE_REMOVE_FAVORITE):
+        hass.services.async_register(
+            DOMAIN,
+            SERVICE_REMOVE_FAVORITE,
+            handle_remove_favorite,
+            schema=vol.Schema(
+                {
+                    vol.Required("favorite_id"): vol.Coerce(int),
+                    **_ENTRY_ID_FIELD,
+                }
+            ),
+            supports_response=SupportsResponse.ONLY,
         )
 
 
