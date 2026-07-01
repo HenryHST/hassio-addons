@@ -24,6 +24,7 @@ Dieses Add-on lädt die offizielle [BLS 4.0](https://blsdb.de/download)-Datenban
 - Diabetes-Einheiten: **gKH**, **BE**, **KE**, **FPE** (WETID-inspiriert)
 - Barcode-Lookup und Kamera-Scan über **Open Food Facts** (inkl. Nutri-Score, Nova, Eco-Score)
 - Map-Tab mit Supermärkten im Umkreis (OpenStreetMap + Overpass API)
+- **Favoriten** mit Import/Export (JSON/CSV), Standard-Portion und eigenem Bild
 - Dark Mode und „Zuletzt berechnet“-Chips
 - Eigene Lebensmittel und Rezepte
 
@@ -56,6 +57,7 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `map_enabled` | `false` | Map-Tab in der Ingress-UI aktivieren |
 | `map_radius_km` | `20` | Suchradius für Supermärkte in km (`1`–`50`) |
 | `favorites_enabled` | `true` | Favoriten-Tab und Herz-Buttons in der Ingress-UI |
+| `favorites_confirm_delete` | `true` | Bestätigungsdialog beim Entfernen im Favoriten-Tab |
 
 ## API Endpoints
 
@@ -67,6 +69,8 @@ Eine Custom Integration für Home Assistant ist im Ordner `integration/` enthalt
 | `GET /foods/barcode/{ean}` | Barcode-Lookup |
 | `GET /map/supermarkets` | Supermärkte im Radius um den HA-Standort |
 | `GET /favorites` | Favoriten auflisten |
+| `GET /favorites/export?format=json\|csv` | Favoriten exportieren |
+| `POST /favorites/import?mode=merge\|replace` | Favoriten importieren |
 | `POST /favorites` | Favorit anlegen |
 | `PATCH /favorites/{id}` | Favorit umbenennen / Standard-Portion |
 | `POST /favorites/{id}/image` | Eigenes Bild hochladen |
