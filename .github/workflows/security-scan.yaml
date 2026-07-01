@@ -46,7 +46,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build netboot.xyz image for scanning
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./netboot_xyz
           file: ./netboot_xyz/Dockerfile
@@ -115,7 +115,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build NUT image for scanning
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./nut
           file: ./nut/Dockerfile
@@ -185,7 +185,7 @@ jobs:
 
       - name: Build Corosync QNetd image for scanning
         id: build_corosyncd
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: ./corosyncd
@@ -267,7 +267,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build Chrony NTP image for scanning
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./chronyd
           file: ./chronyd/Dockerfile
@@ -340,7 +340,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build BLS image for scanning
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./bls_nutrition
           file: ./bls_nutrition/Dockerfile
