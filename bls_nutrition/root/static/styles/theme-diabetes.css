@@ -250,6 +250,14 @@ body {
   background: color-mix(in srgb, var(--color-nav-active) 12%, transparent);
 }
 
+#nav-favorites-btn:not(.active) .nav-heart-icon {
+  color: #e53935;
+}
+
+#nav-favorites-btn.active .nav-heart-icon {
+  color: var(--color-nav-active);
+}
+
 .footer {
   color: var(--color-text-muted);
   background: var(--color-bg);

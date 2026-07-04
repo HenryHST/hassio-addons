@@ -455,12 +455,18 @@
     }
   }
 
+  const FAVORITE_PLACEHOLDER_IMAGE = "static/assets/favorite-food-placeholder.svg";
+
   function favoriteImageSrc(fav) {
     const resolved = fav.resolved_image;
     if (resolved && String(resolved).startsWith("http")) return resolved;
     if (resolved) return resolved;
     if (fav.has_local_image) return `favorites/${fav.id}/image`;
-    return null;
+    return FAVORITE_PLACEHOLDER_IMAGE;
+  }
+
+  function isFavoritePlaceholderImage(src) {
+    return src === FAVORITE_PLACEHOLDER_IMAGE;
   }
 
   function renderFavoritesList(items) {
@@ -486,16 +492,18 @@
       const thumbWrap = document.createElement("div");
       thumbWrap.className = "favorite-thumb-wrap";
       const imgSrc = favoriteImageSrc(fav);
-      if (imgSrc) {
-        const img = document.createElement("img");
-        img.className = "favorite-thumb";
-        img.alt = "";
-        img.src = imgSrc;
-        thumbWrap.appendChild(img);
-      } else {
-        thumbWrap.innerHTML = heartIconHtml(true);
-        thumbWrap.querySelector("svg")?.classList.add("favorite-thumb-placeholder");
+      const img = document.createElement("img");
+      img.className = "favorite-thumb";
+      img.alt = "";
+      img.src = imgSrc;
+      if (isFavoritePlaceholderImage(imgSrc)) {
+        img.classList.add("is-placeholder");
       }
+      img.addEventListener("error", () => {
+        img.src = FAVORITE_PLACEHOLDER_IMAGE;
+        img.classList.add("is-placeholder");
+      });
+      thumbWrap.appendChild(img);
 
       const body = document.createElement("div");
       body.className = "favorite-body";

@@ -5,6 +5,16 @@ All notable changes to the BLS Nährwertdatenbank Home Assistant Add-on will be 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.6] - 2026-07-04
+
+### Changed
+
+- Ingress: 3px Abstand zwischen Header und Hero-Kacheln (gKH/BE/KE/FPE)
+- Hero-Kacheln mit stärker abgerundeten Ecken (15px)
+- Favoriten-Nav-Icon: rotes Herz wenn Tab inaktiv, grün wenn aktiv
+- Nutri-Score / Nova / Eco-Score Labels fett dargestellt
+- Favoriten ohne Bild zeigen einheitliches Lebensmittel-Platzhalterbild statt Herz-SVG
+
 ## [1.8.5] - 2026-07-01
 
 ### Added
