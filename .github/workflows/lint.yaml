@@ -48,31 +48,31 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Run Hadolint on netboot_xyz
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: netboot_xyz/Dockerfile
           failure-threshold: warning
 
       - name: Run Hadolint on nut
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: nut/Dockerfile
           failure-threshold: warning
 
       - name: Run Hadolint on corosyncd
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: corosyncd/Dockerfile
           failure-threshold: warning
 
       - name: Run Hadolint on chronyd
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: chronyd/Dockerfile
           failure-threshold: warning
 
       - name: Run Hadolint on bls_nutrition
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: bls_nutrition/Dockerfile
           failure-threshold: warning
