@@ -177,7 +177,12 @@ jobs:
             exit 1
           fi
 
-          docker logs "${cid}" 2>&1 | grep -q "Home Assistant Add-on Version"
+          # Avoid `logs | grep -q` under pipefail (SIGPIPE/141 when match is early)
+          docker logs "${cid}" > /tmp/netboot-smoke.logs 2>&1 || true
+          if ! grep -q "Home Assistant Add-on Version" /tmp/netboot-smoke.logs; then
+            echo "[smoke-debug] H5 FAIL banner missing"
+            exit 1
+          fi
           echo "[smoke-debug] H5 banner ok"
           test -f "${config_dir}/menus/menu.ipxe"
           echo "[smoke-debug] menu.ipxe present"
@@ -185,6 +190,9 @@ jobs:
           tftpd_status="$(docker exec "${cid}" \
             supervisorctl -c /etc/supervisor.conf status in.tftpd || true)"
           echo "[smoke-debug] H3 tftpd_status=${tftpd_status}"
-          echo "${tftpd_status}" | grep -q RUNNING
+          if ! grep -q RUNNING <<< "${tftpd_status}"; then
+            echo "[smoke-debug] H3 FAIL tftpd not RUNNING"
+            exit 1
+          fi
           echo "[smoke-debug] H3 tftpd RUNNING"
           echo "smoke OK"
