@@ -66,6 +66,6 @@ EXPOSE 5403
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD nc -z localhost 5403 || exit 1
+    CMD ["nc", "-z", "localhost", "5403"]
 
 ENTRYPOINT ["/entrypoint.sh"]

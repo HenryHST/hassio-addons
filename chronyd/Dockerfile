@@ -113,6 +113,6 @@ LABEL \
 EXPOSE 123/udp 9123/tcp
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD chronyc -n tracking || exit 1
+    CMD ["chronyc", "-n", "tracking"]
 
 ENTRYPOINT ["/init"]
