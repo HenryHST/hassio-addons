@@ -8,13 +8,6 @@ if ! /bin/bash /init.sh; then
   exit 1
 fi
 echo "[netbootxyz] Initialization completed successfully"
-# #region agent log
-MENU_FILE_STATE="missing"
-[[ -f /config/menus/remote/menu.ipxe ]] && MENU_FILE_STATE="present"
-STORED_MENU_VERSION="unset"
-[[ -f /config/menuversion.txt ]] && STORED_MENU_VERSION=$(tr -d '[:space:]' < /config/menuversion.txt)
-echo "[netbootxyz] DEBUG post-init menu.ipxe=${MENU_FILE_STATE} menuversion=${STORED_MENU_VERSION}"
-# #endregion
 
 echo "            _   _                 _                      "
 echo " _ __   ___| |_| |__   ___   ___ | |_  __  ___   _ ____  "

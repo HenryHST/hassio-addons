@@ -93,7 +93,7 @@ ENV WEB_APP_PORT='3000'
 COPY root/ /
 
 # Set executable permissions for scripts
-RUN chmod +x /start.sh /init.sh /usr/local/bin/syslog-ng-debug.sh
+RUN chmod +x /start.sh /init.sh
 
 # Expose ports
 EXPOSE 69/udp 80 3000
