@@ -45,13 +45,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y nginx gettext-base
+          # Config uses `user nbxyz;` (created in the add-on image); create it for nginx -t
+          sudo useradd -r -M -s /usr/sbin/nologin nbxyz || true
           export NETBOOTXYZ_VERSION=0.7.6
           mkdir -p /tmp/netboot-config/nginx/site-confs /tmp/netboot-config/log/nginx
           cp netboot_xyz/root/defaults/nginx.conf /tmp/netboot-config/nginx/nginx.conf
           envsubst < netboot_xyz/root/defaults/default > /tmp/netboot-config/nginx/site-confs/default
           sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/nginx.conf
           sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/site-confs/default
-          # nginx -t opens the pid path and briefly binds listen sockets (port 80 needs root)
+          # Writable pid path; sudo needed so listen 80 and user nbxyz resolve
           sed -i 's#pid /run/nginx.pid;#pid /tmp/netboot-config/nginx.pid;#' /tmp/netboot-config/nginx/nginx.conf
           sudo nginx -t -c /tmp/netboot-config/nginx/nginx.conf
 
