@@ -99,9 +99,14 @@ jobs:
           set -euo pipefail
           data_dir="$(mktemp -d)"
           config_dir="$(mktemp -d)"
-          cat > "${data_dir}/options.json" <<'EOF'
-{"menu_version":"","enable_secure_boot":false,"ipxe_sb_version":"","enable_ha_sensors":false,"sensor_poll_interval":60,"tftpd_opts":""}
-EOF
+          python3 -c 'import json,sys; json.dump({
+            "menu_version":"",
+            "enable_secure_boot":False,
+            "ipxe_sb_version":"",
+            "enable_ha_sensors":False,
+            "sensor_poll_interval":60,
+            "tftpd_opts":""
+          }, open(sys.argv[1],"w"))' "${data_dir}/options.json"
 
           cid=$(docker run -d --name netboot-smoke \
             -v "${data_dir}:/data" \
