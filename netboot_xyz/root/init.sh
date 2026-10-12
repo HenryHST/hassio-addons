@@ -37,13 +37,28 @@ if [[ ! -f /config/menus/remote/menu.ipxe ]]; then
     fi
   fi
   echo "[netbootxyz-init] Downloading netboot.xyz at ${MENU_VERSION}"
+  # #region agent log
+  MENUS_URL="https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/menus.tar.gz"
+  ENDPOINTS_URL="https://raw.githubusercontent.com/netbootxyz/netboot.xyz/${MENU_VERSION}/endpoints.yml"
+  echo "[netbootxyz-init] DEBUG menu_version=${MENU_VERSION} netbootxyz_version=${NETBOOTXYZ_VERSION:-unset}"
+  echo "[netbootxyz-init] DEBUG menus_url=${MENUS_URL}"
+  # #endregion
   # menu files
   curl -o \
     /config/endpoints.yml -sL \
-    "https://raw.githubusercontent.com/netbootxyz/netboot.xyz/${MENU_VERSION}/endpoints.yml"
-  curl -o \
-    /tmp/menus.tar.gz -sL \
-    "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/menus.tar.gz"
+    "${ENDPOINTS_URL}"
+  # #region agent log
+  MENUS_HTTP=$(curl -o /tmp/menus.tar.gz -sL -w "%{http_code}" "${MENUS_URL}")
+  MENUS_SIZE=$(wc -c < /tmp/menus.tar.gz | tr -d ' ')
+  MENUS_MAGIC=$(od -An -N8 -tx1 /tmp/menus.tar.gz 2>/dev/null | tr -s ' ' | sed 's/^ //')
+  MENUS_HEAD=$(head -c 64 /tmp/menus.tar.gz 2>/dev/null | tr '\n' ' ' | tr -cd '[:print:] ')
+  echo "[netbootxyz-init] DEBUG menus_http=${MENUS_HTTP} size=${MENUS_SIZE} magic=${MENUS_MAGIC} head=${MENUS_HEAD}"
+  DEBUG_PAYLOAD="{\"sessionId\":\"92f7bb\",\"runId\":\"ha-repro\",\"hypothesisId\":\"A\",\"location\":\"init.sh:menus-download\",\"message\":\"menus.tar.gz download result\",\"data\":{\"menu_version\":\"${MENU_VERSION}\",\"netbootxyz_version\":\"${NETBOOTXYZ_VERSION:-unset}\",\"url\":\"${MENUS_URL}\",\"http_code\":\"${MENUS_HTTP}\",\"size\":${MENUS_SIZE},\"magic\":\"${MENUS_MAGIC}\",\"head\":\"${MENUS_HEAD}\"},\"timestamp\":$(date +%s000)}"
+  echo "${DEBUG_PAYLOAD}" >> /config/debug-92f7bb.ndjson 2>/dev/null || true
+  curl -sS -m 2 -X POST "http://127.0.0.1:7737/ingest/27302f83-b01b-4083-886f-80acfc734226" \
+    -H "Content-Type: application/json" -H "X-Debug-Session-Id: 92f7bb" \
+    -d "${DEBUG_PAYLOAD}" >/dev/null 2>&1 || true
+  # #endregion
   tar xf \
     /tmp/menus.tar.gz -C \
     /config/menus/remote
