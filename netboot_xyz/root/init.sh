@@ -26,33 +26,36 @@ mkdir -p \
   /config/menus/remote \
   /config/menus/local
 
-# Resolve menu release tag (netboot.xyz releases), NOT the webapp version.
+# Resolve desired menu release tag (netboot.xyz releases), NOT the webapp version.
 # NETBOOTXYZ_VERSION is the webapp pin (e.g. 0.7.6) and must not be used here.
-MENU_VERSION=""
+DEFAULT_MENU_VERSION="3.0.3"
+MENU_VERSION="${DEFAULT_MENU_VERSION}"
 if [[ -f /data/options.json ]]; then
-  MENU_VERSION=$(jq -r '.menu_version // empty' /data/options.json)
-fi
-if [[ -z "${MENU_VERSION}" && -f /config/menuversion.txt ]]; then
-  MENU_VERSION=$(tr -d '[:space:]' < /config/menuversion.txt)
-fi
-if [[ -z "${MENU_VERSION}" ]]; then
-  MENU_VERSION=$(curl -fsSL "https://api.github.com/repos/netbootxyz/netboot.xyz/releases/latest" | jq -r '.tag_name // empty')
-fi
-if [[ -z "${MENU_VERSION}" || "${MENU_VERSION}" == "null" ]]; then
-  MENU_VERSION="3.0.3"
+  configured_menu=$(jq -r '.menu_version // empty' /data/options.json)
+  if [[ -n "${configured_menu}" ]]; then
+    MENU_VERSION="${configured_menu}"
+  fi
 fi
 
-# download menus if not found
-if [[ ! -f /config/menus/remote/menu.ipxe ]]; then
+INSTALLED_MENU_VERSION=""
+if [[ -f /config/menuversion.txt ]]; then
+  INSTALLED_MENU_VERSION=$(tr -d '[:space:]' < /config/menuversion.txt)
+fi
+
+# Download when menus are missing or the stored version differs from the desired pin
+if [[ ! -f /config/menus/remote/menu.ipxe ]] || [[ "${INSTALLED_MENU_VERSION}" != "${MENU_VERSION}" ]]; then
   echo "[netbootxyz-init] Downloading netboot.xyz at ${MENU_VERSION}"
-  MENUS_URL="https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/menus.tar.gz"
+  # Clear previous remote menus when upgrading between versions
+  rm -rf /config/menus/remote
+  mkdir -p /config/menus/remote
+
   # menu files
   curl -fsSL -o \
     /config/endpoints.yml \
     "https://raw.githubusercontent.com/netbootxyz/netboot.xyz/${MENU_VERSION}/endpoints.yml"
   curl -fsSL -o \
     /tmp/menus.tar.gz \
-    "${MENUS_URL}"
+    "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/menus.tar.gz"
   tar xf \
     /tmp/menus.tar.gz -C \
     /config/menus/remote
@@ -81,6 +84,16 @@ if [[ ! -f /config/menus/remote/menu.ipxe ]]; then
   curl -fsSL -o \
     /config/menus/remote/netboot.xyz-arm64-snponly.efi \
     "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/netboot.xyz-arm64-snponly.efi"
+  # legacy boot files (3.x+; no USB NIC drivers — preserve USB keyboard on some firmware)
+  for legacy_file in netboot.xyz-legacy.kpxe netboot.xyz-legacy.efi; do
+    if curl -fsSL -o "/config/menus/remote/${legacy_file}" \
+      "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/${legacy_file}"; then
+      echo "[netbootxyz-init] Downloaded ${legacy_file}"
+    else
+      echo "[netbootxyz-init] ${legacy_file} not available for ${MENU_VERSION}, skipping"
+      rm -f "/config/menus/remote/${legacy_file}"
+    fi
+  done
   # layer and cleanup
   echo -n "${MENU_VERSION}" > /config/menuversion.txt
   cp -r /config/menus/remote/* /config/menus

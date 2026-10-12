@@ -1,11 +1,12 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.0.8  
-**netboot.xyz Core Version**: 0.7.6
+**Add-on Version**: 1.0.9  
+**netboot.xyz Webapp Version**: 0.7.6  
+**netboot.xyz Menus Version**: 3.0.3
 
-> **Note**: The add-on version is independent of the netboot.xyz core version. The add-on version tracks 
-> changes to the Home Assistant integration, while the core version indicates the underlying netboot.xyz 
-> version being used.
+> **Note**: The add-on version tracks Home Assistant integration changes. The **webapp** version is the
+> Node UI (`netbootxyz/webapp`). The **menus** version is the boot menus and iPXE binaries from
+> [`netboot.xyz` releases](https://github.com/netbootxyz/netboot.xyz/releases) (currently pinned to 3.0.3).
 
 ## Quick start (Ingress)
 
@@ -28,9 +29,11 @@ This add-on has one optional configuration option. All other setup is done throu
 
 ### `menu_version` (optional)
 
-Tag of the netboot.xyz boot menus to download on first start (e.g. `0.7.6`). Leave empty to use the pinned webapp version bundled with the add-on.
+Tag of the netboot.xyz boot menus / boot binaries to download (e.g. `3.0.3`). Leave empty to use the
+add-on pin (**3.0.3**). On start, menus are re-downloaded if `/config/menuversion.txt` differs from the
+desired version (upgrade path for existing installs).
 
-**Note**: _Remember to restart the add-on when making changes through the web interface if needed._
+**Note**: _Remember to restart the add-on when making configuration changes._
 
 ## Network Configuration
 
@@ -78,6 +81,8 @@ The following boot files are available for different boot scenarios:
 | `netboot.xyz-arm64.efi` | ARM64 | ARM64 UEFI boot with built-in drivers |
 | `netboot.xyz-arm64-snp.efi` | ARM64 | ARM64 UEFI with SNP (all devices) |
 | `netboot.xyz-arm64-snponly.efi` | ARM64 | ARM64 UEFI with SNP (chainloaded only) |
+| `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
+| `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
 
 ## DHCP Configuration Examples

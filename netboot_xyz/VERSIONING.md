@@ -2,11 +2,12 @@
 
 ## Overview
 
-This add-on uses **dual versioning** to distinguish between the add-on wrapper and the underlying netboot.xyz core:
+This add-on uses **multi-layer versioning** to distinguish the Home Assistant wrapper from upstream components:
 
 ```
-Add-on Version: 1.0.6 (semantic versioning)
-Core Version: 0.7.6 (netboot.xyz upstream version)
+Add-on Version: 1.0.9 (semantic versioning)
+Webapp Version: 0.7.6 (netbootxyz/webapp)
+Menus Version:  3.0.3 (netbootxyz/netboot.xyz releases)
 ```
 
 ## Add-on Version (Semantic Versioning)
@@ -22,34 +23,41 @@ The add-on version follows [Semantic Versioning](https://semver.org/) (MAJOR.MIN
 - `1.0.0` → `1.1.0`: Added new configuration option
 - `1.0.0` → `2.0.0`: Changed config.yaml schema (breaking change)
 
-## Core Version (netboot.xyz)
+## Webapp Version
 
-The core version indicates which version of netboot.xyz is bundled with the add-on:
+Pinned in the Dockerfile as `NETBOOTXYZ_VERSION`. This is the Node.js management UI from
+[`netbootxyz/webapp`](https://github.com/netbootxyz/webapp).
 
-- `0.7.6`: Current netboot.xyz webapp and boot files version
+- Current: `0.7.6`
 
-## Why Dual Versioning?
+## Menus Version
 
-This approach allows:
+Boot menus and iPXE binaries from [`netbootxyz/netboot.xyz` releases](https://github.com/netbootxyz/netboot.xyz/releases).
+Downloaded at init time (not baked into the image).
 
-1. **Independent Updates**: The add-on can be updated for Home Assistant compatibility, bug fixes, or new features without changing the netboot.xyz core
-2. **Clear Communication**: Users know both what add-on version they're running AND what netboot.xyz version is included
-3. **Flexible Upgrades**: Core updates can be done independently when new netboot.xyz releases are available
+- Default pin: `3.0.3`
+- Override: add-on option `menu_version`
+- Stored after download in `/config/menuversion.txt`
+- Re-downloaded when the stored version differs from the desired pin
+
+## Why Separate Versions?
+
+1. **Independent updates**: Webapp and menus ship on different release trains
+2. **Clear communication**: Users know which UI and which boot menus they run
+3. **Flexible upgrades**: `menu_version` can pin or override without rebuilding the image
 
 ## Version Display
 
-Both versions are displayed at add-on startup:
+All three are shown at add-on startup:
 
 ```
 -----------------------------------------------------------
- Home Assistant Add-on Version: 1.0.6
- netboot.xyz Core Version: 0.7.6
+ Home Assistant Add-on Version: 1.0.9
+ netboot.xyz Webapp Version: 0.7.6
+ netboot.xyz Menus Version: 3.0.3
 -----------------------------------------------------------
 ```
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
-
-
-

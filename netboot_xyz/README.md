@@ -36,7 +36,7 @@ This add-on is ideal for:
 
 The add-on supports the following configuration options:
 
-- **menu_version**: Optional boot-menu tag (e.g. `0.7.6`). Defaults to the pinned webapp version.
+- **menu_version**: Optional boot-menu tag (e.g. `3.0.3`). Leave empty to use the pinned menus release (`3.0.3`).
 
 ### Port Configuration
 
@@ -145,6 +145,8 @@ The following boot files are available and can be configured in your DHCP server
 | `netboot.xyz-arm64.efi` | ARM64 | ARM64 UEFI boot with built-in drivers |
 | `netboot.xyz-arm64-snp.efi` | ARM64 | ARM64 UEFI with SNP (all devices) |
 | `netboot.xyz-arm64-snponly.efi` | ARM64 | ARM64 UEFI with SNP (chainloaded only) |
+| `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
+| `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
 
 ## Support & Documentation

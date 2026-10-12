@@ -9,6 +9,11 @@ if ! /bin/bash /init.sh; then
 fi
 echo "[netbootxyz] Initialization completed successfully"
 
+MENU_VERSION_DISPLAY="unset"
+if [[ -f /config/menuversion.txt ]]; then
+  MENU_VERSION_DISPLAY=$(tr -d '[:space:]' < /config/menuversion.txt)
+fi
+
 echo "            _   _                 _                      "
 echo " _ __   ___| |_| |__   ___   ___ | |_  __  ___   _ ____  "
 echo "| '_ \ / _ \ __| '_ \ / _ \ / _ \| __| \ \/ / | | |_  /  "
@@ -18,7 +23,8 @@ echo "                                             |___/       "
 echo ""
 echo "-----------------------------------------------------------"
 echo " Home Assistant Add-on Version: ${ADDON_VERSION:-unknown}"
-echo " netboot.xyz Core Version: ${NETBOOTXYZ_VERSION:-unknown}"
+echo " netboot.xyz Webapp Version: ${NETBOOTXYZ_VERSION:-unknown}"
+echo " netboot.xyz Menus Version: ${MENU_VERSION_DISPLAY}"
 echo "-----------------------------------------------------------"
 echo ""
 

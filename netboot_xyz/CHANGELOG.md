@@ -2,8 +2,21 @@
 
 All notable changes to this Home Assistant Add-on will be documented in this file.
 
-**Note**: The add-on version (e.g., 1.0.0) is independent of the netboot.xyz core version (currently 0.7.6). 
-The add-on version tracks changes to the Home Assistant integration, configuration, and wrapper functionality.
+**Note**: The add-on version is independent of upstream layers:
+- **Webapp** (UI): currently `0.7.6` (`netbootxyz/webapp`)
+- **Menus / boot files**: currently pinned to `3.0.3` (`netbootxyz/netboot.xyz` releases)
+
+## [1.0.9] - 2026-10-12
+
+### Changed
+
+- Boot menus pinned to [netboot.xyz 3.0.3](https://github.com/netbootxyz/netboot.xyz/releases/tag/3.0.3) (no longer confused with webapp `0.7.6`)
+- Existing installs re-download menus when stored `menuversion.txt` differs from the desired pin
+- Startup banner shows webapp and menus versions separately
+
+### Added
+
+- Legacy boot files `netboot.xyz-legacy.kpxe` / `netboot.xyz-legacy.efi` (3.x+; skipped if unavailable)
 
 ## [1.0.8] - 2026-06-28
 
