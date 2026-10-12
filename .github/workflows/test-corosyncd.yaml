@@ -42,7 +42,8 @@ jobs:
 
           cleanup() {
             docker rm -f "${cid}" >/dev/null 2>&1 || true
-            rm -rf "${data_dir}"
+            # Container writes root-owned NSS DB into the bind mount
+            sudo rm -rf "${data_dir}"
           }
           trap cleanup EXIT
 
