@@ -1,8 +1,9 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.0.9  
+**Add-on Version**: 1.1.0  
 **netboot.xyz Webapp Version**: 0.7.6  
-**netboot.xyz Menus Version**: 3.0.3
+**netboot.xyz Menus Version**: 3.0.3  
+**iPXE Secure Boot**: v2.0.0 (default)
 
 > **Note**: The add-on version tracks Home Assistant integration changes. The **webapp** version is the
 > Node UI (`netbootxyz/webapp`). The **menus** version is the boot menus and iPXE binaries from
@@ -25,13 +26,23 @@
 
 ## Configuration
 
-This add-on has one optional configuration option. All other setup is done through the web interface after installation.
+Configuration options below. All other setup is done through the web interface after installation.
 
 ### `menu_version` (optional)
 
 Tag of the netboot.xyz boot menus / boot binaries to download (e.g. `3.0.3`). Leave empty to use the
 add-on pin (**3.0.3**). On start, menus are re-downloaded if `/config/menuversion.txt` differs from the
 desired version (upgrade path for existing installs).
+
+### `enable_secure_boot` (default: `true`)
+
+When enabled, downloads UEFI Secure Boot binaries (Microsoft-signed shim + signed iPXE) and
+`autoexec.ipxe` into TFTP paths under `secureboot-x86_64/` and `secureboot-arm64/`. Independent of
+the menu download; existing installs pick up Secure Boot files on the next start.
+
+### `ipxe_sb_version` (optional)
+
+iPXE release tag for `ipxeboot.tar.gz` (e.g. `v2.0.0`). Leave empty to use **v2.0.0**.
 
 **Note**: _Remember to restart the add-on when making configuration changes._
 
@@ -84,6 +95,27 @@ The following boot files are available for different boot scenarios:
 | `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
+
+### UEFI Secure Boot
+
+Point DHCP `boot-file-name` at the Microsoft-signed shim. Keep all files in that Secure Boot
+directory together (shim expects iPXE and `autoexec.ipxe` alongside it).
+
+| Boot File Name | Architecture | Description |
+|----------------|--------------|-------------|
+| `secureboot-x86_64/shimx64.efi` | x86/x64 UEFI SB | Microsoft-signed shim (entry point) |
+| `secureboot-arm64/shimaa64.efi` | ARM64 UEFI SB | Microsoft-signed shim (entry point) |
+
+Also present in each Secure Boot directory (do not relocate): `ipxe.efi`, `ipxe-shim.efi`,
+`snponly.efi`, `snponly-shim.efi`, `autoexec.ipxe`.
+
+Boot flow: firmware → shim → signed iPXE → `autoexec.ipxe` → netboot.xyz menu.
+
+DHCP example (x86_64 Secure Boot):
+
+```
+filename "secureboot-x86_64/shimx64.efi";
+```
 
 ## DHCP Configuration Examples
 

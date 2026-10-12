@@ -1,6 +1,6 @@
 ---
 name: netboot.xyz
-version: 1.0.9
+version: 1.1.0
 slug: netboot_xyz
 description: >-
   netboot_xyz is a convenient place to boot into any type of operating system
@@ -30,12 +30,14 @@ panel_icon: mdi:ip
 panel_title: netboot.xyz
 homeassistant_api: true
 webui: http://[HOST]:[PORT:3000]
-services:
-  - mqtt:want
 options:
   menu_version: ""
+  enable_secure_boot: true
+  ipxe_sb_version: ""
 schema:
   menu_version: str?
+  enable_secure_boot: bool
+  ipxe_sb_version: str?
 ports:
   3000/tcp: 3000
   69/udp: 69

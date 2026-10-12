@@ -6,6 +6,22 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 - **Webapp** (UI): currently `0.7.6` (`netbootxyz/webapp`)
 - **Menus / boot files**: currently pinned to `3.0.3` (`netbootxyz/netboot.xyz` releases)
 
+## [1.1.0] - 2026-10-12
+
+### Added
+
+- UEFI Secure Boot: downloads signed iPXE binaries (`ipxeboot.tar.gz` v2.0.0) and `autoexec.ipxe` into `secureboot-x86_64/` / `secureboot-arm64/`
+- Options `enable_secure_boot` (default `true`) and `ipxe_sb_version` (empty = `v2.0.0`)
+
+### Changed
+
+- Multi-stage Dockerfile: npm only in build stage; runtime without `git`, `sudo`, `busybox`, `npm`, `syslog-ng`
+- Removed unused `mqtt:want` service declaration
+
+### Removed
+
+- `syslog-ng` and `messages-log` supervisor programs (upstream no longer uses them; avoids FATAL spam)
+
 ## [1.0.9] - 2026-10-12
 
 ### Changed

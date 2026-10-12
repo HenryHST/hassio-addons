@@ -30,10 +30,20 @@ mkdir -p \
 # NETBOOTXYZ_VERSION is the webapp pin (e.g. 0.7.6) and must not be used here.
 DEFAULT_MENU_VERSION="3.0.3"
 MENU_VERSION="${DEFAULT_MENU_VERSION}"
+ENABLE_SECURE_BOOT=true
+IPXE_SB_VERSION="v2.0.0"
 if [[ -f /data/options.json ]]; then
   configured_menu=$(jq -r '.menu_version // empty' /data/options.json)
   if [[ -n "${configured_menu}" ]]; then
     MENU_VERSION="${configured_menu}"
+  fi
+  enable_sb=$(jq -r '.enable_secure_boot // true' /data/options.json)
+  if [[ "${enable_sb}" == "false" ]]; then
+    ENABLE_SECURE_BOOT=false
+  fi
+  configured_sb=$(jq -r '.ipxe_sb_version // empty' /data/options.json)
+  if [[ -n "${configured_sb}" ]]; then
+    IPXE_SB_VERSION="${configured_sb}"
   fi
 fi
 
@@ -98,6 +108,66 @@ if [[ ! -f /config/menus/remote/menu.ipxe ]] || [[ "${INSTALLED_MENU_VERSION}" !
   echo -n "${MENU_VERSION}" > /config/menuversion.txt
   cp -r /config/menus/remote/* /config/menus
   rm -f /tmp/menus.tar.gz
+fi
+
+# Secure Boot files (runs independently of menu download):
+# - Signed EFI binaries from upstream iPXE (ipxeboot.tar.gz) — unmodified
+# - autoexec.ipxe from the netboot.xyz menu release
+# Tolerant of failures so older menu pins without autoexec.ipxe still start
+if [[ "${ENABLE_SECURE_BOOT}" == "true" ]] && [[ ! -d /config/menus/remote/secureboot-x86_64 ]]; then
+  echo "[netbootxyz-init] Downloading Secure Boot binaries (iPXE ${IPXE_SB_VERSION})..."
+  set +e
+  curl -fsSL -o /tmp/ipxeboot.tar.gz \
+    "https://github.com/ipxe/ipxe/releases/download/${IPXE_SB_VERSION}/ipxeboot.tar.gz"
+  curl_rc=$?
+  set -e
+  if [[ ${curl_rc} -eq 0 ]] && [[ -f /tmp/ipxeboot.tar.gz ]] && [[ -s /tmp/ipxeboot.tar.gz ]]; then
+    if tar xf /tmp/ipxeboot.tar.gz -C /tmp; then
+      mkdir -p \
+        /config/menus/remote/secureboot-x86_64 \
+        /config/menus/remote/secureboot-arm64
+      for f in shimx64.efi ipxe-shim.efi ipxe.efi snponly.efi snponly-shim.efi; do
+        if [[ -f "/tmp/ipxeboot/x86_64-sb/${f}" ]]; then
+          cp "/tmp/ipxeboot/x86_64-sb/${f}" /config/menus/remote/secureboot-x86_64/
+        else
+          echo "[netbootxyz-init] Warning: ${f} not found in iPXE x86_64-sb archive"
+        fi
+      done
+      for f in shimaa64.efi ipxe-shim.efi ipxe.efi snponly.efi snponly-shim.efi; do
+        if [[ -f "/tmp/ipxeboot/arm64-sb/${f}" ]]; then
+          cp "/tmp/ipxeboot/arm64-sb/${f}" /config/menus/remote/secureboot-arm64/
+        else
+          echo "[netbootxyz-init] Warning: ${f} not found in iPXE arm64-sb archive"
+        fi
+      done
+      set +e
+      curl -fsSL -o /tmp/autoexec.ipxe \
+        "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/autoexec.ipxe"
+      autoexec_rc=$?
+      set -e
+      if [[ ${autoexec_rc} -eq 0 ]]; then
+        cp /tmp/autoexec.ipxe /config/menus/remote/secureboot-x86_64/autoexec.ipxe
+        cp /tmp/autoexec.ipxe /config/menus/remote/secureboot-arm64/autoexec.ipxe
+        rm -f /tmp/autoexec.ipxe
+      else
+        echo "[netbootxyz-init] autoexec.ipxe not available for ${MENU_VERSION}, skipping"
+      fi
+      shopt -s nullglob
+      for sbdir in /config/menus/remote/secureboot-*/; do
+        cp -r "$sbdir" /config/menus/
+      done
+      shopt -u nullglob
+      echo "[netbootxyz-init] Secure Boot files layered under /config/menus/secureboot-*"
+    else
+      echo "[netbootxyz-init] Failed to extract iPXE Secure Boot archive, skipping"
+    fi
+    rm -rf /tmp/ipxeboot /tmp/ipxeboot.tar.gz
+  else
+    echo "[netbootxyz-init] iPXE Secure Boot archive not available, skipping"
+    rm -f /tmp/ipxeboot.tar.gz
+  fi
+elif [[ "${ENABLE_SECURE_BOOT}" != "true" ]]; then
+  echo "[netbootxyz-init] Secure Boot download disabled (enable_secure_boot=false)"
 fi
 
 # Ownership

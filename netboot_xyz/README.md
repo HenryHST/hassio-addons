@@ -19,6 +19,7 @@ This add-on is ideal for:
 - **Web Interface**: Easy-to-use management interface on port 3000
 - **Asset Hosting**: Nginx server for local asset mirroring (port 80)
 - **TFTP Server**: Network boot file serving (port 69/UDP)
+- **UEFI Secure Boot**: Signed shim + iPXE under `secureboot-x86_64/` / `secureboot-arm64/`
 - **Multi-Architecture**: Supports x86-64, ARM64, and ARMv6 platforms
 - **Ingress Support**: Integrated with Home Assistant UI
 
@@ -37,6 +38,8 @@ This add-on is ideal for:
 The add-on supports the following configuration options:
 
 - **menu_version**: Optional boot-menu tag (e.g. `3.0.3`). Leave empty to use the pinned menus release (`3.0.3`).
+- **enable_secure_boot**: Download UEFI Secure Boot binaries on start (default `true`).
+- **ipxe_sb_version**: Optional iPXE Secure Boot release tag (empty = `v2.0.0`).
 
 ### Port Configuration
 
@@ -148,6 +151,10 @@ The following boot files are available and can be configured in your DHCP server
 | `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
+| `secureboot-x86_64/shimx64.efi` | x86/x64 UEFI SB | Microsoft-signed shim (Secure Boot entry point) |
+| `secureboot-arm64/shimaa64.efi` | ARM64 UEFI SB | Microsoft-signed shim (Secure Boot entry point) |
+
+Keep all files under `secureboot-x86_64/` or `secureboot-arm64/` in the same TFTP path (shim + iPXE + `autoexec.ipxe`).
 
 ## Support & Documentation
 

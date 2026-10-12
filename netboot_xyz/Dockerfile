@@ -1,6 +1,33 @@
+# Build stage: install webapp with npm (not present in runtime image)
+FROM alpine:3.24 AS build
+
+ARG NETBOOTXYZ_VERSION="0.7.6"
+
+# hadolint ignore=DL3018
+RUN apk add --no-cache \
+        ca-certificates \
+        curl \
+        nodejs \
+        npm \
+        tar \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+RUN \
+    echo "Installing netboot.xyz webapp version: ${NETBOOTXYZ_VERSION}" \
+    && curl -fsSL -o /tmp/webapp.tar.gz \
+        "https://github.com/netbootxyz/webapp/archive/${NETBOOTXYZ_VERSION}.tar.gz" \
+    && tar xzf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
+    && npm install --omit=dev \
+    && echo "Applying security patches..." \
+    && npm install systeminformation@5.27.14 express@4.22.2 js-yaml@4.3.0 --save --omit=dev \
+    && npm audit fix --omit=dev \
+    && npm cache clean --force \
+    && rm -rf /tmp/* /root/.npm
+
+# Runtime stage
 FROM alpine:3.24
 
-# Set version label
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG BUILD_REF
@@ -30,31 +57,24 @@ LABEL \
     org.opencontainers.image.revision="${BUILD_REF}" \
     org.opencontainers.image.version="${BUILD_VERSION}"
 
-# Store versions in environment for runtime access
 ENV ADDON_VERSION="${BUILD_VERSION}" \
     NETBOOTXYZ_VERSION="${NETBOOTXYZ_VERSION}"
 
-# Set shell with pipefail option
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
-# Install required packages and setup base system
+# Runtime packages only (no npm/git/sudo/syslog-ng)
 # hadolint ignore=DL3018
 RUN \
     apk add --no-cache \
         bash \
-        busybox \
         ca-certificates \
         curl \
         gettext \
-        git \
         jq \
         nginx \
         nodejs \
-        npm \
         shadow \
-        sudo \
         supervisor \
-        syslog-ng \
         tar \
         tftp-hpa \
         tzdata \
@@ -66,41 +86,19 @@ RUN \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
 
-# Install netboot.xyz webapp
-WORKDIR /app
-ARG NETBOOTXYZ_VERSION
-RUN \
-    echo "Installing netboot.xyz webapp version: ${NETBOOTXYZ_VERSION}" \
-    && curl -fsSL -o /tmp/webapp.tar.gz \
-        "https://github.com/netbootxyz/webapp/archive/${NETBOOTXYZ_VERSION}.tar.gz" \
-    && tar xzf /tmp/webapp.tar.gz -C /app/ --strip-components=1 \
-    && npm install --omit=dev \
-    && echo "Applying security patches..." \
-    && npm install systeminformation@5.27.14 express@4.22.2 js-yaml@4.3.0 --save --omit=dev \
-    && npm audit fix --omit=dev \
-    && npm cache clean --force \
-    && rm -rf /tmp/* /root/.npm
+COPY --from=build /app /app
 
-# Reset workdir to root
-WORKDIR /
-
-# Environment variables
 ENV TFTPD_OPTS=''
 ENV NGINX_PORT='80'
 ENV WEB_APP_PORT='3000'
 
-# Copy root filesystem
 COPY root/ /
 
-# Set executable permissions for scripts
 RUN chmod +x /start.sh /init.sh
 
-# Expose ports
 EXPOSE 69/udp 80 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD ["curl", "-f", "http://127.0.0.1:3000/"]
 
-# Default command
 CMD ["/bin/bash", "/start.sh"]
-
