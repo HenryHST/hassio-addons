@@ -1,6 +1,6 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.1.0  
+**Add-on Version**: 1.2.0  
 **netboot.xyz Webapp Version**: 0.7.6  
 **netboot.xyz Menus Version**: 3.0.3  
 **iPXE Secure Boot**: v2.0.0 (default)
@@ -44,9 +44,38 @@ the menu download; existing installs pick up Secure Boot files on the next start
 
 iPXE release tag for `ipxeboot.tar.gz` (e.g. `v2.0.0`). Leave empty to use **v2.0.0**.
 
+### `enable_ha_sensors` (default: `true`)
+
+Publish status entities to Home Assistant via the Core States API (no MQTT).
+
+### `sensor_poll_interval` (default: `60`)
+
+Seconds between sensor updates (30–300).
+
 **Note**: _Remember to restart the add-on when making configuration changes._
 
+## Home Assistant Sensors
+
+When `enable_ha_sensors` is enabled, the add-on creates:
+
+| Entity | Description |
+|--------|-------------|
+| `sensor.netboot_xyz_menu_version` | Installed boot-menu tag |
+| `sensor.netboot_xyz_last_download` | UTC timestamp of last menu/Secure Boot download (`secure_boot` attribute) |
+| `binary_sensor.netboot_xyz_tftp` | TFTP process running (`menus_present` attribute) |
+
 ## Network Configuration
+
+### Host network
+
+This add-on uses **host networking** (`host_network: true`) so PXE/TFTP works reliably with DHCP
+`next-server` pointing at your Home Assistant host IP. Services bind directly on the host:
+
+- Web UI: `3000`
+- TFTP: `69/udp`
+- Asset HTTP (nginx): **`8080`** (not 80, to avoid conflicting with other host services)
+
+The add-on starts automatically with Home Assistant (`boot: auto`).
 
 ### Requirements
 
@@ -63,8 +92,6 @@ To use this add-on, configure your DHCP server with:
 Your DHCP server should have a static IP address for reliable operation.
 
 ## Ports
-
-The add-on exposes the following ports:
 
 | Port | Protocol | Purpose |
 |------|----------|---------|

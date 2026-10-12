@@ -89,14 +89,14 @@ RUN \
 COPY --from=build /app /app
 
 ENV TFTPD_OPTS=''
-ENV NGINX_PORT='80'
+ENV NGINX_PORT='8080'
 ENV WEB_APP_PORT='3000'
 
 COPY root/ /
 
-RUN chmod +x /start.sh /init.sh
+RUN chmod +x /start.sh /init.sh /ha-sensors.sh
 
-EXPOSE 69/udp 80 3000
+EXPOSE 69/udp 8080 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD ["curl", "-f", "http://127.0.0.1:3000/"]

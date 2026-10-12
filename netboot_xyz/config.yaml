@@ -1,6 +1,6 @@
 ---
 name: netboot.xyz
-version: 1.1.0
+version: 1.2.0
 slug: netboot_xyz
 description: >-
   netboot_xyz is a convenient place to boot into any type of operating system
@@ -13,10 +13,10 @@ arch:
 map:
   - config:rw
   - ssl
-boot: manual
+boot: auto
 apparmor: true
 backup: cold
-host_network: false
+host_network: true
 host_pid: false
 panel_admin: true
 hassio_api: true
@@ -34,15 +34,19 @@ options:
   menu_version: ""
   enable_secure_boot: true
   ipxe_sb_version: ""
+  enable_ha_sensors: true
+  sensor_poll_interval: 60
 schema:
   menu_version: str?
   enable_secure_boot: bool
   ipxe_sb_version: str?
+  enable_ha_sensors: bool
+  sensor_poll_interval: int(30,300)
 ports:
   3000/tcp: 3000
   69/udp: 69
-  80/tcp: 8080
+  8080/tcp: 8080
 ports_description:
   3000/tcp: Web configuration interface
   69/udp: TFTP Port
-  80/tcp: NGINX server for hosting assets
+  8080/tcp: NGINX server for hosting assets

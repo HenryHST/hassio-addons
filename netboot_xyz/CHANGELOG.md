@@ -6,6 +6,23 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 - **Webapp** (UI): currently `0.7.6` (`netbootxyz/webapp`)
 - **Menus / boot files**: currently pinned to `3.0.3` (`netbootxyz/netboot.xyz` releases)
 
+## [1.2.0] - 2026-10-12
+
+### Added
+
+- Home Assistant sensors via Core States API: `sensor.netboot_xyz_menu_version`, `sensor.netboot_xyz_last_download`, `binary_sensor.netboot_xyz_tftp`
+- Options `enable_ha_sensors` (default `true`) and `sensor_poll_interval` (30–300, default `60`)
+
+### Changed
+
+- `boot: auto` — add-on starts with Home Assistant
+- `host_network: true` — improves PXE/TFTP reliability; nginx listens on **8080** (avoids host port 80 conflict)
+- Port mapping documented as `8080/tcp` (was container `80` → host `8080`)
+
+### Notes
+
+- `mqtt:want` remains removed (unused since 1.1.0); status uses `homeassistant_api`, not MQTT
+
 ## [1.1.0] - 2026-10-12
 
 ### Added

@@ -48,12 +48,13 @@ jobs:
           # Config uses `user nbxyz;` (created in the add-on image); create it for nginx -t
           sudo useradd -r -M -s /usr/sbin/nologin nbxyz || true
           export NETBOOTXYZ_VERSION=0.7.6
+          export NGINX_PORT=8080
           mkdir -p /tmp/netboot-config/nginx/site-confs /tmp/netboot-config/log/nginx
           cp netboot_xyz/root/defaults/nginx.conf /tmp/netboot-config/nginx/nginx.conf
-          envsubst < netboot_xyz/root/defaults/default > /tmp/netboot-config/nginx/site-confs/default
+          envsubst '${NGINX_PORT}' < netboot_xyz/root/defaults/default > /tmp/netboot-config/nginx/site-confs/default
           sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/nginx.conf
           sed -i 's#/config#/tmp/netboot-config#g' /tmp/netboot-config/nginx/site-confs/default
-          # Writable pid path; sudo needed so listen 80 and user nbxyz resolve
+          # Writable pid path; user nbxyz for nginx -t
           sed -i 's#pid /run/nginx.pid;#pid /tmp/netboot-config/nginx.pid;#' /tmp/netboot-config/nginx/nginx.conf
           sudo nginx -t -c /tmp/netboot-config/nginx/nginx.conf
 

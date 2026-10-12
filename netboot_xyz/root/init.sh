@@ -6,15 +6,19 @@ mkdir -p \
   /assets \
   /config/nginx/site-confs \
   /config/log/nginx \
+  /config/status \
   /run \
   /var/lib/nginx/tmp/client_body \
   /var/tmp/nginx
+
+# Default NGINX_PORT for host-network (avoid conflict with host :80)
+export NGINX_PORT="${NGINX_PORT:-8080}"
 
 # copy config files (always update default to get latest changes)
 [[ ! -f /config/nginx/nginx.conf ]] && \
   cp /defaults/nginx.conf /config/nginx/nginx.conf
 # Always copy default site config to ensure updates
-envsubst < /defaults/default > /config/nginx/site-confs/default
+envsubst '${NGINX_PORT}' < /defaults/default > /config/nginx/site-confs/default
 
 # Ownership
 chown -R nbxyz:nbxyz /assets
@@ -46,6 +50,10 @@ if [[ -f /data/options.json ]]; then
     IPXE_SB_VERSION="${configured_sb}"
   fi
 fi
+
+stamp_last_download() {
+  date -u +"%Y-%m-%dT%H:%M:%SZ" > /config/status/last_download.txt
+}
 
 INSTALLED_MENU_VERSION=""
 if [[ -f /config/menuversion.txt ]]; then
@@ -108,6 +116,7 @@ if [[ ! -f /config/menus/remote/menu.ipxe ]] || [[ "${INSTALLED_MENU_VERSION}" !
   echo -n "${MENU_VERSION}" > /config/menuversion.txt
   cp -r /config/menus/remote/* /config/menus
   rm -f /tmp/menus.tar.gz
+  stamp_last_download
 fi
 
 # Secure Boot files (runs independently of menu download):
@@ -158,16 +167,23 @@ if [[ "${ENABLE_SECURE_BOOT}" == "true" ]] && [[ ! -d /config/menus/remote/secur
       done
       shopt -u nullglob
       echo "[netbootxyz-init] Secure Boot files layered under /config/menus/secureboot-*"
+      echo -n "enabled" > /config/status/secure_boot.txt
+      stamp_last_download
     else
       echo "[netbootxyz-init] Failed to extract iPXE Secure Boot archive, skipping"
+      echo -n "failed" > /config/status/secure_boot.txt
     fi
     rm -rf /tmp/ipxeboot /tmp/ipxeboot.tar.gz
   else
     echo "[netbootxyz-init] iPXE Secure Boot archive not available, skipping"
+    echo -n "failed" > /config/status/secure_boot.txt
     rm -f /tmp/ipxeboot.tar.gz
   fi
 elif [[ "${ENABLE_SECURE_BOOT}" != "true" ]]; then
   echo "[netbootxyz-init] Secure Boot download disabled (enable_secure_boot=false)"
+  echo -n "disabled" > /config/status/secure_boot.txt
+elif [[ -d /config/menus/remote/secureboot-x86_64 ]]; then
+  echo -n "enabled" > /config/status/secure_boot.txt
 fi
 
 # Ownership

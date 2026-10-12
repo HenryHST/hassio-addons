@@ -17,8 +17,10 @@ This add-on is ideal for:
 ## Features
 
 - **Web Interface**: Easy-to-use management interface on port 3000
-- **Asset Hosting**: Nginx server for local asset mirroring (port 80)
+- **Asset Hosting**: Nginx server for local asset mirroring (port 8080)
 - **TFTP Server**: Network boot file serving (port 69/UDP)
+- **Host network**: Reliable PXE with DHCP `next-server` on the HA host IP
+- **HA sensors**: Menu version, last download, TFTP status entities
 - **UEFI Secure Boot**: Signed shim + iPXE under `secureboot-x86_64/` / `secureboot-arm64/`
 - **Multi-Architecture**: Supports x86-64, ARM64, and ARMv6 platforms
 - **Ingress Support**: Integrated with Home Assistant UI
@@ -40,16 +42,20 @@ The add-on supports the following configuration options:
 - **menu_version**: Optional boot-menu tag (e.g. `3.0.3`). Leave empty to use the pinned menus release (`3.0.3`).
 - **enable_secure_boot**: Download UEFI Secure Boot binaries on start (default `true`).
 - **ipxe_sb_version**: Optional iPXE Secure Boot release tag (empty = `v2.0.0`).
+- **enable_ha_sensors**: Publish HA entities for menu version, last download, TFTP (default `true`).
+- **sensor_poll_interval**: Sensor refresh interval in seconds (30–300, default `60`).
 
 ### Port Configuration
 
+Runs on the **host network**. Services bind on the HA host:
+
 - **3000/tcp**: Web management interface (default)
 - **69/udp**: TFTP server for network booting (required)
-- **8080/tcp**: HTTP server for hosting boot assets (optional)
+- **8080/tcp**: HTTP server for hosting boot assets (optional; not port 80)
 
 ### Network Requirements
 
-This add-on requires an existing DHCP server configured to direct network boot requests to the add-on. You will need to configure your DHCP server's `next-server` and `boot-file-name` parameters. See the DHCP Configuration section below for examples.
+This add-on requires an existing DHCP server configured to direct network boot requests to the add-on. You will need to configure your DHCP server's `next-server` (Home Assistant host IP) and `boot-file-name` parameters. See the DHCP Configuration section below for examples.
 
 ### Local Asset Mirroring
 

@@ -5,7 +5,7 @@
 This add-on uses **multi-layer versioning** to distinguish the Home Assistant wrapper from upstream components:
 
 ```
-Add-on Version: 1.1.0 (semantic versioning)
+Add-on Version: 1.2.0 (semantic versioning)
 Webapp Version: 0.7.6 (netbootxyz/webapp)
 Menus Version:  3.0.3 (netbootxyz/netboot.xyz releases)
 iPXE SB:        v2.0.0 (ipxe/ipxe ipxeboot.tar.gz; option ipxe_sb_version)
@@ -53,13 +53,14 @@ All three are shown at add-on startup:
 
 ```
 -----------------------------------------------------------
- Home Assistant Add-on Version: 1.1.0
+ Home Assistant Add-on Version: 1.2.0
  netboot.xyz Webapp Version: 0.7.6
  netboot.xyz Menus Version: 3.0.3
 -----------------------------------------------------------
 ```
 
-Secure Boot download status is logged during init (not in the banner).
+Secure Boot download status is logged during init (not in the banner). Menu version, last download,
+and TFTP status are also published as Home Assistant entities when `enable_ha_sensors` is true.
 
 ## Changelog
 
