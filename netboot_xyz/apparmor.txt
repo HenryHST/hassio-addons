@@ -23,6 +23,9 @@ profile netboot_xyz flags=(attach_disconnected,mediate_deleted) {
 
   /start.sh ix,
   /init.sh ix,
+  /ha-sensors.sh ix,
+  /tftpd.sh ix,
+  # Secure Boot under /config/menus/secureboot-*/ and mirrored assets under /assets/ (covered below)
   /etc/supervisor.conf r,
   /run/supervisor/** rw,
   /run/** rwk,

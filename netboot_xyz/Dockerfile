@@ -88,13 +88,12 @@ RUN \
 
 COPY --from=build /app /app
 
-ENV TFTPD_OPTS=''
 ENV NGINX_PORT='8080'
 ENV WEB_APP_PORT='3000'
 
 COPY root/ /
 
-RUN chmod +x /start.sh /init.sh /ha-sensors.sh
+RUN chmod +x /start.sh /init.sh /ha-sensors.sh /tftpd.sh
 
 EXPOSE 69/udp 8080 3000
 

@@ -1,6 +1,6 @@
 # Home Assistant Add-on: netboot.xyz
 
-**Add-on Version**: 1.2.0  
+**Add-on Version**: 1.3.0  
 **netboot.xyz Webapp Version**: 0.7.6  
 **netboot.xyz Menus Version**: 3.0.3  
 **iPXE Secure Boot**: v2.0.0 (default)
@@ -52,6 +52,17 @@ Publish status entities to Home Assistant via the Core States API (no MQTT).
 
 Seconds between sensor updates (30–300).
 
+### `tftpd_opts` (optional)
+
+Extra arguments passed to `in.tftpd` (whitespace-separated). Example for firewalls/NAT that
+block high UDP source ports:
+
+```yaml
+tftpd_opts: "--tftp-single-port"
+```
+
+Leave empty for default tftp-hpa behaviour. Only pass flags you understand; invalid flags prevent TFTP from starting.
+
 **Note**: _Remember to restart the add-on when making configuration changes._
 
 ## Home Assistant Sensors
@@ -77,6 +88,17 @@ This add-on uses **host networking** (`host_network: true`) so PXE/TFTP works re
 
 The add-on starts automatically with Home Assistant (`boot: auto`).
 
+### Ingress vs host ports (important)
+
+| Purpose | Use |
+|---------|-----|
+| PXE `next-server` / TFTP | **HA host IP**, UDP **69** — never Ingress |
+| Asset HTTP (`live_endpoint`) | `http://<HA-host-IP>:8080` |
+| Web UI (direct) | `http://<HA-host-IP>:3000` |
+| Web UI (Ingress) | Home Assistant sidebar only — **not** for DHCP/PXE boot files |
+
+Ingress proxies the management UI. Network boot clients talk to the host IP on TFTP/HTTP ports.
+
 ### Requirements
 
 This add-on requires a DHCP server configured to direct network boot requests to the add-on. The add-on itself does not include a DHCP server.
@@ -86,7 +108,7 @@ This add-on requires a DHCP server configured to direct network boot requests to
 ### DHCP Server Setup
 
 To use this add-on, configure your DHCP server with:
-- **next-server**: IP address of your Home Assistant host
+- **next-server**: IP address of your **Home Assistant host** (not an Ingress URL)
 - **boot-file-name**: The appropriate boot file for your clients (see Boot Files table below)
 
 Your DHCP server should have a static IP address for reliable operation.
@@ -121,7 +143,16 @@ The following boot files are available for different boot scenarios:
 | `netboot.xyz-arm64-snponly.efi` | ARM64 | ARM64 UEFI with SNP (chainloaded only) |
 | `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
-| `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
+| `netboot.xyz-metal.kpxe` | x86/x64 Legacy | Metal/BMC-oriented legacy boot |
+| `netboot.xyz-metal.efi` | x86/x64 UEFI | Metal/BMC-oriented UEFI boot |
+| `netboot.xyz-metal-snp.efi` | x86/x64 UEFI | Metal SNP (all devices) |
+| `netboot.xyz-metal-snponly.efi` | x86/x64 UEFI | Metal SNP (chainloaded only) |
+| `netboot.xyz-metal-legacy.kpxe` | x86/x64 Legacy | Metal legacy without USB NIC drivers |
+| `netboot.xyz-metal-legacy.efi` | x86/x64 UEFI | Metal UEFI without USB NIC drivers |
+| `netboot.xyz-metal-arm64.efi` | ARM64 | Metal ARM64 UEFI |
+| `netboot.xyz-metal-arm64-snp.efi` | ARM64 | Metal ARM64 SNP |
+| `netboot.xyz-metal-arm64-snponly.efi` | ARM64 | Metal ARM64 SNP (chainloaded only) |
+| `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | RPi4 UEFI SNP (downloaded only if present in the menu release) |
 
 ### UEFI Secure Boot
 

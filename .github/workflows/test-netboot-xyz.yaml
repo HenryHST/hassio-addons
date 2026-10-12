@@ -83,3 +83,50 @@ jobs:
           npm install systeminformation@5.27.14 express@4.22.2 js-yaml@4.3.0 --save --omit=dev
           npm audit fix --omit=dev
           npm audit --omit=dev --audit-level=high
+
+  smoke:
+    name: Container smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t netboot_xyz:test ./netboot_xyz
+
+      - name: Run smoke test
+        run: |
+          set -euo pipefail
+          data_dir="$(mktemp -d)"
+          config_dir="$(mktemp -d)"
+          cat > "${data_dir}/options.json" <<'EOF'
+{"menu_version":"","enable_secure_boot":false,"ipxe_sb_version":"","enable_ha_sensors":false,"sensor_poll_interval":60,"tftpd_opts":""}
+EOF
+
+          cid=$(docker run -d --name netboot-smoke \
+            -v "${data_dir}:/data" \
+            -v "${config_dir}:/config" \
+            -e SUPERVISOR_TOKEN= \
+            -p 3000:3000 \
+            -p 69:69/udp \
+            netboot_xyz:test)
+
+          cleanup() {
+            docker logs "${cid}" || true
+            docker rm -f "${cid}" >/dev/null 2>&1 || true
+            sudo rm -rf "${data_dir}" "${config_dir}"
+          }
+          trap cleanup EXIT
+
+          for _ in $(seq 1 90); do
+            if curl -fsS "http://127.0.0.1:3000/" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          curl -fsS "http://127.0.0.1:3000/" >/dev/null
+          docker logs "${cid}" 2>&1 | grep -q "Home Assistant Add-on Version"
+          test -f "${config_dir}/menus/menu.ipxe"
+          nc -zu 127.0.0.1 69
+          echo "smoke OK"

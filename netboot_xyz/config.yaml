@@ -1,6 +1,6 @@
 ---
 name: netboot.xyz
-version: 1.2.0
+version: 1.3.0
 slug: netboot_xyz
 description: >-
   netboot_xyz is a convenient place to boot into any type of operating system
@@ -36,12 +36,14 @@ options:
   ipxe_sb_version: ""
   enable_ha_sensors: true
   sensor_poll_interval: 60
+  tftpd_opts: ""
 schema:
   menu_version: str?
   enable_secure_boot: bool
   ipxe_sb_version: str?
   enable_ha_sensors: bool
   sensor_poll_interval: int(30,300)
+  tftpd_opts: str?
 ports:
   3000/tcp: 3000
   69/udp: 69

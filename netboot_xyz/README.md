@@ -44,6 +44,7 @@ The add-on supports the following configuration options:
 - **ipxe_sb_version**: Optional iPXE Secure Boot release tag (empty = `v2.0.0`).
 - **enable_ha_sensors**: Publish HA entities for menu version, last download, TFTP (default `true`).
 - **sensor_poll_interval**: Sensor refresh interval in seconds (30–300, default `60`).
+- **tftpd_opts**: Extra `in.tftpd` flags (e.g. `--tftp-single-port` behind firewalls/NAT).
 
 ### Port Configuration
 
@@ -52,6 +53,8 @@ Runs on the **host network**. Services bind on the HA host:
 - **3000/tcp**: Web management interface (default)
 - **69/udp**: TFTP server for network booting (required)
 - **8080/tcp**: HTTP server for hosting boot assets (optional; not port 80)
+
+**Ingress** is only for the web UI in the HA sidebar. PXE/`next-server` and asset HTTP must use the **HA host IP** and ports above — not Ingress URLs.
 
 ### Network Requirements
 
@@ -156,7 +159,8 @@ The following boot files are available and can be configured in your DHCP server
 | `netboot.xyz-arm64-snponly.efi` | ARM64 | ARM64 UEFI with SNP (chainloaded only) |
 | `netboot.xyz-legacy.kpxe` | x86/x64 Legacy | Legacy BIOS without USB NIC drivers (USB keyboard on some firmware) |
 | `netboot.xyz-legacy.efi` | x86/x64 UEFI | UEFI without USB NIC drivers (USB keyboard on some firmware) |
-| `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | Raspberry Pi 4 specific UEFI boot |
+| `netboot.xyz-metal.kpxe` / `.efi` / `-snp` / `-snponly` / `-legacy` / `-arm64*` | Metal/BMC | Metal-oriented TFTP bootloaders |
+| `netboot.xyz-rpi4-snp.efi` | Raspberry Pi 4 | RPi4 UEFI SNP (if present in the menu release) |
 | `secureboot-x86_64/shimx64.efi` | x86/x64 UEFI SB | Microsoft-signed shim (Secure Boot entry point) |
 | `secureboot-arm64/shimaa64.efi` | ARM64 UEFI SB | Microsoft-signed shim (Secure Boot entry point) |
 

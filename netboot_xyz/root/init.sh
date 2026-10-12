@@ -112,6 +112,27 @@ if [[ ! -f /config/menus/remote/menu.ipxe ]] || [[ "${INSTALLED_MENU_VERSION}" !
       rm -f "/config/menus/remote/${legacy_file}"
     fi
   done
+  # metal + optional RPi4 TFTP binaries (.efi/.kpxe only; skip ISO/IMG/DSK)
+  for extra_file in \
+    netboot.xyz-metal.kpxe \
+    netboot.xyz-metal.efi \
+    netboot.xyz-metal-snp.efi \
+    netboot.xyz-metal-snponly.efi \
+    netboot.xyz-metal-legacy.kpxe \
+    netboot.xyz-metal-legacy.efi \
+    netboot.xyz-metal-arm64.efi \
+    netboot.xyz-metal-arm64-snp.efi \
+    netboot.xyz-metal-arm64-snponly.efi \
+    netboot.xyz-rpi4-snp.efi
+  do
+    if curl -fsSL -o "/config/menus/remote/${extra_file}" \
+      "https://github.com/netbootxyz/netboot.xyz/releases/download/${MENU_VERSION}/${extra_file}"; then
+      echo "[netbootxyz-init] Downloaded ${extra_file}"
+    else
+      echo "[netbootxyz-init] ${extra_file} not available for ${MENU_VERSION}, skipping"
+      rm -f "/config/menus/remote/${extra_file}"
+    fi
+  done
   # layer and cleanup
   echo -n "${MENU_VERSION}" > /config/menuversion.txt
   cp -r /config/menus/remote/* /config/menus

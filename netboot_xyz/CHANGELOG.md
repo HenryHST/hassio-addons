@@ -6,6 +6,23 @@ All notable changes to this Home Assistant Add-on will be documented in this fil
 - **Webapp** (UI): currently `0.7.6` (`netbootxyz/webapp`)
 - **Menus / boot files**: currently pinned to `3.0.3` (`netbootxyz/netboot.xyz` releases)
 
+## [1.3.0] - 2026-10-12
+
+### Added
+
+- Option `tftpd_opts` (e.g. `--tftp-single-port`) via `/tftpd.sh` wrapper for firewalls/NAT
+- Metal TFTP boot files (`netboot.xyz-metal*.efi` / `.kpxe`) and optional `netboot.xyz-rpi4-snp.efi` (skipped if missing from the menu release)
+- CI container smoke test (web UI :3000, TFTP :69, `menu.ipxe` present)
+
+### Changed
+
+- DOCS: Ingress vs host-IP/ports clarified for PXE/DHCP
+- AppArmor: execute rules for `ha-sensors.sh` and `tftpd.sh`
+
+### Notes
+
+- Still uses **tftp-hpa** (no dnsmasq/ProxyDHCP in this add-on; deferred)
+
 ## [1.2.0] - 2026-10-12
 
 ### Added
