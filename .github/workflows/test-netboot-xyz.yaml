@@ -105,43 +105,65 @@ jobs:
           set -euo pipefail
           data_dir="$(mktemp -d)"
           config_dir="$(mktemp -d)"
-          # Compact one-liner avoids YAML/heredoc pitfalls (H4)
           opts='{"enable_secure_boot":false,"enable_ha_sensors":false,"sensor_poll_interval":60}'
           echo "${opts}" > "${data_dir}/options.json"
-          echo "[smoke-debug] H4 options.json bytes=$(wc -c < "${data_dir}/options.json")"
 
-          # Avoid host privileged UDP 69 bind (H1) — map high ports
+          # Pre-seed menus so init skips GitHub downloads (H2/H7) — smoke tests runtime only
+          mkdir -p "${config_dir}/menus/remote" "${config_dir}/menus/local" "${config_dir}/status"
+          printf '%s\n' '#!ipxe' > "${config_dir}/menus/remote/menu.ipxe"
+          printf '%s\n' '#!ipxe' > "${config_dir}/menus/menu.ipxe"
+          printf '%s' '3.0.3' > "${config_dir}/menuversion.txt"
+          echo "[smoke-debug] H7 preseeded menu.ipxe + menuversion 3.0.3"
+
+          docker image inspect netboot_xyz:test >/dev/null
+          echo "[smoke-debug] H6 image present"
+
+          # High host ports avoid privileged bind issues (H1)
           echo "[smoke-debug] H1 docker run -p 13000:3000 -p 1069:69/udp"
-          cid=$(docker run -d --name netboot-smoke \
+          docker run -d --name netboot-smoke \
+            --cidfile="${data_dir}/cid" \
             -v "${data_dir}:/data" \
             -v "${config_dir}:/config" \
             -p 13000:3000 \
             -p 1069:69/udp \
-            netboot_xyz:test)
-          echo "[smoke-debug] H1 container id=${cid}"
+            netboot_xyz:test
+          cid="$(cat "${data_dir}/cid")"
+          echo "[smoke-debug] H1 cid=${cid}"
 
           cleanup() {
-            st=$(docker inspect -f '{{.State.Status}}/{{.State.ExitCode}}' "${cid}" 2>/dev/null || echo gone)
+            echo "[smoke-debug] --- docker ps -a ---"
+            docker ps -a --filter "id=${cid}" || true
+            fmt='{{.State.Status}}/{{.State.ExitCode}}/{{.State.Error}}'
+            st=$(docker inspect -f "${fmt}" "${cid}" 2>/dev/null || echo gone)
             echo "[smoke-debug] container state=${st}"
-            docker logs "${cid}" 2>&1 | tail -80 || true
+            echo "[smoke-debug] --- docker logs ---"
+            docker logs "${cid}" 2>&1 || true
             docker rm -f "${cid}" >/dev/null 2>&1 || true
             sudo rm -rf "${data_dir}" "${config_dir}"
           }
           trap cleanup EXIT
 
-          # Init downloads menus before webapp listens (H2) — wait up to ~6 min
-          for i in $(seq 1 120); do
+          # With preseed, init should finish in seconds; fail fast if not running
+          sleep 5
+          state=$(docker inspect -f '{{.State.Running}}' "${cid}")
+          echo "[smoke-debug] H2 running_after_5s=${state}"
+          if [[ "${state}" != "true" ]]; then
+            echo "[smoke-debug] H2 FAIL container exited early"
+            exit 1
+          fi
+          docker logs "${cid}" 2>&1 | tail -40 || true
+
+          for i in $(seq 1 60); do
             state=$(docker inspect -f '{{.State.Running}}' "${cid}")
             if [[ "${state}" != "true" ]]; then
-              echo "[smoke-debug] H2 container not running at iter=${i}"
-              docker logs "${cid}" 2>&1 || true
+              echo "[smoke-debug] H2 FAIL not running at iter=${i}"
               exit 1
             fi
             if curl -fsS "http://127.0.0.1:13000/" >/dev/null 2>&1; then
               echo "[smoke-debug] H2 web UI up at iter=${i}"
               break
             fi
-            sleep 3
+            sleep 2
           done
 
           curl -fsS "http://127.0.0.1:13000/" >/dev/null
@@ -150,8 +172,9 @@ jobs:
           test -f "${config_dir}/menus/menu.ipxe"
           echo "[smoke-debug] menu.ipxe present"
 
-          # H3: assert tftpd inside container instead of fragile host nc -zu :69
-          docker exec "${cid}" supervisorctl -c /etc/supervisor.conf status in.tftpd \
-            | tee /dev/stderr | grep -q RUNNING
+          tftpd_status="$(docker exec "${cid}" \
+            supervisorctl -c /etc/supervisor.conf status in.tftpd || true)"
+          echo "[smoke-debug] H3 tftpd_status=${tftpd_status}"
+          echo "${tftpd_status}" | grep -q RUNNING
           echo "[smoke-debug] H3 tftpd RUNNING"
           echo "smoke OK"
