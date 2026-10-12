@@ -41,7 +41,8 @@ if [[ -f /data/options.json ]]; then
   if [[ -n "${configured_menu}" ]]; then
     MENU_VERSION="${configured_menu}"
   fi
-  enable_sb=$(jq -r '.enable_secure_boot // true' /data/options.json)
+  # jq's // treats JSON false as missing — use explicit null check
+  enable_sb=$(jq -r 'if .enable_secure_boot == null then true else .enable_secure_boot end' /data/options.json)
   if [[ "${enable_sb}" == "false" ]]; then
     ENABLE_SECURE_BOOT=false
   fi

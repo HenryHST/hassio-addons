@@ -118,41 +118,47 @@ jobs:
           docker image inspect netboot_xyz:test >/dev/null
           echo "[smoke-debug] H6 image present"
 
-          # High host ports avoid privileged bind issues (H1)
+          # High host ports; cidfile outside bind mounts (H10)
+          rm -f /tmp/netboot-smoke.cid
           echo "[smoke-debug] H1 docker run -p 13000:3000 -p 1069:69/udp"
           docker run -d --name netboot-smoke \
-            --cidfile="${data_dir}/cid" \
+            --cidfile=/tmp/netboot-smoke.cid \
             -v "${data_dir}:/data" \
             -v "${config_dir}:/config" \
             -p 13000:3000 \
             -p 1069:69/udp \
             netboot_xyz:test
-          cid="$(cat "${data_dir}/cid")"
+          cid="$(cat /tmp/netboot-smoke.cid)"
           echo "[smoke-debug] H1 cid=${cid}"
 
           cleanup() {
+            local id="${cid:-}"
             echo "[smoke-debug] --- docker ps -a ---"
-            docker ps -a --filter "id=${cid}" || true
-            fmt='{{.State.Status}}/{{.State.ExitCode}}/{{.State.Error}}'
-            st=$(docker inspect -f "${fmt}" "${cid}" 2>/dev/null || echo gone)
-            echo "[smoke-debug] container state=${st}"
-            echo "[smoke-debug] --- docker logs ---"
-            docker logs "${cid}" 2>&1 || true
-            docker rm -f "${cid}" >/dev/null 2>&1 || true
+            docker ps -a --filter "name=netboot-smoke" || true
+            if [[ -n "${id}" ]]; then
+              fmt='{{.State.Status}}/{{.State.ExitCode}}/{{.State.Error}}'
+              st=$(docker inspect -f "${fmt}" "${id}" 2>/dev/null || echo gone)
+              echo "[smoke-debug] container state=${st}"
+              echo "[smoke-debug] --- docker logs ---"
+              docker logs "${id}" 2>&1 || true
+              docker rm -f "${id}" >/dev/null 2>&1 || true
+            fi
+            rm -f /tmp/netboot-smoke.cid
             sudo rm -rf "${data_dir}" "${config_dir}"
           }
           trap cleanup EXIT
 
           # With preseed, init should finish in seconds; fail fast if not running
-          sleep 5
+          sleep 8
           state=$(docker inspect -f '{{.State.Running}}' "${cid}")
-          echo "[smoke-debug] H2 running_after_5s=${state}"
+          echo "[smoke-debug] H2 running_after_8s=${state}"
+          docker logs "${cid}" 2>&1 | tail -50 || true
           if [[ "${state}" != "true" ]]; then
             echo "[smoke-debug] H2 FAIL container exited early"
             exit 1
           fi
-          docker logs "${cid}" 2>&1 | tail -40 || true
 
+          web_up=0
           for i in $(seq 1 60); do
             state=$(docker inspect -f '{{.State.Running}}' "${cid}")
             if [[ "${state}" != "true" ]]; then
@@ -161,12 +167,16 @@ jobs:
             fi
             if curl -fsS "http://127.0.0.1:13000/" >/dev/null 2>&1; then
               echo "[smoke-debug] H2 web UI up at iter=${i}"
+              web_up=1
               break
             fi
             sleep 2
           done
+          if [[ "${web_up}" -ne 1 ]]; then
+            echo "[smoke-debug] H2 FAIL web UI never responded"
+            exit 1
+          fi
 
-          curl -fsS "http://127.0.0.1:13000/" >/dev/null
           docker logs "${cid}" 2>&1 | grep -q "Home Assistant Add-on Version"
           echo "[smoke-debug] H5 banner ok"
           test -f "${config_dir}/menus/menu.ipxe"

@@ -6,7 +6,8 @@ ENABLE_HA_SENSORS=true
 POLL_INTERVAL=60
 
 if [[ -f /data/options.json ]]; then
-  enable=$(jq -r '.enable_ha_sensors // true' /data/options.json)
+  # jq's // treats JSON false as missing — use explicit null check
+  enable=$(jq -r 'if .enable_ha_sensors == null then true else .enable_ha_sensors end' /data/options.json)
   if [[ "${enable}" == "false" ]]; then
     ENABLE_HA_SENSORS=false
   fi
