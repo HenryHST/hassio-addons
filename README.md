@@ -127,6 +127,11 @@ Run a Chrony NTP server on Home Assistant. Synchronize from upstream NTP pools, 
 
 [:books: Read the full add-on documentation][addon-doc-chronyd]
 
+
+### Related (not an add-on)
+
+**[UniFi SSH Logs](https://github.com/HenryHST/ha-unifi-ssh-logs)** is a **HACS Integration** (custom component), not a Supervisor add-on. Install via HACS custom repository — do not add this add-ons repo as a HACS integration.
+
 ## Support
 
 Got questions?
